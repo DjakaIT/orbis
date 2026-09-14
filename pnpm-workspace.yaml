@@ -1,3 +1,11 @@
 # Aplikacija živi u korijenu repozitorija, worker je zaseban paket. SPEC §3.
 packages:
   - 'worker'
+
+# esbuild treba postinstall (tsx ga koristi); msgpackr-extract je opcionalni ubrzivač
+# mapshaperovog cachea. better-sqlite3 je mapshaperova neobavezna SQL grana koju ne
+# diramo — native build na Windowsu traži toolchain koji nam ne treba.
+allowBuilds:
+  better-sqlite3: false
+  esbuild: true
+  msgpackr-extract: true

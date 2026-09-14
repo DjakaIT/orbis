@@ -55,3 +55,21 @@ three.js: 45 KB" iz SPEC §9.5 — sve to je `react` + `react-dom`, koji se ne d
 ispod ~60 KB. Budžet je time nedostižan uz React 19 iz SPEC §1; ostavljam ga zabilježenim
 kao otvoreno pitanje za fazu 4, gdje se uz bundle analizu odlučuje hoće li se podići
 brojka ili zamijeniti runtime (npr. Preact preko aliasa).
+
+## 2026-09-14 — Izbjegavanje ponavljanja meta odstupa od koda u SPEC §5.2
+
+Kod u SPEC-u gradi prozor „zadnjih 30 dana" od **sirovih** indeksa prethodnih dana, a
+ne od stvarno objavljenih; kad avoidance petlja pomakne metu, taj pomaknuti indeks
+nikad ne ude u prozor. Test je odmah nasao ponavljanje na razmaku od deset dana
+(2026-03-21 i 2026-03-31 pri bazenu od 177), sto je upravo ono sto §5.2 zabranjuje.
+
+Zamjena: niz se razrjesava unaprijed od fiksne epohe `2026-01-01`, uz klizni prozor
+stvarno objavljenih meta. Racun ostaje cist i deterministican — ne ovisi o lokalnoj
+povijesti igraca — pa svi klijenti za isti dan i dalje dobiju isti indeks, a jamstvo
+od 30 dana sada stvarno vrijedi. Cijena je hod od epohe do danasnjeg dana, memoiziran,
+mjereno ispod 500 ms i deset godina nakon epohe.
+
+**Posljedica:** `EPOCH` je time postao jednako nepromjenjiv kao `SALT` — pomak bi
+razbacao sve mete. Niz meta razlikuje se od onoga koji bi dao doslovni SPEC kod;
+buduci da jos nista nije u pogonu, to nista ne lomi, ali nakon pustanja u rad vise
+se ne smije dirati.
