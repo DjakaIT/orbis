@@ -169,7 +169,7 @@ Zastavica `gj2008` u mapshaperovom izlazu zadržava staru konvenciju namotavanja
 Svjetski globus ovo ne dira jer se crta vlastitim ravninskim kodom u `render/texture.ts`,
 ne d3-geom.
 
-**Test koji je ovo propustio** provjeravao je samo da su projicirane točke *unutar*
+**Test koji je ovo propustio** provjeravao je samo da su projicirane točke _unutar_
 canvasa — a skupljene u središte to i jesu. Sada provjerava i da su Zagreb i Dubrovnik
 razmaknuti barem 200 px, te da `geoArea` obrisa ostane ispod 0,01 sr.
 

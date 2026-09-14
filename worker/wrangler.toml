@@ -1,0 +1,15 @@
+name = "orbis-api"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "orbis-db"
+database_id = "local"   # popuni nakon `wrangler d1 create orbis-db`
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["0 * * * 5"]   # petkom svaki sat; handler provjerava zagrebački sat
+
+[vars]
+ALLOWED_ORIGIN = "https://orbis.hr"

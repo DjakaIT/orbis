@@ -1,0 +1,162 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.lead {
+  color: var(--ink);
+  font-size: var(--t-sm);
+}
+
+.row {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--void);
+  color: var(--ink);
+}
+
+.input::placeholder {
+  color: var(--ink-muted);
+}
+
+/* Kod se diktira preko telefona — široko razmaknuta velika slova. */
+.code {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.button {
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: var(--s-2) var(--s-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--void);
+  font-size: var(--t-sm);
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--ink-muted);
+}
+
+.button:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+.error {
+  color: var(--error);
+  font-size: var(--t-sm);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.name {
+  font-size: var(--t-md);
+}
+
+.closes {
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+}
+
+.board {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Redak ljestvice je mreža; redak obrasca iznad ostaje flex. */
+.board .row {
+  display: grid;
+  grid-template-columns: 1.5em 1fr auto auto 1.5em;
+  gap: var(--s-3);
+  align-items: baseline;
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.me {
+  color: var(--ink);
+}
+
+.rank,
+.points {
+  font-variant-numeric: tabular-nums;
+}
+
+.rank {
+  color: var(--ink-muted);
+}
+
+.who {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.points {
+  font-size: var(--t-md);
+}
+
+.tries {
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.today {
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+.note,
+.share,
+.recovery {
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+}
+
+.recovery {
+  padding: var(--s-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+.codeText {
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-family: inherit;
+  letter-spacing: 0.08em;
+}
+
+.winner {
+  font-size: var(--t-sm);
+}
