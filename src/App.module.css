@@ -1,0 +1,54 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  padding: 0 var(--s-4);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding: var(--s-4) 0 var(--s-3);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.wordmark {
+  /* Naslovna uloga varijabilne obitelji: uže i optički veće. SPEC §2.3. */
+  font-size: var(--t-md);
+  font-variation-settings:
+    'wdth' 85,
+    'opsz' 48;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.modes {
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-12) 0;
+}
+
+.note {
+  max-width: 34ch;
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.footer {
+  padding: var(--s-3) 0 var(--s-4);
+  border-top: 1px solid var(--hairline);
+  /* --ink-faint je 2.77:1 na --void i ne smije nositi tekst. SPEC §11.3 t. 8. */
+  color: var(--ink-muted);
+  font-size: var(--t-xs);
+}

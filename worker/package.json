@@ -1,0 +1,9 @@
+{
+  "name": "orbis-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"worker: faza 3\" && exit 1",
+    "deploy": "echo \"worker: faza 3\" && exit 1"
+  }
+}

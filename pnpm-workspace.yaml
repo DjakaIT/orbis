@@ -1,0 +1,3 @@
+# Aplikacija živi u korijenu repozitorija, worker je zaseban paket. SPEC §3.
+packages:
+  - 'worker'
