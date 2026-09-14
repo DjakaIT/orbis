@@ -16,7 +16,7 @@ import { now, zagrebDate } from '../engine/time';
 import type { HrGeometry } from '../render/mapHR';
 import type { Mode, Persisted, Place, Tier } from '../types';
 import { GameCtx, type GameValue } from './context';
-import { load, save } from './persist';
+import { load, patch } from './persist';
 import { initialState, reducer, toRound } from './reducer';
 
 /** Sve što jedan mod treba da bi se odigrao. */
@@ -114,14 +114,12 @@ export function GameProvider({ mode, tier, children }: ProviderProps) {
   // Svaka promjena partije ide u pohranu odmah — refresh ne smije pojesti potez.
   useEffect(() => {
     if (state.status !== 'ready') return;
-    const next: Persisted = {
-      ...persisted.current,
+    // patch, ne save: ligu pise drugi dio aplikacije u isti kljuc.
+    persisted.current = patch({
       ...(mode === 'world' ? { world: toRound(state) } : { hr: { ...toRound(state), tier } }),
       stats: state.stats,
       prefs: { sortBy: state.sortBy },
-    };
-    persisted.current = next;
-    save(next);
+    });
   }, [state, mode, tier]);
 
   const guess = useCallback(

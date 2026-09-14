@@ -169,7 +169,7 @@ Zastavica `gj2008` u mapshaperovom izlazu zadržava staru konvenciju namotavanja
 Svjetski globus ovo ne dira jer se crta vlastitim ravninskim kodom u `render/texture.ts`,
 ne d3-geom.
 
-**Test koji je ovo propustio** provjeravao je samo da su projicirane točke *unutar*
+**Test koji je ovo propustio** provjeravao je samo da su projicirane točke _unutar_
 canvasa — a skupljene u središte to i jesu. Sada provjerava i da su Zagreb i Dubrovnik
 razmaknuti barem 200 px, te da `geoArea` obrisa ostane ispod 0,01 sr.
 
@@ -183,3 +183,34 @@ označavaju druga naselja.
 `mode` i `tier` zato žive u `App` i zajedno čine `key` providera. Remount vraća status
 na `loading`, a efekt spremanja ima stražu `status !== 'ready'`, pa prozor za zapis
 stale partije više ne postoji.
+
+## 2026-09-14 — Hosting je Netlify, ne Cloudflare Pages
+
+SPEC §1 traži Cloudflare Pages; vlasnik projekta je već na Netlifyju i repo je
+ondje spojen (`orbis-urbis`). Odluka je njegova i nadjačava §1.
+
+Praktično se ništa ne gubi: `public/_headers` ima isti format na oba, a `netlify.toml`
+dodaje samo ono što Pages radi implicitno — SPA rewrite za `/l/*` i `/v/*`, bez kojeg
+bi deep linkovi lige vraćali 404 prije nego aplikacija uopće krene.
+
+**Otvoreno:** API lige ostaje Cloudflare Worker jer je D1 ondje. Netlify ga može
+proxyjati (`/api/*` → `workers.dev`), čime sve ostaje na istom originu i CORS-a nema.
+Dok Worker nije deployan, liga u produkciji ne radi — igra radi, panel lige javlja
+grešku. Alternativa je prepisati API na Netlify Functions, što znači i zamjenu D1.
+
+## 2026-09-14 — CI ostaje u repou, ali se ne čeka
+
+GitHub Actions na ovom računu ne pokreće jobove: „The job was not started because your
+account is locked due to a billing issue." To je stanje računa, ne greška u konfiguraciji.
+
+`ci.yml` ostaje jer ga SPEC §10 traži i jer proradi čim se naplata riješi. Do tada je
+provjera lokalna i temeljitija nego što bi CI bio: uz `pnpm check` i `pnpm build` svaka
+je faza vožena i u pravom pregledniku (Playwright, screenshotovi) te, za ligu, protiv
+prave baze kroz miniflare.
+
+## 2026-09-14 — `ALLOWED_ORIGIN` je popis, ne jedna domena
+
+Frontend je na Netlifyju, Worker na `workers.dev`, a Netlify uz produkciju pravi i
+deploy preview domene. Jedna vrijednost ne pokriva to, pa se `ALLOWED_ORIGIN` čita kao
+popis odvojen zarezom. Kad API ide kroz Netlify proxy, sve je na istom originu i CORS
+ionako ne dolazi do izražaja — ovo pokriva izravni poziv na Worker.

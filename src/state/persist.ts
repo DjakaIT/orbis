@@ -69,6 +69,26 @@ export function save(state: Persisted): void {
   }
 }
 
+/**
+ * Čita pohranu **bez** prijelaza dana i upisuje izmjene.
+ *
+ * Igru i ligu pišu dva neovisna mjesta u isti ključ; bez read-modify-write jedno
+ * bi drugome pregazilo polja svojim zastarjelim snimkom.
+ */
+export function patch(changes: Partial<Persisted>): Persisted {
+  let current = emptyState();
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) current = migrate(JSON.parse(raw)) ?? current;
+  } catch {
+    // Nedostupna pohrana: krece se od praznog stanja.
+  }
+
+  const next = { ...current, ...changes };
+  save(next);
+  return next;
+}
+
 export function clear(): void {
   try {
     localStorage.removeItem(KEY);

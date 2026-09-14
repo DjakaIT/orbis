@@ -7,6 +7,7 @@ import Header from './components/Header';
 import ModeToggle from './components/ModeToggle';
 import ShareSheet from './components/ShareSheet';
 import TierToggle from './components/TierToggle';
+import { readDeepLink } from './league/client';
 import { useGame } from './state/context';
 import { GameProvider } from './state/GameContext';
 import { load } from './state/persist';
@@ -15,6 +16,9 @@ import styles from './App.module.css';
 
 /** Karta Hrvatske i `d3-geo` idu u chunk koji se dohvaća tek pri odabiru moda. */
 const MapHR = lazy(() => import('./components/MapHR'));
+
+/** Liga je neobavezna — njezin kod se dohvaća tek kad se panel otvori. */
+const League = lazy(() => import('./components/league/League'));
 
 export default function App() {
   const [mode, setMode] = useState<Mode>('world');
@@ -42,6 +46,7 @@ interface BoardProps {
 
 function Board({ mode, onMode, tier, onTier }: BoardProps) {
   const { state } = useGame();
+  const [leagueOpen, setLeagueOpen] = useState(() => readDeepLink() !== null);
 
   return (
     <div className={styles.shell}>
@@ -71,10 +76,30 @@ function Board({ mode, onMode, tier, onTier }: BoardProps) {
           <GuessInput />
           <GuessList />
           <ShareSheet />
+
+          {leagueOpen && (
+            <Suspense fallback={null}>
+              <div className={styles.league}>
+                <League />
+              </div>
+            </Suspense>
+          )}
         </div>
       </main>
 
-      <footer className={styles.footer}>Podaci: Natural Earth, DGU, GeoNames</footer>
+      <footer className={styles.footer}>
+        <button
+          type="button"
+          className={styles.leagueToggle}
+          aria-expanded={leagueOpen}
+          onClick={() => {
+            setLeagueOpen((open) => !open);
+          }}
+        >
+          {leagueOpen ? 'Sakrij ligu' : 'Liga'}
+        </button>
+        <span>Podaci: Natural Earth, DGU, GeoNames</span>
+      </footer>
     </div>
   );
 }

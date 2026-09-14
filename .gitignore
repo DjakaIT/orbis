@@ -28,3 +28,6 @@ Thumbs.db
 # Cloudflare
 .wrangler
 .dev.vars
+
+# Lokalni D1 i wrangler stanje
+worker/.wrangler

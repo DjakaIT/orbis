@@ -1,0 +1,35 @@
+# Netlify deploy. Frontend je statičan; API lige je zaseban Worker (vidi niže).
+
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # `pnpm data` skida Natural Earth i GeoNames pri svakom buildu. SPEC §4 tako
+  # i predviđa — podaci nisu u gitu jer su reproducibilni.
+  NETLIFY_USE_PNPM = "true"
+
+# Deep linkovi lige su klijentske rute: `/l/:code` i `/v/:token` moraju vratiti
+# index.html, inače Netlify javi 404 prije nego aplikacija uopće krene. SPEC §7.2.
+[[redirects]]
+  from = "/l/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/v/*"
+  to = "/index.html"
+  status = 200
+
+# API lige živi na Cloudflare Workersu (D1 je ondje). Kad Worker bude deployan,
+# odkomentiraj i upiši njegovu adresu — tada `VITE_API_URL` može ostati `/api`
+# i nema CORS-a jer je sve na istom originu.
+#
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://orbis-api.<subdomena>.workers.dev/api/:splat"
+#   status = 200
+#   force = true
+
+# Zaglavlja su u public/_headers — Netlify i Cloudflare Pages dijele isti format.

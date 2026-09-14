@@ -65,6 +65,11 @@ export function zagrebWeekday(d: Date = new Date()): number {
   return n;
 }
 
+/** Dan u tjednu za trenutak zadan u milisekundama od epohe. */
+export function zagrebWeekdayAt(ms: number): number {
+  return zagrebWeekday(new Date(ms));
+}
+
 /** Milisekunde do sljedeće zagrebačke ponoći — kad stiže nova zagonetka. */
 export function msUntilNextPuzzle(d: Date = new Date()): number {
   const midnight = instantOfZagrebMidnight(addDays(zagrebDate(d), 1));
