@@ -2,26 +2,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+  max-width: 34rem;
+  margin: 0 auto;
   padding: 0 var(--s-4);
-}
-
-.header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--s-4);
-  padding: var(--s-4) 0 var(--s-3);
-  border-bottom: 1px solid var(--hairline);
-}
-
-.wordmark {
-  /* Naslovna uloga varijabilne obitelji: uže i optički veće. SPEC §2.3. */
-  font-size: var(--t-md);
-  font-variation-settings:
-    'wdth' 85,
-    'opsz' 48;
-  font-weight: 600;
-  letter-spacing: 0.01em;
 }
 
 .modes {
@@ -32,17 +15,19 @@
 .body {
   display: flex;
   flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: var(--s-12) 0;
+  flex-direction: column;
 }
 
-.note {
-  max-width: 34ch;
-  color: var(--ink-muted);
+/* Input je uvijek vidljiv bez scrolla. SPEC §2.4. */
+.panel {
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--hairline);
+}
+
+.error {
+  padding: var(--s-4) 0;
+  color: var(--error);
   font-size: var(--t-sm);
-  text-align: center;
-  text-wrap: balance;
 }
 
 .footer {
