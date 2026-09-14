@@ -1,0 +1,18 @@
+.globe {
+  /* Globus je heroj. SPEC §2.4. */
+  width: 100%;
+  height: 55vh;
+  min-height: 260px;
+  max-height: 60svh;
+  cursor: grab;
+}
+
+.globe:active {
+  cursor: grabbing;
+}
+
+.globe canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

@@ -1,19 +1,43 @@
+import Globe from './components/Globe';
+import GuessInput from './components/GuessInput';
+import GuessList from './components/GuessList';
+import Header from './components/Header';
+import ShareSheet from './components/ShareSheet';
+import { useGame } from './state/context';
+import { GameProvider } from './state/GameContext';
 import styles from './App.module.css';
 
-/**
- * Ljuska sučelja. Globus, unos i lista pogodaka dolaze u fazi 1 (SPEC §10);
- * ovdje stoji samo okvir koji dokazuje da tokeni i font rade.
- */
 export default function App() {
   return (
+    <GameProvider mode="world">
+      <Board />
+    </GameProvider>
+  );
+}
+
+function Board() {
+  const { state } = useGame();
+
+  return (
     <div className={styles.shell}>
-      <header className={styles.header}>
-        <span className={styles.wordmark}>Orbis</span>
-        <span className={styles.modes}>Svijet · Hrvatska</span>
-      </header>
+      <Header>
+        <span className={styles.modes}>Svijet</span>
+      </Header>
 
       <main className={styles.body}>
-        <p className={styles.note}>Dnevna geografska igra. Prva zagonetka stiže u fazi 1.</p>
+        <Globe />
+
+        {state.status === 'error' && (
+          <p className={styles.error} role="alert">
+            {state.error}
+          </p>
+        )}
+
+        <div className={styles.panel}>
+          <GuessInput />
+          <GuessList />
+          <ShareSheet />
+        </div>
       </main>
 
       <footer className={styles.footer}>Podaci: Natural Earth, DGU, GeoNames</footer>

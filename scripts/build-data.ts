@@ -199,7 +199,8 @@ function minDistance(a: Shape, b: Shape): number {
     }
 
     for (let j = 0; j < b.count; j++) {
-      const d = ax * (b.vec[j * 3] ?? 0) + ay * (b.vec[j * 3 + 1] ?? 0) + az * (b.vec[j * 3 + 2] ?? 0);
+      const d =
+        ax * (b.vec[j * 3] ?? 0) + ay * (b.vec[j * 3 + 1] ?? 0) + az * (b.vec[j * 3 + 2] ?? 0);
       if (d > best) {
         best = d;
         if (best >= 1) return 0;

@@ -1,0 +1,61 @@
+.wrap {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--t-base);
+}
+
+.input::placeholder {
+  color: var(--ink-muted);
+}
+
+.input:disabled {
+  color: var(--ink-muted);
+  cursor: default;
+}
+
+.options {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  left: 0;
+  margin: var(--s-1) 0 0;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: var(--surface);
+  list-style: none;
+}
+
+/* Na mobitelu dropdown ide prema gore ako input nije u gornjoj polovici
+   ekrana, inače ga tipkovnica prekrije. SPEC §5.4. */
+.up {
+  top: auto;
+  bottom: 100%;
+  margin: 0 0 var(--s-1);
+}
+
+.option {
+  display: block;
+  width: 100%;
+  padding: var(--s-2) var(--s-4);
+  text-align: left;
+}
+
+.option:hover,
+.active {
+  background: var(--landmass);
+}
+
+.unknown {
+  margin-top: var(--s-2);
+  color: var(--error);
+  font-size: var(--t-sm);
+}

@@ -75,14 +75,16 @@ export function oklchToRgb(l: number, c: number, hDeg: number): string {
 }
 
 /**
- * Kvadratić za share tekst — boja pogotka mapirana na najbliži emoji. SPEC §7.6.
- * Pet koraka po skali, od najbližeg do najdaljeg.
+ * Kvadratić za share tekst — udaljenost mapirana na najbliži emoji. SPEC §7.6.
+ *
+ * Zelena je rezervirana za pogodak. Da je i najbliži promašaj zelen, iz grida se
+ * ne bi vidjelo gdje je partija zapravo završila.
  */
-const SQUARES = ['🟩', '🟨', '🟧', '🟪', '🟦'] as const;
+const SQUARES = ['🟨', '🟧', '🟪', '🟦'] as const;
 
 export function distanceSquare(km: number, mode: Mode): string {
   if (km === 0) return '🟩';
-  const t = Math.min(km / MAX_KM[mode], 1);
+  const t = Math.min(Math.max(km, 0) / MAX_KM[mode], 1);
   const i = Math.min(SQUARES.length - 1, Math.floor(t * SQUARES.length));
   return SQUARES[i] ?? '🟦';
 }

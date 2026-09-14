@@ -41,7 +41,10 @@ export const MAX_SUGGESTIONS = 6;
 /** Kraći unos od ovoga nikad ne razrješava prefiks — previše kandidata. */
 const MIN_PREFIX = 3;
 
-export function buildIndex(entries: SearchEntry[], aliases: Record<string, string> = {}): SearchIndex {
+export function buildIndex(
+  entries: SearchEntry[],
+  aliases: Record<string, string> = {},
+): SearchIndex {
   const indexed: IndexedEntry[] = entries.map((e) => ({ ...e, key: normalize(e.name) }));
 
   const exact = new Map<string, number>();

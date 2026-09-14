@@ -9,8 +9,7 @@ export function haversine(lat1: number, lon1: number, lat2: number, lon2: number
   const dLat = rad(lat2 - lat1);
   const dLon = rad(lon2 - lon1);
   const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
+    Math.sin(dLat / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -36,7 +35,7 @@ const ARROWS = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'] as const
 /** Osam smjerova, azimut zaokružen na 45°. Pri udaljenosti 0 meta je pogođena. */
 export function arrow(bearingDeg: number, km: number): string {
   if (km === 0) return '✦';
-  const i = Math.round(((bearingDeg % 360) + 360) % 360 / 45) % 8;
+  const i = Math.round((((bearingDeg % 360) + 360) % 360) / 45) % 8;
   return ARROWS[i] ?? '↑';
 }
 
@@ -45,5 +44,7 @@ export function arrow(bearingDeg: number, km: number): string {
  * Brojevi se čitaju kao instrument, pa nema decimala.
  */
 export function formatKm(km: number): string {
-  return `${Math.round(km).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u2009')}\u2009km`;
+  return `${Math.round(km)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '\u2009')}\u2009km`;
 }

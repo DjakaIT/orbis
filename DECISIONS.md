@@ -104,3 +104,39 @@ nulama na dijagonali, pa se zapisuje samo gornji trokut: 30 KB sirovo, 29 KB gzi
 Klijent ga pri ucitavanju jednom razvije u puni niz, da cijena po pogotku ostane
 jedan pristup nizu kako §4.3 trazi. Razdvajanje na bajtne ravnine stedjelo bi jos
 1,6 KB i nije vrijedno slozenosti.
+
+## 2026-09-14 — `lodash` u stablu, ali ne u bundleu
+
+`pnpm why lodash` vodi na `mapshaper → @ngageoint/geopackage → lodash`. Mapshaper je
+devDependency i koristi se samo u `scripts/`, pa lodash nikad ne dode do klijenta —
+provjereno grepom po `dist/assets/*.js`. SPEC §1 zabranjuje lodash kao ovisnost
+aplikacije; tranzitivna ovisnost build alata nije ista stvar i ne placa se bajtovima.
+
+## 2026-09-14 — Gradijent udaljenosti prolazi kroz zelenu `--hit` boje
+
+Formula iz SPEC §5.5 vodi ton od 28° do 260°, a `--hit` je na 152° — sto znaci da
+drzava udaljena oko 10 700 km dobiva gotovo istu zelenu kao pogodak. To se kosi s
+tezom iz §2.1 da je pogodak jedina zelena na ekranu.
+
+Formula ostaje kakva jest: eksplicitno je zadana, a pogodak se u praksi razaznaje po
+svjetlini (L 0,85 naspram 0,58 na toj udaljenosti), oznaci `✦`, nuli kilometara,
+onemogucenom polju i okretanju globusa prema meti. Ako se u igri ipak pokaze zbunjujuce,
+najmanji zahvat je povesti ton drugim smjerom — 28° → −100° ≡ 260° — cime se dobiva
+crveno → ruzicasto → ljubicasto → indigo, bez zelene. Zabiljezeno da odluka bude svjesna.
+
+## 2026-09-14 — Budzeti iz SPEC §9.5 nakon faze 1
+
+| Asset | Izmjereno (gzip) | Budzet |
+| --- | --- | --- |
+| JS aplikacije | 77,8 KB | 45 KB |
+| three.js chunk | 130,3 KB | 85 KB |
+| CSS | 2,1 KB | 6 KB |
+| `world-topo.json` | 13,4 KB | 40 KB |
+| `world-matrix.bin` | 29,3 KB | 40 KB |
+| font woff2 | 185 KB | 32 KB |
+
+Podaci i CSS su ispod budzeta. Tri stavke nisu, i uzroci su poznati: `react` +
+`react-dom` su ~60 KB prije ijedne linije igre, `WebGLRenderer` nosi vecinu three.js
+chunka i ne da se tree-shakeati dok se crta na WebGL-u, a font se salje u punom latin
+rezu. Najveci jedinstveni dobitak je podskup glifova na hrvatski raspon (~150 KB), i
+to ide u fazu 4 uz bundle analizu, kako SPEC §10 i predvida.

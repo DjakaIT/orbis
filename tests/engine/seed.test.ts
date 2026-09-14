@@ -11,7 +11,9 @@ describe('dailyTarget', () => {
   });
 
   it('razliciti modovi istog dana daju neovisne mete', () => {
-    expect(dailyTarget('2026-09-14', 'world', POOL)).not.toBe(dailyTarget('2026-09-14', 'hr', POOL));
+    expect(dailyTarget('2026-09-14', 'world', POOL)).not.toBe(
+      dailyTarget('2026-09-14', 'hr', POOL),
+    );
   });
 
   it('uvijek je unutar bazena', () => {
@@ -31,10 +33,9 @@ describe('dailyTarget', () => {
       const idx = dailyTarget(date, 'world', POOL);
       const previous = seen.get(idx);
       if (previous !== undefined) {
-        expect(
-          lastNDates(date, 30).includes(previous),
-          `${date} ponavlja metu s ${previous}`,
-        ).toBe(false);
+        expect(lastNDates(date, 30).includes(previous), `${date} ponavlja metu s ${previous}`).toBe(
+          false,
+        );
       }
       seen.set(idx, date);
       date = addDays(date, 1);
@@ -48,10 +49,9 @@ describe('dailyTarget', () => {
       const idx = dailyTarget(date, 'hr', 60);
       const previous = seen.get(idx);
       if (previous !== undefined) {
-        expect(
-          lastNDates(date, 30).includes(previous),
-          `${date} ponavlja metu s ${previous}`,
-        ).toBe(false);
+        expect(lastNDates(date, 30).includes(previous), `${date} ponavlja metu s ${previous}`).toBe(
+          false,
+        );
       }
       seen.set(idx, date);
       date = addDays(date, 1);

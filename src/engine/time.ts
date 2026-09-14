@@ -47,6 +47,11 @@ export function zagrebDate(d: Date = new Date()): DateString {
   return dayFmt.format(d);
 }
 
+/** Trenutak u milisekundama od epohe. Jedini dopušteni izvor `Date.now()`. */
+export function now(): number {
+  return Date.now();
+}
+
 /** Zagrebački sat, 0–23. */
 export function zagrebHour(d: Date = new Date()): number {
   return wallClock(d).hour;

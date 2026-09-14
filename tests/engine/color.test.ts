@@ -114,6 +114,11 @@ describe('distanceSquare', () => {
     expect(distanceSquare(0, 'world')).toBe('\u{1F7E9}');
   });
 
+  it('zelena je samo za pogodak — ni najblizi promasaj je ne dobiva', () => {
+    expect(distanceSquare(1, 'world')).not.toBe('\u{1F7E9}');
+    expect(distanceSquare(1, 'hr')).not.toBe('\u{1F7E9}');
+  });
+
   it('sto dalje, to hladnije', () => {
     expect(distanceSquare(19_999, 'world')).toBe('\u{1F7E6}');
     expect(distanceSquare(20_000, 'world')).toBe('\u{1F7E6}');
@@ -121,6 +126,6 @@ describe('distanceSquare', () => {
 
   it('koristi skalu svog moda', () => {
     expect(distanceSquare(399, 'hr')).toBe('\u{1F7E6}');
-    expect(distanceSquare(399, 'world')).toBe('\u{1F7E9}');
+    expect(distanceSquare(399, 'world')).toBe('\u{1F7E8}');
   });
 });
