@@ -1,0 +1,45 @@
+/* Orbis — dizajn tokeni. SPEC §2.2.
+   Boja je isključivo informacija, nikad dekoracija: jedina zasićena boja u
+   sučelju dolazi iz gradijenta udaljenosti (engine/color.ts) te iz --hit/--error. */
+
+:root {
+  /* Baza — plavo-crna noć, ne tintani crni */
+  --void: #080b14; /* pozadina stranice */
+  --ocean: #10182b; /* sfera, neotkriveni ocean */
+  --landmass: #1d2840; /* kopno bez pogotka */
+  --hairline: #2c3a57; /* granice, graticule, razdjelnici */
+  --surface: #0d1322; /* input polje, kartice lige */
+
+  /* Tekst */
+  --ink: #e6eaf2;
+  --ink-muted: #7d8aa6;
+  --ink-faint: #4a5878; /* 2.77:1 na --void — nikad tekst, samo grafika (zvijezde, rubovi) */
+
+  /* Semantika — jedine boje izvan gradijenta */
+  --hit: oklch(0.85 0.19 152);
+  --error: oklch(0.65 0.17 25);
+
+  /* Tipografija */
+  --font: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+
+  /* Modularna skala, omjer 1.25, baza 16px */
+  --t-xs: 0.64rem;
+  --t-sm: 0.8rem;
+  --t-base: 1rem;
+  --t-md: 1.25rem;
+  --t-lg: 1.563rem;
+  --t-xl: 1.953rem;
+  --t-2xl: 2.441rem;
+
+  /* Prostor, skala od 4px */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+
+  --radius: 2px; /* gotovo oštro — instrument, ne kartica */
+}

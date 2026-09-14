@@ -1,0 +1,7 @@
+# Prettier je konfiguriran s endOfLine: lf — bez ovoga `pnpm format:check`
+# pada na Windows checkoutu jer git vrati CRLF.
+* text=auto eol=lf
+
+*.png binary
+*.woff2 binary
+*.bin binary

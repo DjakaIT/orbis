@@ -1,16 +1,51 @@
-# React + Vite
+# Orbis
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dnevna geografska igra u dva moda: **Svijet** (države na 3D globusu) i **Hrvatska**
+(naselja na 2D karti). Jedna meta po modu dnevno, ista za sve igrače, generirana
+deterministički iz datuma. Uz to privatna tjedna liga koja se zatvara petkom u 17:00.
 
-Currently, two official plugins are available:
+Ime dolazi od latinskog _orbis_ — krug, kolo, svijet.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Pokretanje
 
-## React Compiler
+Traži Node 22+ i pnpm.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+pnpm install
+pnpm dev
+```
 
-## Expanding the ESLint configuration
+## Naredbe
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Naredba           | Što radi                                                     |
+| ----------------- | ------------------------------------------------------------ |
+| `pnpm dev`        | Dev server (Vite)                                            |
+| `pnpm check`      | Lint + typecheck + testovi — mora proći prije svakog commita |
+| `pnpm build`      | Produkcijski build                                           |
+| `pnpm test`       | Vitest                                                       |
+| `pnpm e2e`        | Playwright smoke testovi                                     |
+| `pnpm format`     | Prettier                                                     |
+| `pnpm worker:dev` | Cloudflare Worker lokalno (od faze 3)                        |
+
+## Struktura
+
+```
+src/engine/      čista logika: vrijeme, sjeme, udaljenost, pretraga, boja, bodovi
+src/render/      three.js globus i canvas karta Hrvatske
+src/components/  React sučelje
+src/state/       reducer, kontekst, localStorage
+worker/          Cloudflare Worker + D1 za ligu
+scripts/         data pipeline (izlaz u public/data, nije u gitu)
+tests/           Vitest (engine) i Playwright (e2e)
+```
+
+## Dokumenti
+
+- [SPEC.md](SPEC.md) — potpuna specifikacija, jedini izvor istine
+- [DECISIONS.md](DECISIONS.md) — odluke izvan SPEC-a, s datumom i obrazloženjem
+- [CLAUDE.md](CLAUDE.md) — sažetak za svaku novu sesiju
+
+## Podaci
+
+Natural Earth (public domain), DGU Registar prostornih jedinica (otvorena licenca),
+GeoNames (CC BY 4.0).
