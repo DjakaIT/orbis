@@ -126,17 +126,60 @@ crveno → ruzicasto → ljubicasto → indigo, bez zelene. Zabiljezeno da odluk
 
 ## 2026-09-14 — Budzeti iz SPEC §9.5 nakon faze 1
 
-| Asset | Izmjereno (gzip) | Budzet |
-| --- | --- | --- |
-| JS aplikacije | 77,8 KB | 45 KB |
-| three.js chunk | 130,3 KB | 85 KB |
-| CSS | 2,1 KB | 6 KB |
-| `world-topo.json` | 13,4 KB | 40 KB |
-| `world-matrix.bin` | 29,3 KB | 40 KB |
-| font woff2 | 185 KB | 32 KB |
+| Asset              | Izmjereno (gzip) | Budzet |
+| ------------------ | ---------------- | ------ |
+| JS aplikacije      | 77,8 KB          | 45 KB  |
+| three.js chunk     | 130,3 KB         | 85 KB  |
+| CSS                | 2,1 KB           | 6 KB   |
+| `world-topo.json`  | 13,4 KB          | 40 KB  |
+| `world-matrix.bin` | 29,3 KB          | 40 KB  |
+| font woff2         | 185 KB           | 32 KB  |
 
 Podaci i CSS su ispod budzeta. Tri stavke nisu, i uzroci su poznati: `react` +
 `react-dom` su ~60 KB prije ijedne linije igre, `WebGLRenderer` nosi vecinu three.js
 chunka i ne da se tree-shakeati dok se crta na WebGL-u, a font se salje u punom latin
 rezu. Najveci jedinstveni dobitak je podskup glifova na hrvatski raspon (~150 KB), i
 to ide u fazu 4 uz bundle analizu, kako SPEC §10 i predvida.
+
+## 2026-09-14 — DGU nije dohvaćen, GeoNames je izvor populacije
+
+SPEC §4.4 predviđa DGU kao primarni izvor, a GeoNames kao dopunu za broj stanovnika.
+`data.gov.hr` API nije vratio upotrebljiv dataset — URL nije stabilan i §4.1 izričito
+zabranjuje izmišljanje URL-a — pa je za sada GeoNames jedini izvor, kako §4.1 i predviđa
+kao fallback. `fetch-sources.ts` ispisuje uputu za ručni dohvat.
+
+Posljedica: 4 758 naselja bez broja stanovnika ispada iz oba bazena, zabilježeno u
+`scripts/MISSING_POP.md`. Broj stanovnika se **ne procjenjuje**.
+
+Iz GeoNames dumpa izbačeni su kodovi `PPLX` (dio naselja — zagrebački „Centar" ima
+37 000 stanovnika ali nije naselje), `PPLQ` (napušteno), `PPLW` (razoreno) i `PPLH`
+(povijesno). Bez toga bi u igri bili kvartovi i nepostojeća mjesta.
+
+Dobiveno je 71 grad (SPEC očekuje ~60) i 624 mjesta (SPEC očekuje ~250). Kriteriji su
+oni iz §4.4 — 5 000 odnosno 800 stanovnika — pa je razlika u procjeni, ne u pravilu.
+
+## 2026-09-14 — Obris Hrvatske ide kroz `-o gj2008`
+
+d3-geo je stariji od RFC 7946 i očekuje vanjski prsten **u smjeru kazaljke na satu**;
+RFC propisuje suprotno, i mapshaper po defaultu piše po RFC-u. d3-geo takav poligon
+tumači kao cijelu sferu bez Hrvatske: `geoArea` ispadne 12,57 sr umjesto 0,0014,
+`fitExtent` se sruši na skalu 0,0038 i karta nestane u jednu točku usred canvasa.
+
+Zastavica `gj2008` u mapshaperovom izlazu zadržava staru konvenciju namotavanja.
+Svjetski globus ovo ne dira jer se crta vlastitim ravninskim kodom u `render/texture.ts`,
+ne d3-geom.
+
+**Test koji je ovo propustio** provjeravao je samo da su projicirane točke *unutar*
+canvasa — a skupljene u središte to i jesu. Sada provjerava i da su Zagreb i Dubrovnik
+razmaknuti barem 200 px, te da `geoArea` obrisa ostane ispod 0,01 sr.
+
+## 2026-09-14 — Mod i razina remountaju providera preko `key`
+
+Promjena razine težine u modu Hrvatska otkrila je utrku: efekt koji sprema partiju
+okinuo bi se prije nego što se novi bazen učita i žigosao bi staru partiju novom
+razinom, pa bi se pokušaji iz „gradova" pojavili u „mjestima" — gdje isti indeksi
+označavaju druga naselja.
+
+`mode` i `tier` zato žive u `App` i zajedno čine `key` providera. Remount vraća status
+na `loading`, a efekt spremanja ima stražu `status !== 'ready'`, pa prozor za zapis
+stale partije više ne postoji.

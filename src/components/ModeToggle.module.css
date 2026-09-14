@@ -1,0 +1,20 @@
+.wrap {
+  display: flex;
+  gap: var(--s-3);
+}
+
+.tab {
+  padding: 0;
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.on {
+  color: var(--ink);
+  /* Aktivni mod nosi tanku podvlaku, ne boju — boja je rezervirana za podatak. */
+  box-shadow: inset 0 -1px 0 0 var(--ink);
+}

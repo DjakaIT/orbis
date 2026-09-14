@@ -10,33 +10,90 @@ import {
   type ReactNode,
 } from 'react';
 
-import { loadWorld, type WorldData } from '../data/load';
-import { match } from '../engine/search';
+import { loadWorld } from '../data/load';
+import { match, type SearchIndex } from '../engine/search';
 import { now, zagrebDate } from '../engine/time';
-import type { Mode, Persisted } from '../types';
+import type { HrGeometry } from '../render/mapHR';
+import type { Mode, Persisted, Place, Tier } from '../types';
 import { GameCtx, type GameValue } from './context';
 import { load, save } from './persist';
 import { initialState, reducer, toRound } from './reducer';
 
-export function GameProvider({ mode = 'world', children }: { mode?: Mode; children: ReactNode }) {
+/** Sve što jedan mod treba da bi se odigrao. */
+interface Loaded {
+  mode: Mode;
+  places: Place[];
+  index: SearchIndex;
+  /** Svijet ide preko prebuildane matrice; naselja su točke pa haversine dostaje. */
+  matrix: Uint16Array | null;
+  shapes: Map<string, GeoJSON.Geometry> | null;
+  geometry: HrGeometry | null;
+}
+
+async function loadMode(mode: Mode, tier: Tier): Promise<Loaded> {
+  if (mode === 'world') {
+    const d = await loadWorld();
+    return {
+      mode,
+      places: d.places,
+      index: d.index,
+      matrix: d.matrix,
+      shapes: d.shapes,
+      geometry: null,
+    };
+  }
+
+  /*
+   * Dinamički import, ne statički: hrvatski podaci i `d3-geo` idu u zaseban
+   * chunk koji se dohvaća tek kad igrač odabere mod. SPEC §10, faza 2.
+   */
+  const { loadHr } = await import('./../data/loadHr');
+  const d = await loadHr(tier);
+  return {
+    mode,
+    places: d.places,
+    index: d.index,
+    matrix: null,
+    shapes: null,
+    geometry: d.geometry,
+  };
+}
+
+/** Spremljena partija vrijedi samo za svoj mod i, u Hrvatskoj, svoju razinu. */
+function roundFor(p: Persisted, mode: Mode, tier: Tier) {
+  if (mode === 'world') return p.world;
+  return p.hr?.tier === tier ? p.hr : null;
+}
+
+interface ProviderProps {
+  mode: Mode;
+  tier: Tier;
+  children: ReactNode;
+}
+
+export function GameProvider({ mode, tier, children }: ProviderProps) {
   // Jedno čitanje pohrane po sesiji; dalje je reducer izvor istine za partiju.
   const [initial] = useState<Persisted>(load);
   const persisted = useRef<Persisted>(initial);
 
   const [date] = useState(zagrebDate);
   const [state, dispatch] = useReducer(reducer, initial, (p) => initialState(p, mode, date));
-  const [world, setWorld] = useState<WorldData | null>(null);
+  const [loaded, setLoaded] = useState<Loaded | null>(null);
 
   useEffect(() => {
+    // Provider se remounta pri promjeni moda (`key={mode}` u App.tsx), pa je
+    // stanje vec svjeze — nema sto resetirati.
     let alive = true;
-    loadWorld().then(
+
+    loadMode(mode, tier).then(
       (data) => {
         if (!alive) return;
-        setWorld(data);
+        setLoaded(data);
         dispatch({
           type: 'loaded',
-          data: { places: data.places, matrix: data.matrix, n: data.n },
-          round: persisted.current[mode],
+          data: { places: data.places, matrix: data.matrix, n: data.places.length },
+          // Druga razina je drugi bazen: indeksi iz nje ne znace nista ovdje.
+          round: roundFor(persisted.current, mode, tier),
           now: now(),
         });
       },
@@ -48,28 +105,29 @@ export function GameProvider({ mode = 'world', children }: { mode?: Mode; childr
         });
       },
     );
+
     return () => {
       alive = false;
     };
-  }, [mode]);
+  }, [mode, tier]);
 
   // Svaka promjena partije ide u pohranu odmah — refresh ne smije pojesti potez.
   useEffect(() => {
     if (state.status !== 'ready') return;
     const next: Persisted = {
       ...persisted.current,
-      [mode]: toRound(state),
+      ...(mode === 'world' ? { world: toRound(state) } : { hr: { ...toRound(state), tier } }),
       stats: state.stats,
       prefs: { sortBy: state.sortBy },
     };
     persisted.current = next;
     save(next);
-  }, [state, mode]);
+  }, [state, mode, tier]);
 
   const guess = useCallback(
     (input: string): boolean => {
-      if (!world) return false;
-      const id = match(input, world.index);
+      if (!loaded) return false;
+      const id = match(input, loaded.index);
       if (id === null) {
         dispatch({ type: 'unknown', input });
         return false;
@@ -77,7 +135,7 @@ export function GameProvider({ mode = 'world', children }: { mode?: Mode; childr
       dispatch({ type: 'guess', id, now: now() });
       return true;
     },
-    [world],
+    [loaded],
   );
 
   const setSort = useCallback((by: 'distance' | 'time') => {
@@ -89,11 +147,12 @@ export function GameProvider({ mode = 'world', children }: { mode?: Mode; childr
       state,
       guess,
       setSort,
-      index: world?.index ?? null,
-      shapes: world?.shapes ?? null,
-      places: world?.places ?? null,
+      index: loaded?.index ?? null,
+      shapes: loaded?.shapes ?? null,
+      geometry: loaded?.geometry ?? null,
+      places: loaded?.places ?? null,
     }),
-    [state, guess, setSort, world],
+    [state, guess, setSort, loaded],
   );
 
   return <GameCtx value={value}>{children}</GameCtx>;
