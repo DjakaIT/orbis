@@ -20,6 +20,8 @@ export default function GuessInput() {
   const field = useRef<HTMLInputElement>(null);
   const listId = useId();
   const disabled = state.solved || state.status !== 'ready';
+  // U modu Hrvatska se ne upisuje država nego naselje.
+  const label = state.mode === 'world' ? 'Upiši državu' : 'Upiši naselje';
 
   // Prijedlozi su izvedeni iz unosa — računaju se u renderu, ne u efektu.
   const options = useMemo<SearchEntry[]>(
@@ -75,8 +77,8 @@ export default function GuessInput() {
         onKeyDown={onKeyDown}
         onFocus={onFocus}
         disabled={disabled}
-        placeholder={state.solved ? 'Pogodak' : 'Upiši državu'}
-        aria-label="Upiši državu"
+        placeholder={state.solved ? 'Pogodak' : label}
+        aria-label={label}
         autoComplete="off"
         autoCorrect="off"
         spellCheck={false}

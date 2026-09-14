@@ -7,9 +7,13 @@
   padding: 0 var(--s-4);
 }
 
-.modes {
-  color: var(--ink-muted);
-  font-size: var(--t-sm);
+.stage {
+  min-height: 260px;
+}
+
+.stagePlaceholder {
+  height: 55vh;
+  min-height: 260px;
 }
 
 .body {

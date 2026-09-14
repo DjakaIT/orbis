@@ -1,31 +1,64 @@
+import { lazy, Suspense, useState } from 'react';
+
 import Globe from './components/Globe';
 import GuessInput from './components/GuessInput';
 import GuessList from './components/GuessList';
 import Header from './components/Header';
+import ModeToggle from './components/ModeToggle';
 import ShareSheet from './components/ShareSheet';
+import TierToggle from './components/TierToggle';
 import { useGame } from './state/context';
 import { GameProvider } from './state/GameContext';
+import { load } from './state/persist';
+import type { Mode, Tier } from './types';
 import styles from './App.module.css';
 
+/** Karta Hrvatske i `d3-geo` idu u chunk koji se dohvaća tek pri odabiru moda. */
+const MapHR = lazy(() => import('./components/MapHR'));
+
 export default function App() {
+  const [mode, setMode] = useState<Mode>('world');
+  const [tier, setTier] = useState<Tier>(() => load().hr?.tier ?? 'gradovi');
+
+  /*
+   * `key` remounta providera pri svakoj promjeni moda ili razine. Bez toga bi
+   * efekt koji sprema partiju stigao prije nego što se novi bazen učita i
+   * žigosao staru partiju novom razinom — pa bi se pokušaji iz „gradova"
+   * pojavili u „mjestima", gdje ti indeksi znače druga naselja.
+   */
   return (
-    <GameProvider mode="world">
-      <Board />
+    <GameProvider key={`${mode}-${tier}`} mode={mode} tier={tier}>
+      <Board mode={mode} onMode={setMode} tier={tier} onTier={setTier} />
     </GameProvider>
   );
 }
 
-function Board() {
+interface BoardProps {
+  mode: Mode;
+  onMode: (m: Mode) => void;
+  tier: Tier;
+  onTier: (t: Tier) => void;
+}
+
+function Board({ mode, onMode, tier, onTier }: BoardProps) {
   const { state } = useGame();
 
   return (
     <div className={styles.shell}>
       <Header>
-        <span className={styles.modes}>Svijet</span>
+        <ModeToggle mode={mode} onChange={onMode} />
       </Header>
 
       <main className={styles.body}>
-        <Globe />
+        <div className={styles.stage}>
+          {mode === 'world' ? (
+            <Globe />
+          ) : (
+            <Suspense fallback={<div className={styles.stagePlaceholder} />}>
+              <MapHR />
+            </Suspense>
+          )}
+        </div>
 
         {state.status === 'error' && (
           <p className={styles.error} role="alert">
@@ -34,6 +67,7 @@ function Board() {
         )}
 
         <div className={styles.panel}>
+          {mode === 'hr' && <TierToggle tier={tier} onChange={onTier} />}
           <GuessInput />
           <GuessList />
           <ShareSheet />

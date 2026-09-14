@@ -20,6 +20,7 @@ import mapshaper from 'mapshaper';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 
+import { buildHr, writeMissingPopReport } from './build-hr';
 import { NATURAL_EARTH, fetchSource, readCached } from './fetch-sources';
 
 const require = createRequire(import.meta.url);
@@ -309,6 +310,19 @@ async function main(): Promise<void> {
 
   await writeMissingReport(missing);
   await report(n, triangle, entries);
+
+  console.warn('Hrvatska →');
+  const croatia = await buildHr();
+  for (const [tier, list] of Object.entries(croatia.places)) {
+    console.warn(`  ${tier}: ${String(list.length)}`);
+  }
+  console.warn(`  bez populacije, izostavljeno: ${String(croatia.dropped)}`);
+  await writeFile(join(OUT, 'hr-places.json'), JSON.stringify(croatia.places));
+  await writeFile(
+    join(OUT, 'hr-outline.json'),
+    JSON.stringify({ outline: croatia.outline, counties: croatia.counties }),
+  );
+  await writeMissingPopReport(HERE, croatia.dropped);
 }
 
 function round(x: number): number {

@@ -54,6 +54,16 @@ export const GEONAMES_HR: Source = {
 };
 
 /**
+ * Županijske granice i obris Hrvatske. 10m rezolucija, ne 50m: hrvatska je obala
+ * razvedena i na grubljem sloju se pretvori u ravnu crtu. 39 MB se skida jednom
+ * i ostaje u cacheu.
+ */
+export const NE_ADMIN1: Source = {
+  file: 'ne_10m_admin_1_states_provinces.geojson',
+  url: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson',
+};
+
+/**
  * Dohvaca izvor ako vec nije u cacheu. Vraca putanju ili `null` ako izvor
  * nije dostupan, a ima rucnu uputu.
  */

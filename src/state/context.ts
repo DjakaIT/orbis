@@ -8,6 +8,7 @@
 import { createContext, use } from 'react';
 
 import type { SearchIndex } from '../engine/search';
+import type { HrGeometry } from '../render/mapHR';
 import type { Place } from '../types';
 import type { GameState } from './reducer';
 
@@ -18,8 +19,10 @@ export interface GameValue {
   setSort: (by: 'distance' | 'time') => void;
   /** Indeks pretrage za autocomplete; `null` dok se podaci učitavaju. */
   index: SearchIndex | null;
-  /** Geometrije granica za teksturu globusa. */
+  /** Geometrije granica za teksturu globusa; null u modu Hrvatska. */
   shapes: Map<string, GeoJSON.Geometry> | null;
+  /** Obris i županije za kartu Hrvatske; null u modu svijet. */
+  geometry: HrGeometry | null;
   places: Place[] | null;
 }
 
