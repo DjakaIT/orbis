@@ -73,3 +73,34 @@ mjereno ispod 500 ms i deset godina nakon epohe.
 razbacao sve mete. Niz meta razlikuje se od onoga koji bi dao doslovni SPEC kod;
 buduci da jos nista nije u pogonu, to nista ne lomi, ali nakon pustanja u rad vise
 se ne smije dirati.
+
+## 2026-09-14 — Filtar drzava odstupa od SPEC §4.2
+
+`-filter 'ISO_A3 !== "-99"'` iz SPEC-a izbacuje pet zapisa, medu njima
+**Francusku i Norvesku** — u Natural Earthu obje imaju `ISO_A3 = -99` — i ostavlja
+172 drzave umjesto 177 koliko §4.3 ocekuje u `world-meta.json`. Pipeline zato uzima
+`ISO_A3_EH` kad je valjan, a inace `ADM0_A3`; tako prolaze sve 177 s jedinstvenim
+kodovima, ukljucujuci Kosovo (KOS), Sj. Cipar (CYN) i Somaliland (SOL).
+
+## 2026-09-14 — Hrvatski nazivi drzava iz CLDR-a, ne rucno
+
+SPEC §4.2 trazi rucno provjerenu mapu ISO3 → hrvatski naziv. Umjesto pisanja iz
+glave, nazivi se citaju iz `cldr-localenames-full` (Unicode CLDR, locale `hr`) —
+to je izvor, a ne procjena, i pokriva 175 od 177 drzava. Preostale dvije (Sj. Cipar,
+Somaliland) zadrzavaju izvorni naziv i zapisane su u `scripts/MISSING_HR.md`, tocno
+kako §4.2 propisuje za nesigurne egzonime. Paket je devDependency i ne ide u bundle.
+
+## 2026-09-14 — Poredak drzava sortiran po ISO kodu
+
+Indeks u bazenu odreduje koja je meta kojeg dana, a Natural Earth ne jamci redoslijed
+zapisa izmedu izdanja. Bez stabilnog poretka svaki bi `pnpm data` mogao pomaknuti sve
+mete, pa se popis sortira po ISO kodu prije dodjele indeksa.
+
+## 2026-09-14 — Matrica se zapisuje kao gornji trokut
+
+Puni N*N niz je 61 KB sirovo i 57 KB gzipano — Uint16 vrijednosti su visoke entropije
+pa gzip gotovo ne pomaze, a budzet iz SPEC §9.5 je 40 KB. Matrica je simetricna s
+nulama na dijagonali, pa se zapisuje samo gornji trokut: 30 KB sirovo, 29 KB gzipano.
+Klijent ga pri ucitavanju jednom razvije u puni niz, da cijena po pogotku ostane
+jedan pristup nizu kako §4.3 trazi. Razdvajanje na bajtne ravnine stedjelo bi jos
+1,6 KB i nije vrijedno slozenosti.
