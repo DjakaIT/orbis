@@ -18,14 +18,26 @@ import { closeDueRounds } from './rounds';
 
 const DEV_ORIGIN = 'http://localhost:5173';
 
+/**
+ * ALLOWED_ORIGIN je popis odvojen zarezom — frontend je na Netlifyju, a Worker na
+ * workers.dev, pa ih zna biti više (produkcija plus deploy preview).
+ * Kad se API proxyja kroz Netlify, sve je na istom originu i CORS ne dolazi do
+ * izrazaja; ovo pokriva slucaj izravnog poziva na Worker.
+ */
+function allowed(env: Env): string[] {
+  return env.ALLOWED_ORIGIN.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+}
+
 const app = new Hono<App>();
 
 app.use(
   '*',
   cors({
-    // Samo produkcijska domena i lokalni dev server. SPEC §7.5.
+    // Samo dopuštene domene i lokalni dev server. SPEC §7.5.
     origin: (origin, c) =>
-      origin === c.env.ALLOWED_ORIGIN || origin === DEV_ORIGIN ? origin : null,
+      origin === DEV_ORIGIN || allowed(c.env).includes(origin) ? origin : null,
     allowHeaders: ['Authorization', 'Content-Type'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     maxAge: 86_400,

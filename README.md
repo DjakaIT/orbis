@@ -27,6 +27,28 @@ pnpm dev
 | `pnpm format`     | Prettier                                                     |
 | `pnpm worker:dev` | Cloudflare Worker lokalno (od faze 3)                        |
 
+## Liga
+
+API lige je Cloudflare Worker s D1 bazom. Lokalno:
+
+```bash
+pnpm -C worker exec wrangler d1 migrations apply orbis-db --local
+pnpm worker:dev                 # :8787
+```
+
+Provjera backenda bez preglednika:
+
+```bash
+node worker/test-league.mjs     # API: auth, validacija, ljestvica
+node worker/test-close.mjs …    # rano zatvaranje runde
+```
+
+## Hosting
+
+Frontend je na Netlifyju (`netlify.toml`). Deep linkovi `/l/:code` i `/v/:token`
+traže SPA rewrite, koji je ondje podešen. API lige ostaje Worker; kad se deploya,
+odkomentiraj `/api/*` proxy u `netlify.toml` da sve bude na istom originu.
+
 ## Struktura
 
 ```

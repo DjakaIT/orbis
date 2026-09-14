@@ -2,7 +2,14 @@
 
 import type { ClosedRound, LeagueView, Me, NewLeague, NewPlayer, ScoreResult } from './types';
 
-const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8787/api';
+/*
+ * U developmentu Worker sluša na 8787; u produkciji se očekuje da je API na
+ * istom originu (Netlify redirect na Worker, vidi netlify.toml), pa nema CORS-a.
+ * `VITE_API_URL` nadjačava oboje.
+ */
+const BASE =
+  (import.meta.env.VITE_API_URL as string | undefined) ??
+  (import.meta.env.DEV ? 'http://localhost:8787/api' : '/api');
 
 /** Greška s HTTP statusom, da pozivatelj može razlikovati 409 od 404. */
 export class ApiError extends Error {

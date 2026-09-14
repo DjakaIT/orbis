@@ -12,4 +12,5 @@ migrations_dir = "migrations"
 crons = ["0 * * * 5"]   # petkom svaki sat; handler provjerava zagrebački sat
 
 [vars]
-ALLOWED_ORIGIN = "https://orbis.hr"
+# Popis odvojen zarezom. Frontend je na Netlifyju — upisi stvarnu domenu.
+ALLOWED_ORIGIN = "https://orbis-urbis.netlify.app"
