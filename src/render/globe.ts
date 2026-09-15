@@ -39,6 +39,32 @@ const AUTO_ROTATE = 0.0026; // ≈ 0,15° po frameu
 const DRAG_SENSITIVITY = 0.005;
 const MAX_PITCH = Math.PI / 2 - 0.05;
 
+/** Vertikalni kut kamere. */
+const FOV = 38;
+/**
+ * Koliki dio **krace** poluosi zauzima kugla.
+ *
+ * Izvedeno iz dosadasnjih fov = 38° i z = 3,2, pa na sirokom ekranu globus ostaje
+ * tocno velik koliko je i bio.
+ */
+const FILL = 1 / (Math.tan((FOV * Math.PI) / 360) * 3.2);
+
+/**
+ * Koliko daleko kamera mora stajati da kugla stane cijela.
+ *
+ * Kamera ima **vertikalni** kut, pa je na uspravnom ekranu sirina ono sto
+ * ogranicava: pri fov = 38° i z = 3,2 vidljiva poluvisina je 1,10, a polusirina
+ * je to puta omjer. Cim je omjer uzi od 0,908 polusirina padne ispod polumjera
+ * kugle i ekran joj odsijece lijevu i desnu stranu — sto se na mobitelu i
+ * dogadalo, jer mu je omjer oko 0,84.
+ *
+ * Zato se kamera odmakne tocno onoliko koliko uza os trazi. Na sirokom ekranu
+ * `max` uzme jedinicu i ispadne dosadasnjih 3,2, pa se ondje nista ne mijenja.
+ */
+export function cameraDistance(aspect: number, fov = FOV): number {
+  return Math.max(1, 1 / aspect) / (FILL * Math.tan((fov * Math.PI) / 360));
+}
+
 /** Trajanje okretanja prema meti pri pogotku. SPEC §6.1. */
 const CENTRE_MS = 900;
 /** Trajanje ulijevanja boje u drzavu. SPEC §2.5. */
@@ -87,8 +113,8 @@ export class Globe {
     this.renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio, 2));
     this.host.appendChild(this.renderer.domElement);
 
-    this.camera = new PerspectiveCamera(38, 1, 0.1, 100);
-    this.camera.position.set(0, 0, 3.2);
+    this.camera = new PerspectiveCamera(FOV, 1, 0.1, 100);
+    this.camera.position.set(0, 0, cameraDistance(1));
 
     this.texture = new CanvasTexture(this.painter.canvas);
     // Bez ovoga three tretira teksturu kao linearnu i globus ispadne ispran.
@@ -206,6 +232,8 @@ export class Globe {
     if (w === 0 || h === 0) return;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
+    // Kugla mora stati i po sirini, ne samo po visini. Vidi `cameraDistance`.
+    this.camera.position.z = cameraDistance(this.camera.aspect);
     this.camera.updateProjectionMatrix();
   }
 
