@@ -54,9 +54,12 @@ moda se dohvaćaju tek kad se mod odabere i nisu u precacheu service workera.
 
 | Mod      | Meta        | Bazen    | Udaljenost              |
 | -------- | ----------- | -------- | ----------------------- |
-| Svijet   | država      | 177      | najmanja među granicama |
-| Gradovi  | glavni grad | 164      | haversine među točkama  |
+| Svijet   | država      | 199      | najmanja među granicama |
+| Gradovi  | glavni grad | 192      | haversine među točkama  |
 | Hrvatska | naselje     | 71 / 624 | haversine među točkama  |
+
+Bazen država su **suverene države**, ne i teritoriji: kriterij je da država vlada
+sama sobom, pa su unutra Andora, Monako i Palau, a vani Portoriko, Guam i Grenland.
 
 U modu Svijet nula kilometara znači **dijeli granicu s metom**, ne pogodak —
 susjed se u listi ispisuje kao „susjedna". Pogodak se izvodi iz identiteta mete.
@@ -76,6 +79,19 @@ Provjera backenda bez preglednika:
 node worker/test-league.mjs     # API: auth, validacija, ljestvica
 node worker/test-close.mjs …    # rano zatvaranje runde
 ```
+
+## Tema
+
+Dvije podloge. Stranica je topli papir; globus i karta žive u vlastitoj tamnoj
+sceni, jer se karta crta na prozirnom canvasu i ondje bi tamno kopno i tamni
+natpis pali jedno na drugo. Tokeni su zato razdvojeni — `--paper`, `--surface`,
+`--rule`, `--ink*` za stranicu; `--stage`, `--ocean`, `--landmass`,
+`--hairline`, `--stage-ink` za scenu.
+
+Gradijent udaljenosti ima dvije skale svjetline: ton i zasićenje nose podatak na
+obje podloge, svjetlina se prilagođava da ostane čitljiv. Sve omjere mjeri
+`tests/styles/contrast.test.ts`, a tri signala pristupačnosti — smanjeno gibanje,
+smanjena prozirnost, pojačan kontrast — provjerava `tests/e2e/a11y.spec.ts`.
 
 ## Dijeljenje i PWA
 
