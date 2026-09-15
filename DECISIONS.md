@@ -374,3 +374,83 @@ dakle isti poredak svaki krug. Ondje pokrivenost pobjeđuje. Stvarni bazeni su 7
 
 Usput je nestao hod od epohe do današnjeg dana: krug se računa dijeljenjem, pa je
 posao `O(N)` po krugu umjesto `O(dana)`.
+
+## 2026-09-15 — Susjed mete nije pogodak
+
+Prijavljeno iz igre: četiri države istovremeno pokazuju 0 km i oznaku pogotka, pa
+se ne vidi koja je točna.
+
+Matrica nosi **minimalnu udaljenost između granica**, kako SPEC §4.3 i traži —
+centroidi bi tvrdili da su Rusija i Finska 4 000 km razdvojene iako dijele granicu.
+Posljedica je da je svaka susjedna država točno 0 km od mete. Pet mjesta je pogodak
+izvodilo upravo iz te nule: oznaka u retku, boja gradijenta, bojanje globusa, karta
+Hrvatske i emoji kvadratić u share tekstu.
+
+Provjereno na stvarnim podacima: meta 2026-09-15 je Sjeverna Koreja, a Kina, Južna
+Koreja i Rusija sve su na 0 km. Najgori slučaj u bazenu je Kina — **14 država** bi
+izgledalo kao pogodak.
+
+Pogodak je sada indeks mete, izveden na jednom mjestu u reduceru i nošen uz svaki
+pokušaj kao `hit`. Uz njega idu `neighbour` (nula kilometara, ali nije meta —
+smisleno samo u modu svijet, jer su hrvatska naselja točke) i `trend` prema
+kronološki prethodnom pokušaju.
+
+Očitanje ispod polja bilo je vidljivo samo čitaču ekrana i govorilo je tek ime i
+udaljenost. Sada je vidljivo i kaže što se dogodilo: ime, pa „pogodak" ili
+„susjedna država, dijeli granicu s metom" ili udaljenost, pa je li bliže ili dalje
+nego prethodni pokušaj. U listi susjed piše „susjedna" umjesto „0 km" i zadržava
+strelicu.
+
+## 2026-09-15 — Glavni gradovi su treći mod
+
+Traženo: glavni gradovi kao zasebna igra, nasumično po cijelom svijetu.
+
+**Izvori.** Natural Earth za grad i koordinate, Unicode CLDR za hrvatski naziv —
+oba su već u projektu. CLDR vodi nazive gradova kao „exemplar city" uz vremensku
+zonu; odatle dolaze Beč, Prag, Varšava, Kopenhagen i Kijev. Preostalih 120 gradova
+nema hrvatski egzonim u CLDR-u, zadržavaju izvorni naziv i popisani su u
+`scripts/MISSING_CAPITALS_HR.md`, kako §4.2 propisuje.
+
+**Spoj je trebao pažnju.** Polje `TIMEZONE` iz Natural Eartha je u 110m sloju
+neispravno — Prag ondje nosi `America/Chicago`, Moskva ništa — pa se zona traži po
+zadnjem segmentu imena zone, kroz `NAME`, `NAME_EN`, `NAMEASCII` i `NAMEALT`. Bez
+sva četiri ispadnu Kopenhagen (jer je `NAME` = København) i Kijev (jer je zona još
+uvijek `Europe/Kiev`).
+
+**Četiri države ispadaju umjesto da se pogađa.** Južnoafrička Republika ima tri
+ustavne prijestolnice, a Bolivija, Obala Bjelokosti i Mjanmar razdvojeno de jure i
+de facto sjedište. Dvojben odgovor u kvizu je gori od nikakvog — isto načelo po
+kojem se broj stanovnika ne procjenjuje. Još devet nema suvereni glavni grad
+(Antarktika, prekomorski teritoriji, sporna područja). Bazen je 164, iznad granice
+od 60 koju traži jamstvo od 30 dana.
+
+**Mod ne donosi novu mehaniku.** Gradovi su točke pa je haversine dovoljan i
+matrica ne treba, a globus boji državu kojoj pogođeni grad pripada, jer svaki grad
+nosi ISO kod svoje države. Podaci se učitavaju tek pri odabiru moda i nisu u
+precacheu, isto kao hrvatski.
+
+**Pohrana ostaje `v: 1`.** Shema samo dobiva polje; podizanje verzije obrisalo bi
+sve postojeće streakove, što SPEC §8 izričito zabranjuje. Liga je trebala pravu
+migraciju: SQLite ne zna izmijeniti `CHECK` ograničenje, pa `0002_capitals_mode.sql`
+gradi tablicu `scores` ispočetka i prepisuje podatke.
+
+**Otvoreno:** svjetski mod i mod gradova biraju metu neovisno, pa se otprilike
+jednom u 164 dana može dogoditi da je meta dana Japan, a meta gradova Tokio.
+Vezanje ta dva niza značilo bi da čista funkcija `dailyTarget` mora znati koji
+indeks pripada kojoj državi; za dobitak od dva dana godišnje to nije zamjena
+vrijedna složenosti.
+
+## 2026-09-15 — Gradijent ide drugim smjerom oko kruga
+
+Odluka iz faze 1 zabilježila je da gradijent prolazi kroz zelenu boje `--hit` na
+oko 10 700 km, uz napomenu: ako se u igri pokaže zbunjujuće, najmanji zahvat je
+povesti ton drugim smjerom.
+
+Pokazalo se. Na globusu u modu gradova Meksiko je na nekoliko tisuća kilometara
+bio zelen dovoljno da izgleda kao pogodak, a zemljana paleta je to izoštrila jer
+je i kopno sada zeleno.
+
+Ton sada ide od 28° prema −100°, što je isti kraj kao 260° samo s druge strane
+kruga: crvena → ružičasta → ljubičasta → indigo. Krajevi su i dalje oni iz SPEC
+§5.5; mijenja se put između njih, i zelene na njemu nema. Test prolazi cijelim
+rasponom u sva tri moda i traži da svaka točka ostane barem 60° od tona `--hit`.

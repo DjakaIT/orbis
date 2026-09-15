@@ -1,8 +1,10 @@
 # Orbis
 
-Dnevna geografska igra u dva moda: **Svijet** (države na 3D globusu) i **Hrvatska**
-(naselja na 2D karti). Jedna meta po modu dnevno, ista za sve igrače, generirana
-deterministički iz datuma. Uz to privatna tjedna liga koja se zatvara petkom u 17:00.
+Dnevna geografska igra u tri moda: **Svijet** (države na 3D globusu), **Gradovi**
+(glavni gradovi svijeta) i **Hrvatska** (naselja na 2D karti). Jedna meta po modu
+dnevno, ista za sve igrače, generirana deterministički iz datuma — u jednom krugu
+svaka meta dolazi na red točno jednom, pa nijedna država ne ispada iz igre. Uz to
+privatna tjedna liga koja se zatvara petkom u 17:00.
 
 Ime dolazi od latinskog _orbis_ — krug, kolo, svijet.
 
@@ -44,6 +46,20 @@ E2E vozi dva servera: dev na `:5173` i `vite preview` na `:4173`. Drugi postoji 
 `tests/e2e/pwa.spec.ts` — service worker, offline i manifest u razvoju ne postoje — pa
 `pnpm build` mora proći prije `pnpm e2e`. Testovi lige se preskaču ako worker nije
 pokrenut.
+
+## Modovi
+
+Svaki mod ima svoj bazen, svoju partiju, svoj streak i svoju skalu boja. Podaci
+moda se dohvaćaju tek kad se mod odabere i nisu u precacheu service workera.
+
+| Mod      | Meta        | Bazen    | Udaljenost              |
+| -------- | ----------- | -------- | ----------------------- |
+| Svijet   | država      | 177      | najmanja među granicama |
+| Gradovi  | glavni grad | 164      | haversine među točkama  |
+| Hrvatska | naselje     | 71 / 624 | haversine među točkama  |
+
+U modu Svijet nula kilometara znači **dijeli granicu s metom**, ne pogodak —
+susjed se u listi ispisuje kao „susjedna". Pogodak se izvodi iz identiteta mete.
 
 ## Liga
 

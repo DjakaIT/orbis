@@ -14,6 +14,10 @@ pnpm dev · pnpm data · pnpm check · pnpm build · pnpm worker:dev
 - Boja samo kao informacija — SPEC §2.1
 - Zabranjene ovisnosti — SPEC §1
 - Liga: 6 prijatelja, tjedna runda, zatvara se petkom 17:00 ili kad svi odigraju
+- Tri moda: svijet, gradovi, hrvatska — svaki svoj bazen, partija i streak
+- Pogodak je identitet mete, NIKAD `km === 0` — matrica je udaljenost među
+  granicama, pa je svaki susjed nula kilometara
+- Niz meta je permutacija po krugu: u N dana svaka meta dolazi na red jednom
 
 ## Prije commita
 
