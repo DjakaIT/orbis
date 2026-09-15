@@ -56,6 +56,14 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+/**
+ * Ime pokusaja stoji na dva mjesta: u statusnom retku i u listi. Upiti zato
+ * ciljaju redak liste, inace `getByText` pada na dva pogotka.
+ */
+function row(name: string): HTMLElement[] {
+  return screen.queryAllByRole('listitem').filter((li) => li.textContent?.includes(name));
+}
+
 describe('App', () => {
   it('prikazuje wordmark i atribuciju izvora', async () => {
     render(<App />);
@@ -74,10 +82,55 @@ describe('App', () => {
     await user.type(input, 'Alfa{Enter}');
 
     await waitFor(() => {
-      expect(screen.getByText('Alfa')).toBeInTheDocument();
+      expect(row('Alfa')).toHaveLength(1);
     });
-    // Tanki razmak U+2009 je razdjelnik tisucica; getByText ga inace normalizira.
-    expect(screen.getByText('100 km', { normalizer: (t) => t })).toBeInTheDocument();
+    // Tanki razmak U+2009 je razdjelnik tisucica, pa se usporeduje sirovi tekst.
+    expect(row('Alfa')[0]?.textContent).toContain(`100${String.fromCodePoint(0x2009)}km`);
+  });
+
+  it('oznaku pogotka nosi samo meta', async () => {
+    // Meta je Beta. Alfa je promasaj i mora zadrzati strelicu, ne ✦.
+    const user = userEvent.setup();
+    render(<App />);
+
+    const input = await screen.findByLabelText('Upiši državu');
+    await user.type(input, 'Alfa{Enter}');
+    await waitFor(() => {
+      expect(row('Alfa')).toHaveLength(1);
+    });
+    expect(row('Alfa')[0]?.textContent).not.toContain('✦');
+
+    await user.type(input, 'Beta{Enter}');
+    await waitFor(() => {
+      expect(row('Beta')).toHaveLength(1);
+    });
+    expect(row('Beta')[0]?.textContent).toContain('✦');
+    expect(screen.getByRole('status').textContent).toContain('pogodak');
+  });
+
+  it('poruka kaze je li pokusaj blizi od prethodnog', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const input = await screen.findByLabelText('Upiši državu');
+    // Meta je Beta. Gama je od nje 400 km, Alfa 100 km, Delta 500 km.
+    await user.type(input, 'Gama{Enter}');
+    await waitFor(() => {
+      expect(row('Gama')).toHaveLength(1);
+    });
+    expect(screen.getByRole('status').textContent).not.toContain('bliže');
+
+    await user.type(input, 'Alfa{Enter}');
+    await waitFor(() => {
+      expect(row('Alfa')).toHaveLength(1);
+    });
+    expect(screen.getByRole('status').textContent).toContain('bliže nego prije');
+
+    await user.type(input, 'Delta{Enter}');
+    await waitFor(() => {
+      expect(row('Delta')).toHaveLength(1);
+    });
+    expect(screen.getByRole('status').textContent).toContain('dalje nego prije');
   });
 
   it('neprepoznato ime ne trosi pokusaj', async () => {
@@ -99,7 +152,7 @@ describe('App', () => {
     await user.type(input, 'prva{Enter}');
 
     await waitFor(() => {
-      expect(screen.getByText('Alfa')).toBeInTheDocument();
+      expect(row('Alfa')).toHaveLength(1);
     });
   });
 
@@ -110,14 +163,14 @@ describe('App', () => {
     const input = await screen.findByLabelText('Upiši državu');
     await user.type(input, 'Beta{Enter}');
     await waitFor(() => {
-      expect(screen.getByText('Beta')).toBeInTheDocument();
+      expect(row('Beta')).toHaveLength(1);
     });
 
     first.unmount();
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText('Beta')).toBeInTheDocument();
+      expect(row('Beta')).toHaveLength(1);
     });
   });
 

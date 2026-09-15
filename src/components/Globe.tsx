@@ -53,7 +53,8 @@ export default function Globe() {
       if (!place) continue;
 
       painted.current.add(guess.id);
-      const color = guess.km === 0 ? readTokens().hit : distanceRgb(guess.km, state.mode);
+      // Susjed mete je 0 km i bio bi obojan kao pogodak. SPEC §4.3.
+      const color = guess.hit ? readTokens().hit : distanceRgb(guess.km, state.mode);
       // Prvo crtanje nakon refresha ne animira — boja je vec bila ondje.
       if (painted.current.size === state.guesses.length) g.fill(place.code, color);
       else g.paint(place.code, color);

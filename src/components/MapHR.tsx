@@ -33,6 +33,7 @@ export default function MapHR() {
           lon: place.lon,
           km: g.km,
           color: distanceRgb(g.km, 'hr'),
+          hit: g.hit,
         },
       ];
     });

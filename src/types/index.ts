@@ -15,6 +15,9 @@ export interface Place {
   lon: number;
 }
 
+/** Odnos prema prethodnom pokusaju, kronoloski. */
+export type Trend = 'first' | 'closer' | 'farther' | 'same';
+
 /** Jedan pokusaj igraca. */
 export interface Guess {
   /** Indeks u bazenu meta. */
@@ -25,6 +28,15 @@ export interface Guess {
   bearing: number;
   /** Redni broj pokusaja, od 1. */
   ordinal: number;
+  /**
+   * Je li ovo meta. Izvodi se iz indeksa, nikad iz `km === 0`: matrica nosi
+   * udaljenost izmedu granica, pa je svaka susjedna drzava nula kilometara.
+   */
+  hit: boolean;
+  /** Dijeli granicu s metom — nula kilometara, ali nije meta. */
+  neighbour: boolean;
+  /** Priblizava li se igrac meti u odnosu na prethodni pokusaj. */
+  trend: Trend;
 }
 
 /** Stanje jedne partije, po modu. */

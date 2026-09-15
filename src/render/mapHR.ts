@@ -20,6 +20,8 @@ export interface MapPoint {
   lon: number;
   km: number;
   color: string;
+  /** Je li ovo meta. Nikad se ne izvodi iz `km === 0`. */
+  hit: boolean;
 }
 
 /** Obris je GeometryCollection jer mapshaperov `-dissolve` tako izlazi. */
@@ -155,7 +157,7 @@ export function drawMap(canvas: HTMLCanvasElement, options: DrawOptions): void {
   ctx.globalAlpha = 0.35;
   ctx.lineWidth = 1;
   for (const p of points) {
-    if (p.km === 0) continue;
+    if (p.hit) continue;
     const xy = projection([p.lon, p.lat]);
     if (!xy) continue;
     ctx.strokeStyle = p.color;
@@ -169,7 +171,7 @@ export function drawMap(canvas: HTMLCanvasElement, options: DrawOptions): void {
     const xy = projection([p.lon, p.lat]);
     if (!xy) continue;
 
-    ctx.fillStyle = p.km === 0 ? tokens.hit : p.color;
+    ctx.fillStyle = p.hit ? tokens.hit : p.color;
     ctx.beginPath();
     ctx.arc(xy[0], xy[1], DOT_R, 0, Math.PI * 2);
     ctx.fill();

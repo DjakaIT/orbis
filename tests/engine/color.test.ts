@@ -58,8 +58,18 @@ describe('oklchToRgb', () => {
 
 describe('distanceColor', () => {
   it('pogodak vraca token, ne izracunatu boju', () => {
-    expect(distanceColor(0, 'world')).toBe('var(--hit)');
-    expect(distanceColor(0, 'hr')).toBe('var(--hit)');
+    expect(distanceColor(0, 'world', true)).toBe('var(--hit)');
+    expect(distanceColor(0, 'hr', true)).toBe('var(--hit)');
+  });
+
+  it('nula kilometara bez pogotka nije zelena', () => {
+    /*
+     * Matrica nosi minimalnu udaljenost izmedu granica (SPEC §4.3), pa je svaki
+     * susjed mete nula kilometara. Da nula sama znaci pogodak, cetiri susjedne
+     * drzave bile bi zelene i igrac ne bi znao koja je tocna.
+     */
+    expect(distanceColor(0, 'world')).not.toBe('var(--hit)');
+    expect(distanceColor(0, 'world')).toMatch(/^oklch\(/);
   });
 
   it('blizu je svjetlije i zasicenije od daleko', () => {
@@ -111,7 +121,11 @@ describe('distanceRgb', () => {
 
 describe('distanceSquare', () => {
   it('pogodak je zeleni kvadratic', () => {
-    expect(distanceSquare(0, 'world')).toBe('\u{1F7E9}');
+    expect(distanceSquare(0, 'world', true)).toBe('\u{1F7E9}');
+  });
+
+  it('susjed mete nije zelen, iako je nula kilometara', () => {
+    expect(distanceSquare(0, 'world')).not.toBe('\u{1F7E9}');
   });
 
   it('zelena je samo za pogodak — ni najblizi promasaj je ne dobiva', () => {

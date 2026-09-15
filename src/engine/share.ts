@@ -22,13 +22,13 @@ export function guessNoun(n: number): string {
  */
 export function shareText(
   date: string,
-  guesses: { km: number }[],
+  guesses: { km: number; hit: boolean }[],
   mode: Mode,
   site = SITE,
 ): string {
   const [, month, day] = date.split('-');
   const short = `${String(Number(day))}.${String(Number(month))}.`;
-  const squares = guesses.map((g) => distanceSquare(g.km, mode)).join('');
+  const squares = guesses.map((g) => distanceSquare(g.km, mode, g.hit)).join('');
   const globe = mode === 'world' ? '🌍' : '🇭🇷';
   return `Orbis ${globe} ${short} — ${String(guesses.length)} ${guessNoun(guesses.length)}\n${squares}\n${site}`;
 }

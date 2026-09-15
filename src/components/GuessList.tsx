@@ -2,6 +2,7 @@ import { distanceColor } from '../engine/color';
 import { arrow, formatKm } from '../engine/distance';
 import { useGame } from '../state/context';
 import { sortedGuesses } from '../state/reducer';
+import type { Guess } from '../types';
 import styles from './GuessList.module.css';
 
 /**
@@ -35,12 +36,28 @@ export default function GuessList() {
         </button>
       </div>
 
-      {/* Udaljenost se objavljuje citacu ekrana, ne samo boji. SPEC §11.3 t. 8. */}
-      <p className={styles.live} role="status" aria-live="polite">
-        {latest
-          ? `${latest.name}, ${formatKm(latest.km)}${latest.km === 0 ? ', pogodak' : ''}`
-          : ''}
-      </p>
+      {/*
+       * Ocitanje zadnjeg pokusaja, vidljivo i objavljeno citacu ekrana.
+       * Brojka sama ne kaze je li igrac topliji nego prije, ni sto znaci nula
+       * kilometara — a nula je granica, ne pogodak. SPEC §11.3 t. 8.
+       */}
+      {latest && (
+        <p className={styles.live} role="status" aria-live="polite">
+          <span className={styles.liveName}>{latest.name}</span>
+          <span className={styles.liveSep} aria-hidden="true">
+            ·
+          </span>
+          <span className={latest.hit ? styles.liveHit : undefined}>{verdict(latest)}</span>
+          {latest.trend !== 'first' && !latest.hit && (
+            <>
+              <span className={styles.liveSep} aria-hidden="true">
+                ·
+              </span>
+              <span>{TREND[latest.trend]}</span>
+            </>
+          )}
+        </p>
+      )}
 
       <ol className={styles.list}>
         {rows.map((g) => (
@@ -48,13 +65,15 @@ export default function GuessList() {
             {/* Jedina pojava gradijenta izvan karte — veze listu s globusom. */}
             <span
               className={styles.bar}
-              style={{ background: distanceColor(g.km, state.mode) }}
+              style={{ background: distanceColor(g.km, state.mode, g.hit) }}
               aria-hidden="true"
             />
             <span className={styles.name}>{g.name}</span>
-            <span className={styles.km}>{formatKm(g.km)}</span>
+            <span className={g.neighbour ? styles.kmWord : styles.km}>
+              {g.neighbour ? 'susjedna' : formatKm(g.km)}
+            </span>
             <span className={styles.arrow} aria-hidden="true">
-              {arrow(g.bearing, g.km)}
+              {arrow(g.bearing, g.hit)}
             </span>
           </li>
         ))}
@@ -62,6 +81,19 @@ export default function GuessList() {
     </section>
   );
 }
+
+/** Sto se zapravo dogodilo: pogodak, susjed ili udaljenost. */
+function verdict(g: Guess): string {
+  if (g.hit) return 'pogodak';
+  if (g.neighbour) return 'susjedna država, dijeli granicu s metom';
+  return formatKm(g.km);
+}
+
+const TREND: Record<'closer' | 'farther' | 'same', string> = {
+  closer: 'bliže nego prije',
+  farther: 'dalje nego prije',
+  same: 'jednako daleko',
+};
 
 /** „1 pokušaj", sve ostalo „pokušaja" — paukal i genitiv množine ovdje su isti. */
 function plural(n: number): string {

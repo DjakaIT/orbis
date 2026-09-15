@@ -18,7 +18,12 @@ describe('guessNoun', () => {
 });
 
 describe('shareText', () => {
-  const guesses = [{ km: 19000 }, { km: 9000 }, { km: 2000 }, { km: 0 }];
+  const guesses = [
+    { km: 19000, hit: false },
+    { km: 9000, hit: false },
+    { km: 2000, hit: false },
+    { km: 0, hit: true },
+  ];
 
   it('slijedi oblik iz SPEC 7.6', () => {
     expect(shareText('2026-09-15', guesses, 'world')).toBe(
@@ -27,7 +32,7 @@ describe('shareText', () => {
   });
 
   it('datum je bez vodecih nula', () => {
-    expect(shareText('2026-01-05', [{ km: 0 }], 'world')).toContain(' 5.1. ');
+    expect(shareText('2026-01-05', [{ km: 0, hit: true }], 'world')).toContain(' 5.1. ');
   });
 
   it('kvadratici idu kronoloski, ne po udaljenosti', () => {
@@ -38,13 +43,21 @@ describe('shareText', () => {
   });
 
   it('mod hr ima svoju zastavu i svoju skalu', () => {
-    const text = shareText('2026-09-15', [{ km: 300 }], 'hr');
+    const text = shareText('2026-09-15', [{ km: 300, hit: false }], 'hr');
     expect(text).toContain('\u{1F1ED}\u{1F1F7}');
     // 300 km je na hrvatskoj skali daleko, na svjetskoj blizu.
-    expect(text).not.toBe(shareText('2026-09-15', [{ km: 300 }], 'world'));
+    expect(text).not.toBe(shareText('2026-09-15', [{ km: 300, hit: false }], 'world'));
+  });
+
+  it('susjed mete nije zeleni kvadratic', () => {
+    // Nula kilometara je granica, ne pogodak: matrica nosi udaljenost izmedu
+    // granica pa je svaki susjed nula. Da je zelen, iz grida se ne bi vidjelo
+    // gdje je partija zavrsila. SPEC §7.6.
+    const [, squares] = shareText('2026-09-15', [{ km: 0, hit: false }], 'world').split('\n');
+    expect(squares).not.toBe('\u{1F7E9}');
   });
 
   it('jedan pokusaj je jednina', () => {
-    expect(shareText('2026-09-15', [{ km: 0 }], 'world')).toContain('1 pokušaj\n');
+    expect(shareText('2026-09-15', [{ km: 0, hit: true }], 'world')).toContain('1 pokušaj\n');
   });
 });

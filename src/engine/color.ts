@@ -29,9 +29,14 @@ function ramp(km: number, mode: Mode): Lch {
   };
 }
 
-/** CSS boja za udaljenost. Pogodak vraća token `--hit`. */
-export function distanceColor(km: number, mode: Mode): string {
-  if (km === 0) return 'var(--hit)';
+/**
+ * CSS boja za udaljenost. Pogodak vraća token `--hit`.
+ *
+ * `hit` dolazi iz identiteta mete, nikad iz `km === 0` — matrica nosi udaljenost
+ * između granica, pa su sve susjedne države nula kilometara daleko. Vidi `arrow`.
+ */
+export function distanceColor(km: number, mode: Mode, hit = false): string {
+  if (hit) return 'var(--hit)';
   const { l, c, h } = ramp(km, mode);
   return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(1)})`;
 }
@@ -82,8 +87,8 @@ export function oklchToRgb(l: number, c: number, hDeg: number): string {
  */
 const SQUARES = ['🟨', '🟧', '🟪', '🟦'] as const;
 
-export function distanceSquare(km: number, mode: Mode): string {
-  if (km === 0) return '🟩';
+export function distanceSquare(km: number, mode: Mode, hit = false): string {
+  if (hit) return '🟩';
   const t = Math.min(Math.max(km, 0) / MAX_KM[mode], 1);
   const i = Math.min(SQUARES.length - 1, Math.floor(t * SQUARES.length));
   return SQUARES[i] ?? '🟦';
