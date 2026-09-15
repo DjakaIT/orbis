@@ -1,13 +1,26 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/** Dev server: sve osim PWA-a. */
+export const DEV_URL = 'http://localhost:5173';
+
+/**
+ * Produkcijski build kroz `vite preview`, za `pwa.spec.ts`: service worker,
+ * offline i manifest u razvoju ne postoje. Traži da je `pnpm build` već prošao.
+ */
+export const PREVIEW_URL = 'http://localhost:4173';
+
 export default defineConfig({
   testDir: './tests/e2e',
+  // `warm-up.ts` nije spec nego priprema; bez ovoga bi ga `testDir` pokupio kao
+  // datoteku bez ijednog testa.
+  testMatch: '**/*.spec.ts',
+  globalSetup: './tests/e2e/warm-up.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: DEV_URL,
     trace: 'on-first-retry',
   },
   projects: [
@@ -17,16 +30,12 @@ export default defineConfig({
   webServer: [
     {
       command: 'pnpm dev --port 5173',
-      url: 'http://localhost:5173',
+      url: DEV_URL,
       reuseExistingServer: !process.env.CI,
     },
-    /*
-     * Drugi server posluzuje `dist/`, za `pwa.spec.ts`: service worker, offline
-     * i manifest u razvoju ne postoje. Trazi da je `pnpm build` vec prosao.
-     */
     {
       command: 'pnpm preview --port 4173 --strictPort',
-      url: 'http://localhost:4173',
+      url: PREVIEW_URL,
       reuseExistingServer: !process.env.CI,
     },
   ],

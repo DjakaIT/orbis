@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
+import { PREVIEW_URL } from '../../playwright.config';
+
 /**
  * PWA iz faze 4. Jedini test koji se vozi na **produkcijskom** buildu preko
  * `vite preview` — service worker u razvoju ne postoji, pa bi sve ovo na dev
@@ -7,8 +9,6 @@ import { expect, test, type Page } from '@playwright/test';
  *
  * Traži `pnpm build` prije `pnpm e2e`; preview server podiže playwright.config.ts.
  */
-
-const PREVIEW = 'http://localhost:4173';
 
 /** Čeka da service worker preuzme stranicu — tek tada offline ima smisla. */
 async function serviceWorkerReady(page: Page): Promise<void> {
@@ -32,12 +32,12 @@ async function serviceWorkerReady(page: Page): Promise<void> {
 }
 
 test('manifest je dohvatljiv i opisuje instalabilnu aplikaciju', async ({ page }) => {
-  await page.goto(PREVIEW);
+  await page.goto(PREVIEW_URL);
 
   const href = await page.locator('link[rel="manifest"]').getAttribute('href');
   expect(href).toBeTruthy();
 
-  const response = await page.request.get(new URL(href ?? '', PREVIEW).href);
+  const response = await page.request.get(new URL(href ?? '', PREVIEW_URL).href);
   expect(response.status()).toBe(200);
 
   const manifest = (await response.json()) as {
@@ -50,23 +50,23 @@ test('manifest je dohvatljiv i opisuje instalabilnu aplikaciju', async ({ page }
 
   // Svaka ikona iz manifesta mora se stvarno posluživati, inače instalacija pada.
   for (const icon of manifest.icons) {
-    const icoRes = await page.request.get(new URL(icon.src, PREVIEW).href);
+    const icoRes = await page.request.get(new URL(icon.src, PREVIEW_URL).href);
     expect(icoRes.status(), icon.src).toBe(200);
     expect(icoRes.headers()['content-type']).toContain('image/png');
   }
 });
 
 test('OG slika se poslužuje na adresi iz meta tagova', async ({ page }) => {
-  await page.goto(PREVIEW);
+  await page.goto(PREVIEW_URL);
 
   const og = await page.locator('meta[property="og:image"]').getAttribute('content');
-  const response = await page.request.get(new URL(og ?? '', PREVIEW).href);
+  const response = await page.request.get(new URL(og ?? '', PREVIEW_URL).href);
   expect(response.status()).toBe(200);
   expect((await response.body()).byteLength).toBeGreaterThan(1000);
 });
 
 test('igra se otvara i igra bez mreže nakon prvog posjeta', async ({ page, context }) => {
-  await page.goto(PREVIEW);
+  await page.goto(PREVIEW_URL);
   await expect(page.getByLabel('Upiši državu')).toBeEnabled({ timeout: 20_000 });
   await serviceWorkerReady(page);
 
@@ -85,12 +85,12 @@ test('igra se otvara i igra bez mreže nakon prvog posjeta', async ({ page, cont
 });
 
 test('deep link lige se offline vraća na ljusku, ne na 404', async ({ page, context }) => {
-  await page.goto(PREVIEW);
+  await page.goto(PREVIEW_URL);
   await serviceWorkerReady(page);
 
   await context.setOffline(true);
   // `/l/:code` je klijentska ruta; bez navigateFallbacka ovo bi bila mrežna greška.
-  await page.goto(`${PREVIEW}/l/ABCDEF`);
+  await page.goto(`${PREVIEW_URL}/l/ABCDEF`);
   await expect(page.getByText('Orbis')).toBeVisible({ timeout: 20_000 });
 
   await context.setOffline(false);
@@ -102,7 +102,7 @@ test('service worker ne povlači HR podatke u pozadini', async ({ page }) => {
   const requests: string[] = [];
   page.on('request', (r) => requests.push(r.url()));
 
-  await page.goto(PREVIEW);
+  await page.goto(PREVIEW_URL);
   await expect(page.getByLabel('Upiši državu')).toBeEnabled({ timeout: 20_000 });
   await serviceWorkerReady(page);
 

@@ -4,6 +4,50 @@ import { defineConfig, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 /**
+ * Apsolutna adresa slike za preview, ili root-relativna kad domena nije poznata.
+ *
+ * Open Graph traži apsolutni URL; X ga zahtijeva, Facebook i Slack relativni
+ * najčešće razriješe, ali to nigdje nije zajamčeno. Domena se ne upisuje rukom
+ * nego čita iz okoline builda: Netlify postavlja `URL` za produkciju i
+ * `DEPLOY_PRIME_URL` za deploy preview, pa svaki preview pokazuje na sebe.
+ */
+export function siteUrl(env: NodeJS.ProcessEnv = process.env): string | null {
+  const base = env.URL ?? env.DEPLOY_PRIME_URL ?? env.VITE_SITE_URL;
+  return base ? base.replace(/\/+$/, '') : null;
+}
+
+export function shareImageUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const base = siteUrl(env);
+  return base ? `${base}/og.png` : '/og.png';
+}
+
+/**
+ * Upisuje apsolutnu adresu u `og:image` i `twitter:image` te dodaje `og:url` i
+ * kanonski link. `og:url` je uz title, type i image jedno od četiri polja koja
+ * Open Graph traži, i scraperima je oslonac za razrješavanje relativnih adresa.
+ */
+function shareTags(): Plugin {
+  return {
+    name: 'orbis-share-tags',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        const base = siteUrl();
+        if (!base) return html;
+
+        return {
+          html: html.replaceAll('content="/og.png"', `content="${base}/og.png"`),
+          tags: [
+            { tag: 'meta', attrs: { property: 'og:url', content: `${base}/` }, injectTo: 'head' },
+            { tag: 'link', attrs: { rel: 'canonical', href: `${base}/` }, injectTo: 'head' },
+          ],
+        };
+      },
+    },
+  };
+}
+
+/**
  * Preload za tri reza fonta.
  *
  * Bez ovoga ih preglednik otkrije tek kad isparsira `index.css`, pa tekst prvo
@@ -43,6 +87,7 @@ function preloadFonts(): Plugin {
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    shareTags(),
     preloadFonts(),
     /*
      * `pnpm analyze` gradi isti build i uz njega piše treemap u

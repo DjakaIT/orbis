@@ -6,3 +6,7 @@ public/data
 playwright-report
 test-results
 SPEC.md
+
+# Izvještaji koje piše `pnpm data`. Prettier bi im poravnao tablice, a sljedeći
+# build bi ih vratio — bez ovoga se mijenjaju u gitu pri svakom pokretanju.
+scripts/MISSING_*.md

@@ -214,3 +214,129 @@ Frontend je na Netlifyju, Worker na `workers.dev`, a Netlify uz produkciju pravi
 deploy preview domene. Jedna vrijednost ne pokriva to, pa se `ALLOWED_ORIGIN` čita kao
 popis odvojen zarezom. Kad API ide kroz Netlify proxy, sve je na istom originu i CORS
 ionako ne dolazi do izražaja — ovo pokriva izravni poziv na Worker.
+
+## 2026-09-15 — Podskup fonta umjesto punog reza, i pinane osi umjesto varijabilnih
+
+Faza 1 ostavila je font na 185 KB protiv budžeta od 32 KB (SPEC §9.5), uz bilješku
+da rješenje ide u fazu 4. `scripts/build-font.ts` sada reže glifove na ono što igra
+stvarno ispisuje: sučelje, cijeli ispisivi ASCII i abeceda pročitana iz upravo
+generiranih `world-meta.json` i `hr-places.json`. Rezultat je **16,7 KB za sva tri
+reza**, ispod budžeta.
+
+SPEC §2.3 traži dvije uloge iste obitelji kroz varijabilne osi. Osi su ovdje sredstvo,
+a ne cilj: iste dvije uloge daju dva **pinana** reza uz četvrtinu težine, jer varijabilni
+rez nosi delta podatke za svaku os i svaki glif — mjereno 82 KB s punim osima, 63 KB
+sa suženima, 16,7 KB pinano. Izgled je isti jer sučelje ionako koristi samo dvije
+točke u prostoru osi.
+
+Cijena je da znak izvan podskupa pada na `system-ui`. Za imena iz podataka to ne može
+proći neprimijećeno — test u `tests/build/font.test.ts` provjerava svako ime države,
+naselja i aliasa te svaki string literal u `src/`, parsiran TypeScriptovim parserom da
+hrvatska proza iz komentara ne ulazi u račun. Ostaje slobodan unos nadimaka u ligi:
+zato je u rezu cijeli ispisivi ASCII, a znak izvan njega otpada samo sam za sebe.
+
+## 2026-09-15 — Globus je lazy chunk
+
+`three.js` je 126 KB gzipano i najveći pojedinačni trošak glavne dretve pri učitavanju.
+Dok se parsira i dok WebGL kreće, sučelja nema. Globus se sada učitava kao zaseban
+chunk, isto kao karta Hrvatske od faze 2.
+
+Mjereno kroz Lighthouse, mobilna emulacija: Total Blocking Time **1270 ms → 58 ms**,
+Performance **61 → 89**. Okvir scene drži visinu cijelo vrijeme pa CLS ostaje 0 i
+globus ne poskakuje kad stigne.
+
+Isprobana je i odgoda montiranja scene za jedan frame nakon prvog iscrtavanja. Nije
+promijenila ništa mjerljivo (92 prije i poslije) pa je vraćena — složenost bez dobitka.
+
+## 2026-09-15 — `injectRegister: 'script-defer'` traži eksplicitan `clientsClaim`
+
+Skripta za registraciju service workera ubacivala se u `<head>` kao blokirajuća i sama
+koštala 330 ms do prvog iscrtavanja. Uz `injectRegister: 'script-defer'` vite-plugin-pwa
+prestaje izvoditi `skipWaiting` i `clientsClaim` iz `registerType: 'autoUpdate'` i
+generira service worker **bez `clientsClaim`** — a bez njega prvi posjet nikad nije pod
+kontrolom SW-a, pa offline proradi tek iz drugog otvaranja. Oboje se sada postavlja
+ručno u `workbox`.
+
+Nalaz je došao iz `tests/e2e/pwa.spec.ts`, koji se jedini vozi na produkcijskom buildu
+preko `vite preview`. Lighthouse ovo ne bi prijavio, a u razvoju service workera nema.
+
+## 2026-09-15 — Service worker ne precachea HR podatke
+
+`globPatterns` je povlačio i `hr-places.json` i `hr-outline.json` u precache, pa bi ih
+prvi posjet skinuo u pozadini — a kriterij faze 2 (SPEC §10) je da se HR podaci **ne
+preuzimaju dok se mod ne odabere**. Sada su na `runtimeCaching` pravilu: dohvate se pri
+odabiru moda i od tada su offline. Izbačena je i `og.png`, koju dohvaćaju tuđi
+poslužitelji za preview, nikad uređaj igrača. Precache je pao s 1096 na 970 KiB.
+
+## 2026-09-15 — Font se ne ubacuje u CSS kao data URI
+
+Dva manja reza (latin-ext 1,7 KB, display 1,2 KB) padaju ispod Viteovog praga od 4 KB
+pa su završila u `index.css` kao base64. To su bajtovi fonta naplaćeni CSS budžetu iz
+§9.5, a usput se gubi `immutable` keširanje koje `public/_headers` daje pravim
+`.woff2` datotekama. Uz `assetsInlineLimit` koji odbija woff2, CSS je pao s **5,43 KB
+na 2,19 KB** gzipano.
+
+## 2026-09-15 — Adresa OG slike dolazi iz okoline builda, ne iz koda
+
+Open Graph traži apsolutni URL; X ga zahtijeva, Facebook i Slack relativni najčešće
+razriješe, ali to nigdje nije zajamčeno. Domena se ne upisuje rukom — po istom pravilu
+po kojem §4.1 zabranjuje izmišljanje URL-ova izvora — nego se čita iz `URL`, odnosno
+`DEPLOY_PRIME_URL` koji Netlify postavlja za deploy preview, pa svaki preview pokazuje
+na sebe. Bez ijedne varijable adresa ostaje root-relativna, što je ispravno za
+preglednik i za lokalni `pnpm preview`.
+
+## 2026-09-15 — Footer ide s `--t-xs` na `--t-sm`
+
+`--t-xs` je 10,24 px, ispod granice čitljivosti koju Lighthouse mjeri, a footer nosi
+atribuciju izvora i jedini ulaz u ligu. Skala tokena iz SPEC §2.2 ostaje netaknuta;
+mijenja se samo ova njezina upotreba. Time Best Practices ide sa 96 na 100.
+
+## 2026-09-15 — React ostaje, uz tri zabilježena odstupanja
+
+DECISIONS je u fazi 1 ostavio otvoreno hoće li se runtime zamijeniti Preactom. Obje
+opcije su izmjerene na istom buildu:
+
+|                        | React 19 | preact/compat | Cilj   |
+| ---------------------- | -------- | ------------- | ------ |
+| Lighthouse Performance | 92       | **95**        | ≥ 95   |
+| JS bez three.js        | 77,4 KB  | **17,1 KB**   | 45 KB  |
+| Prvi load, svijet      | 268 KB   | **~213 KB**   | 250 KB |
+| three.js chunk         | 130,3 KB | 130,3 KB      | 85 KB  |
+
+Preact ispunjava sva tri cilja koja React probija, i svih 30 e2e testova prošlo je na
+Preact buildu. Odluka je ipak da **React ostaje**, iz dva razloga.
+
+Prvi: SPEC §1 veže stack na React 19 i to je obvezujuće. Drugi, i važniji u praksi:
+razlika je 60 KB gzipano na **prvom i jedinom** učitavanju — od drugog posjeta sve
+poslužuje service worker iz precachea. Na 4G je to oko desetinke sekunde, jednom.
+Igra se ne igra brže ni sporije.
+
+Cijena zamjene nije bila samo alias. `use(GameCtx)` iz Reacta 19 ne postoji u
+`preact/compat` (trivijalno se mijenja u `useContext`), ali `@testing-library/react`
+povlači pravi `react-dom` i šest unit testova pada dok se ne zamijeni preact verzijom.
+Alternativa je da produkcija vozi Preact a testovi React, što znači da se razlike u
+ponašanju ne bi vidjele ondje gdje se testira.
+
+**Ostaje otvoreno:** ako se ikad pojavi treći mod ili bitno više UI koda, omjer se
+mijenja i ovo treba premjeriti. Brojke iznad su mjerene 2026-09-15 i ponovljive su
+kroz `pnpm analyze`.
+
+## 2026-09-15 — Budžeti i Lighthouse nakon faze 4
+
+| Asset                 | Izmjereno (gzip) | Budžet | Bilješka                          |
+| --------------------- | ---------------- | ------ | --------------------------------- |
+| JS bez three.js       | 77,4 KB          | 45 KB  | react-dom; vidi odluku iznad      |
+| three.js chunk        | 130,3 KB         | 85 KB  | `WebGLRenderer`, ne tree-shaka    |
+| CSS                   | 3,0 KB           | 6 KB   | ✓ (bilo 5,4 prije data URI-ja)    |
+| `world-topo.json`     | 13,0 KB          | 40 KB  | ✓                                 |
+| `world-matrix.bin`    | 28,6 KB          | 40 KB  | ✓                                 |
+| font woff2            | 16,7 KB          | 32 KB  | ✓ (bilo 185 KB)                   |
+| HR podaci, lazy       | 29,8 KB          | 60 KB  | ✓                                 |
+| **Prvi load, svijet** | **268 KB**       | 250 KB | razlika je točno zbroj gornja dva |
+
+Lighthouse, mobilna emulacija: **Performance 92** (cilj ≥ 95), **Accessibility 100**,
+**Best Practices 100**, **SEO 100**.
+
+Testovi u `tests/build/dist.test.ts` čuvaju svaku od ovih brojki. Gdje je budžet
+probijen, test se drži stropa zabilježenog ovdje umjesto da se pravi da je budžet
+postignut — probije li se i strop, pada.

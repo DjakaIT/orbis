@@ -23,9 +23,27 @@ pnpm dev
 | `pnpm check`      | Lint + typecheck + testovi — mora proći prije svakog commita |
 | `pnpm build`      | Produkcijski build                                           |
 | `pnpm test`       | Vitest                                                       |
-| `pnpm e2e`        | Playwright smoke testovi                                     |
+| `pnpm e2e`        | Playwright testovi — traži build, vidi niže                  |
+| `pnpm analyze`    | Build uz treemap bundlea u `dist/stats.html`                 |
 | `pnpm format`     | Prettier                                                     |
 | `pnpm worker:dev` | Cloudflare Worker lokalno (od faze 3)                        |
+
+## Testovi
+
+`pnpm check` pokriva engine, sučelje i izlaz builda: PWA manifest, meta tagove za
+dijeljenje, precache service workera, podskup fonta, generirane ikone i svaki budžet
+iz SPEC §9.5.
+
+Testovi nad `dist/` se preskaču ako builda nema, pa za punu pokrivenost:
+
+```bash
+pnpm build && pnpm check
+```
+
+E2E vozi dva servera: dev na `:5173` i `vite preview` na `:4173`. Drugi postoji zbog
+`tests/e2e/pwa.spec.ts` — service worker, offline i manifest u razvoju ne postoje — pa
+`pnpm build` mora proći prije `pnpm e2e`. Testovi lige se preskaču ako worker nije
+pokrenut.
 
 ## Liga
 
@@ -43,6 +61,18 @@ node worker/test-league.mjs     # API: auth, validacija, ljestvica
 node worker/test-close.mjs …    # rano zatvaranje runde
 ```
 
+## Dijeljenje i PWA
+
+Ikone, OG slika i podskup fonta nastaju u `pnpm data` i nisu u gitu, kao ni podaci.
+
+Adresa OG slike se ne upisuje u kod. Build je čita iz okoline: Netlify postavlja `URL`
+za produkciju i `DEPLOY_PRIME_URL` za deploy preview, pa svaki preview pokazuje na sebe.
+Lokalno ostaje root-relativna. Za ručni build s domenom:
+
+```bash
+VITE_SITE_URL=https://primjer.hr pnpm build
+```
+
 ## Hosting
 
 Frontend je na Netlifyju (`netlify.toml`). Deep linkovi `/l/:code` i `/v/:token`
@@ -57,8 +87,8 @@ src/render/      three.js globus i canvas karta Hrvatske
 src/components/  React sučelje
 src/state/       reducer, kontekst, localStorage
 worker/          Cloudflare Worker + D1 za ligu
-scripts/         data pipeline (izlaz u public/data, nije u gitu)
-tests/           Vitest (engine) i Playwright (e2e)
+scripts/         data pipeline i generatori fonta i ikona (izlaz nije u gitu)
+tests/           Vitest (engine, stanje, build) i Playwright (e2e)
 ```
 
 ## Dokumenti
