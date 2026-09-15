@@ -12,9 +12,15 @@ test('odigra se partija i stanje preživi refresh', async ({ page }) => {
   const input = page.getByLabel('Upiši državu');
   await expect(input).toBeEnabled({ timeout: 15_000 });
 
-  // Globus mora doista zauzeti prostor — heroj je, ne ukras. SPEC §2.4.
+  /*
+   * Globus mora doista zauzeti prostor — heroj je, ne ukras. SPEC §2.4.
+   *
+   * Vlastiti rok, ne zadanih 5 s: globus je namjerno lazy chunk sa three.js-om,
+   * pa stize nakon polja za unos. Pod punim paralelizmom to zna proci 5 s, a da
+   * s aplikacijom nije nista.
+   */
   const canvas = page.locator('canvas').first();
-  await expect(canvas).toBeVisible();
+  await expect(canvas).toBeVisible({ timeout: 20_000 });
   const box = await canvas.boundingBox();
   expect(box?.width ?? 0).toBeGreaterThan(100);
   expect(box?.height ?? 0).toBeGreaterThan(100);

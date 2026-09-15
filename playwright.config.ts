@@ -16,6 +16,15 @@ export default defineConfig({
   testMatch: '**/*.spec.ts',
   globalSetup: './tests/e2e/warm-up.ts',
   fullyParallel: true,
+  /*
+   * WebGL nije neogranicen resurs. Svaka stranica otvara kontekst, a preglednik
+   * ih drzi ogranicen broj po procesu; deset paralelnih globusa na jednom stroju
+   * ne odgovara nicemu stvarnom i tjera testove u rokove. CI ionako ima manje
+   * jezgri, pa ondje ostaje zadano.
+   */
+  // Spread, ne `undefined`: uz `exactOptionalPropertyTypes` izostavljeno polje i
+  // polje postavljeno na `undefined` nisu ista stvar.
+  ...(process.env.CI ? {} : { workers: 4 }),
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: 'list',
