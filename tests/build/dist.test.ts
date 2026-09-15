@@ -104,8 +104,17 @@ describe.skipIf(!built)('PWA manifest', () => {
 describe.skipIf(!built)('meta tagovi za dijeljenje', () => {
   const html = text('index.html');
 
-  const meta = (attr: 'property' | 'name', key: string): string | undefined =>
-    new RegExp(`<meta ${attr}="${key}" content="([^"]*)"`).exec(html)?.[1];
+  /**
+   * Cita `content` iz meta taga. Tag se trazi cijeli pa mu se atributi vade
+   * odvojeno — prettier duge tagove lomi u vise redaka, a njihov redoslijed
+   * nije zajamcen.
+   */
+  const meta = (attr: 'property' | 'name', key: string): string | undefined => {
+    for (const [tag] of html.matchAll(/<meta\s[^>]*>/g)) {
+      if (new RegExp(`${attr}="${key}"`).test(tag)) return /content="([^"]*)"/.exec(tag)?.[1];
+    }
+    return undefined;
+  };
 
   it('ima naslov, opis i jezik', () => {
     expect(html).toContain('<html lang="hr">');
@@ -158,6 +167,19 @@ describe.skipIf(!built)('service worker', () => {
   it('ne precachea OG sliku', () => {
     // Nju dohvacaju tudi posluzitelji za preview, nikad uredaj igraca.
     expect(urls).not.toContain('og.png');
+  });
+
+  it('preuzima kontrolu nad vec otvorenom stranicom', () => {
+    // Bez `clientsClaim` prvi posjet nikad nije pod kontrolom SW-a, pa offline
+    // proradi tek iz drugog otvaranja. vite-plugin-pwa ga tiho izostavi uz neke
+    // kombinacije opcija — `injectRegister: 'script-defer'` je jedna takva.
+    expect(text('sw.js')).toContain('clientsClaim');
+    expect(text('sw.js')).toContain('skipWaiting');
+  });
+
+  it('registracija ne blokira iscrtavanje', () => {
+    // Skripta za registraciju je u headu; bez `defer` sama kosta 330 ms do FCP-a.
+    expect(text('index.html')).toMatch(/registerSW\.js"\s+defer/);
   });
 
   it('vraca se na ljusku za deep linkove lige, ali ne za API', () => {
@@ -230,6 +252,15 @@ describe.skipIf(!built)('budzeti iz SPEC §9.5', () => {
       'data/aliases.json',
     ];
     expect(sum(first)).toBeLessThanOrEqual(280);
+  });
+
+  it('font se preloada, ne ceka na CSS', () => {
+    // Bez preloada preglednik otkrije rez tek nakon parsiranja `index.css`,
+    // pa tekst skoci iz system-ui u Bricolage usred prvog iscrtavanja.
+    const html = text('index.html');
+    for (const font of assets('.woff2')) {
+      expect(html, font).toContain(`rel="preload" as="font" type="font/woff2" href="/${font}"`);
+    }
   });
 
   it('font nije ubacen u CSS kao data URI', () => {

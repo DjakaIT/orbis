@@ -17,7 +17,8 @@
     "worker:dev": "pnpm -C worker dev",
     "worker:deploy": "pnpm -C worker deploy",
     "db:init": "pnpm -C worker exec wrangler d1 migrations apply orbis-db --remote",
-    "data": "tsx scripts/build-data.ts"
+    "data": "tsx scripts/build-data.ts",
+    "analyze": "vite build --mode analyze"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
@@ -53,6 +54,7 @@
     "lightningcss": "^1.33.0",
     "mapshaper": "^0.7.61",
     "prettier": "^3.9.6",
+    "rollup-plugin-visualizer": "^7.1.1",
     "subset-font": "^2.7.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",

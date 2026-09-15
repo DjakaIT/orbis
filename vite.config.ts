@@ -1,14 +1,72 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+/**
+ * Preload za tri reza fonta.
+ *
+ * Bez ovoga ih preglednik otkrije tek kad isparsira `index.css`, pa tekst prvo
+ * padne na system-ui i tek onda skoči u pravi rez — a taj skok je ovdje bio LCP.
+ * Imena su hashirana pa se ne mogu upisati u `index.html`; vade se iz bundlea.
+ *
+ * Sva tri se koriste na prvom ekranu: wordmark je naslovni rez, „Upiši državu"
+ * je latin, a č/ć/ž/š/đ žive u latin-extu.
+ */
+function preloadFonts(): Plugin {
+  return {
+    name: 'orbis-preload-fonts',
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, ctx) {
+        return Object.keys(ctx.bundle ?? {})
+          .filter((file) => file.endsWith('.woff2'))
+          .sort()
+          .map((file) => ({
+            tag: 'link',
+            attrs: {
+              rel: 'preload',
+              as: 'font',
+              type: 'font/woff2',
+              href: `/${file}`,
+              crossorigin: '',
+            },
+            // 'head', ne 'head-prepend': charset mora ostati prvi meta tag.
+            // Preload scanner ionako cita cijeli head prije nego sto parsira CSS.
+            injectTo: 'head' as const,
+          }));
+      },
+    },
+  };
+}
+
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    preloadFonts(),
+    /*
+     * `pnpm analyze` gradi isti build i uz njega piše treemap u
+     * `dist/stats.html`, s gzip veličinom po modulu. SPEC §9.5: kad PR probije
+     * budžet, ovdje se vidi zašto. U običnom buildu plugina nema.
+     */
+    mode === 'analyze'
+      ? visualizer({ filename: 'dist/stats.html', gzipSize: true, brotliSize: false })
+      : null,
     VitePWA({
       registerType: 'autoUpdate',
+      // Bez 'defer' se skripta za registraciju ubacuje u head kao blokirajuca,
+      // i sama kosta 330 ms do prvog iscrtavanja. Registracija nikamo ne zuri.
+      injectRegister: 'script-defer',
       includeAssets: ['apple-touch-icon.png'],
       workbox: {
+        /*
+         * Oboje eksplicitno. Uz `injectRegister: 'script-defer'` vite-plugin-pwa
+         * prestaje ih izvoditi iz `registerType: 'autoUpdate'` i generira service
+         * worker bez `clientsClaim` — a bez njega prvi posjet nikad nije pod
+         * kontrolom SW-a, pa offline proradi tek iz drugog otvaranja.
+         */
+        skipWaiting: true,
+        clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,json,bin,woff2,png}'],
         /*
          * Precache nosi samo ono bez cega se prvo otvaranje ne moze dogoditi.
@@ -19,7 +77,7 @@ export default defineConfig({
          * su offline. OG slika je za previewe koje generiraju tudi posluzitelji,
          * pa na uredaju nikome ne treba.
          */
-        globIgnores: ['**/data/hr-*.json', 'og.png'],
+        globIgnores: ['**/data/hr-*.json', 'og.png', 'stats.html'],
         // Bez ovoga bi se dnevni podaci dohvaćali ponovno pri svakom otvaranju.
         runtimeCaching: [
           {
@@ -73,4 +131,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

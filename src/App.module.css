@@ -49,12 +49,14 @@
   border-top: 1px solid var(--hairline);
   /* --ink-faint je 2.77:1 na --void i ne smije nositi tekst. SPEC §11.3 t. 8. */
   color: var(--ink-muted);
-  font-size: var(--t-xs);
+  /* --t-xs je 10.24px, ispod granice citljivosti. Sitno, ali ne sitnije od te
+     granice — footer nosi atribuciju izvora i jedini ulaz u ligu. */
+  font-size: var(--t-sm);
 }
 
 .leagueToggle {
   color: var(--ink-muted);
-  font-size: var(--t-xs);
+  font-size: var(--t-sm);
   text-decoration: underline;
   text-underline-offset: 3px;
 }

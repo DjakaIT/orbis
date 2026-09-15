@@ -1,0 +1,7 @@
+# Orbis je javna igra — sve je otvoreno za indeksiranje.
+User-agent: *
+Allow: /
+
+# Deep linkovi lige su privatni i nemaju smisla izvan konteksta.
+Disallow: /l/
+Disallow: /v/
