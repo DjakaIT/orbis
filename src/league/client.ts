@@ -24,6 +24,17 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Što se piše igraču kad API uopće nije ondje.
+ *
+ * Worker na svaki odgovor — i na greške — vraća JSON. Odgovor koji nije JSON
+ * znači da zahtjev nije ni stigao do njega: proxy `/api/*` nije podešen ili
+ * Worker nije deployan, pa se vraća HTML stranica hostinga. To je problem
+ * postavljanja, ne igre, i tako mora i pisati — prije je ovdje stajalo doslovno
+ * „HTTP 404", što igraču ne kaže ništa.
+ */
+export const UNREACHABLE = 'Liga trenutno nije dostupna. Igra radi i bez nje.';
+
 interface Options {
   method?: 'GET' | 'POST';
   token?: string | null;
@@ -31,18 +42,30 @@ interface Options {
 }
 
 async function call<T>(path: string, { method = 'GET', token, body }: Options = {}): Promise<T> {
-  const res = await fetch(BASE + path, {
-    method,
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(BASE + path, {
+      method,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+  } catch {
+    // Mreža je pala ili je CORS odbio zahtjev; ni jedno ni drugo nije igra.
+    throw new ApiError(0, UNREACHABLE);
+  }
+
+  const type = res.headers.get('content-type') ?? '';
+  if (!type.includes('application/json')) {
+    // Nije JSON — do Workera se nije ni stiglo. Vidi `UNREACHABLE`.
+    throw new ApiError(res.status, UNREACHABLE);
+  }
 
   if (!res.ok) {
     const detail = (await res.json().catch(() => null)) as { error?: string } | null;
-    throw new ApiError(res.status, detail?.error ?? `HTTP ${String(res.status)}`);
+    throw new ApiError(res.status, detail?.error ?? UNREACHABLE);
   }
 
   return (await res.json()) as T;

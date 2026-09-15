@@ -22,14 +22,20 @@
   to = "/index.html"
   status = 200
 
-# API lige živi na Cloudflare Workersu (D1 je ondje). Kad Worker bude deployan,
-# odkomentiraj i upiši njegovu adresu — tada `VITE_API_URL` može ostati `/api`
-# i nema CORS-a jer je sve na istom originu.
+# API lige živi na Cloudflare Workersu (D1 je ondje), a klijent u produkciji zove
+# `/api` na istom originu. Pravilo koje to spaja se NE PIŠE OVDJE: netlify.toml ne
+# interpolira varijable okoline, pa bi adresa morala biti upisana rukom — a upravo
+# je takvo pravilo, zakomentirano i bez adrese, značilo da prijava u ligu vraća
+# 404 stranicu hostinga.
 #
-# [[redirects]]
-#   from = "/api/*"
-#   to = "https://orbis-api.<subdomena>.workers.dev/api/:splat"
-#   status = 200
-#   force = true
+# Umjesto toga build emitira `_redirects` iz varijable ORBIS_API_URL, koju Netlify
+# spaja s ovom datotekom. Da liga proradi:
+#
+#   1. cd worker && wrangler d1 create orbis-db     → upiši database_id u wrangler.toml
+#   2. wrangler d1 migrations apply orbis-db --remote
+#   3. wrangler deploy                              → ispiše adresu Workera
+#   4. u Netlifyju postavi ORBIS_API_URL na tu adresu i pokreni redeploy
+#
+# Bez te varijable igra radi normalno, a liga jasno kaže da nije dostupna.
 
 # Zaglavlja su u public/_headers — Netlify i Cloudflare Pages dijele isti format.

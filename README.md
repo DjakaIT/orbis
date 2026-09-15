@@ -78,7 +78,27 @@ Provjera backenda bez preglednika:
 ```bash
 node worker/test-league.mjs     # API: auth, validacija, ljestvica
 node worker/test-close.mjs …    # rano zatvaranje runde
+node worker/test-weeks.mjs      # dvije runde: prati li iste igrače kroz tjedne
 ```
+
+### Spajanje lige u produkciji
+
+Klijent zove `/api` na istom originu. Pravilo koje to spaja s Workerom **nije** u
+`netlify.toml` — ondje se ne mogu čitati varijable okoline, pa bi adresa morala
+biti upisana rukom. Build umjesto toga emitira `_redirects` iz `ORBIS_API_URL`:
+
+```bash
+cd worker
+npx wrangler d1 create orbis-db                    # upiši database_id u wrangler.toml
+npx wrangler d1 migrations apply orbis-db --remote
+npx wrangler deploy                                # ispiše adresu Workera
+```
+
+Zatim u Netlifyju postavi `ORBIS_API_URL` na tu adresu i pokreni redeploy. Bez te
+varijable igra radi normalno, a liga jasno kaže da nije dostupna.
+
+Nadimak nije lozinka: isti nadimak s novog uređaja je **novi** igrač. Povratak na
+staro članstvo ide kroz link `/v/:token`, koji se pokazuje jednom nakon prijave.
 
 ## Tema
 

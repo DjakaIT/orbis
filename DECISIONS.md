@@ -603,3 +603,60 @@ li 4 300 km blizu ovisi o tome koliko je velik svijet u kojem se igra.
 prihvaća, pa je tekstura globusa bila točna — ali three.js parsira boju vlastitim
 regexom koji traži zareze i bez njih **tiho vrati bijelu**. Trag je zato bio bijel.
 Zapis je sada sa zarezima, a test to izričito traži.
+
+## 2026-09-15 — Liga u produkciji: 404 je bio nespojen proxy, ne greška u ligi
+
+Prijavljeno: prijava u ligu šalje nadimak i vraća 404. Reproducirano na
+produkcijskom buildu — `POST /api/players` vraća 404, a igraču piše doslovno
+**„HTTP 404"**.
+
+**Uzrok nije bio u ligi.** Klijent u produkciji zove `/api` na istom originu, a
+pravilo koje to spaja s Workerom bilo je **zakomentirano** u `netlify.toml`, uz
+placeholder umjesto adrese. Zahtjev je zato išao hostingu, koji je vratio svoju
+404 stranicu. Uz to je `wrangler.toml` imao `database_id = "local"`, pa Worker
+nikad nije ni bio deployan s pravom bazom.
+
+**Zašto testovi to nisu uhvatili.** Testovi lige se **preskaču** kad Worker nije
+pokrenut (`test.skip`). Zeleni paket je time govorio samo da lokalni Worker nije
+pokrenut — ništa o produkciji. Tiho preskakanje je i bilo rupa.
+
+### Popravci
+
+**Proxy se sada generira iz okoline.** `netlify.toml` ne interpolira varijable, pa
+bi adresa ondje morala biti upisana rukom — a upravo je takvo pravilo i zakazalo.
+Build emitira `_redirects` iz `ORBIS_API_URL`; bez varijable nema pravila, jer je
+bolje da liga jasno kaže da nije dostupna nego da zahtjev ode u prazno.
+
+**Nedostupan API više ne laže.** Worker na svaki odgovor vraća JSON, pa odgovor
+koji nije JSON znači da se do njega nije ni stiglo. Klijent to sada razlikuje i
+piše „Liga trenutno nije dostupna. Igra radi i bez nje." umjesto „HTTP 404".
+Prave greške API-ja (npr. „Nadimak je obavezan") prolaze nepromijenjene.
+
+### Testovi koji su nedostajali
+
+- `tests/build/deploy.test.ts` — **ovaj bi ga bio uhvatio**. Ne traži ni Worker ni
+  mrežu: provjerava da su klijent i isporuka usuglašeni, i da `netlify.toml` ne
+  pokušava sam opisati `/api/*`.
+- `tests/league/client.test.ts` — HTML stranica hostinga, prazan 404 i pala mreža
+  svi daju poruku o nedostupnosti, a ne golu HTTP brojku.
+- `tests/e2e/league-offline.spec.ts` — vozi se na `vite preview`, koji nema `/api`,
+  dakle na točno onim uvjetima pod kojima je bug nastao. **Bez `skip`.** Provjerava
+  i da se nadimak šalje kao POST s JSON tijelom, a ne navigacijom obrasca.
+- `worker/test-weeks.mjs` — dvije uzastopne runde protiv prave baze.
+
+### Praćenje iz tjedna u tjedan
+
+Provjereno, ne pretpostavljeno. `test-weeks.mjs` vozi dvije runde i potvrđuje:
+članstvo preživi zatvaranje runde, snapshot zatvorene runde nosi nadimke, sljedeća
+runda se otvara odmah bez praznog tjedna, povijest ostaje dostupna s imenima, i
+stari token i dalje vodi na istog igrača i njegovu ligu.
+
+**Nadimak nije identitet.** Isti nadimak s novog uređaja dobiva **novi** identitet
+— nadimak nije lozinka. Zato postoji link za povrat `/v/:token`, koji se pokazuje
+jednom odmah nakon prijave. Test to izričito tvrdi, da se ne bi kasnije netko
+zabunio i pokušao spajati igrače po imenu.
+
+**Ostaje na vlasniku projekta:** Worker treba deployati (`wrangler d1 create`,
+migracije, `wrangler deploy`) i postaviti `ORBIS_API_URL` u Netlifyju. Bez toga
+nijedna izmjena u ovom repozitoriju ne može spojiti ligu — ali od trenutka kad se
+varijabla postavi, sve ostalo je već na mjestu.

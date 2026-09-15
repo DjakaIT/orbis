@@ -48,6 +48,47 @@ function shareTags(): Plugin {
 }
 
 /**
+ * Adresa Workera lige, iz okoline builda.
+ *
+ * `netlify.toml` ne interpolira varijable, pa se proxy `/api/*` ne može ondje
+ * napisati bez da se adresa upiše rukom. Zato se emitira `_redirects`, koji
+ * Netlify spaja s `netlify.toml` — a adresa dolazi iz `ORBIS_API_URL`.
+ *
+ * Bez varijable nema pravila. To je namjerno: bolje da liga jasno kaže da nije
+ * dostupna nego da zahtjev ode u prazno i vrati HTML stranicu hostinga.
+ */
+export function apiUrl(env: NodeJS.ProcessEnv = process.env): string | null {
+  const url = env.ORBIS_API_URL?.trim();
+  if (!url) return null;
+  // Bez zavrsne kose crte i bez `/api` na kraju — splat se dodaje ispod.
+  return url.replace(/\/+$/, '').replace(/\/api$/, '');
+}
+
+/**
+ * Proxy lige na isti origin.
+ *
+ * Isti origin znaci da nema CORS preflighta na svaki poziv. `force = true` jer
+ * bi inace staticki 404 imao prednost pred pravilom.
+ */
+function leagueProxy(): Plugin {
+  return {
+    name: 'orbis-league-proxy',
+    apply: 'build',
+    generateBundle() {
+      const base = apiUrl();
+      if (!base) return;
+
+      this.emitFile({
+        type: 'asset',
+        fileName: '_redirects',
+        source: `/api/*  ${base}/api/:splat  200!
+`,
+      });
+    },
+  };
+}
+
+/**
  * Preload za tri reza fonta.
  *
  * Bez ovoga ih preglednik otkrije tek kad isparsira `index.css`, pa tekst prvo
@@ -88,6 +129,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     shareTags(),
+    leagueProxy(),
     preloadFonts(),
     /*
      * `pnpm analyze` gradi isti build i uz njega piše treemap u
