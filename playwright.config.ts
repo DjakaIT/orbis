@@ -14,9 +14,20 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
-  webServer: {
-    command: 'pnpm dev --port 5173',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: 'pnpm dev --port 5173',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+    },
+    /*
+     * Drugi server posluzuje `dist/`, za `pwa.spec.ts`: service worker, offline
+     * i manifest u razvoju ne postoje. Trazi da je `pnpm build` vec prosao.
+     */
+    {
+      command: 'pnpm preview --port 4173 --strictPort',
+      url: 'http://localhost:4173',
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });

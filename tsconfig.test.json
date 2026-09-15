@@ -6,5 +6,7 @@
     "types": ["node", "vite/client"],
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo"
   },
-  "include": ["tests"]
+  // Testovi build skripti uvlace `scripts/`, pa im trebaju i deklaracije za
+  // pakete bez tipova (`subset-font`, `mapshaper`) koje ondje zive.
+  "include": ["tests", "scripts/**/*.d.ts"]
 }

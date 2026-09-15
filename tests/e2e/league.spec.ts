@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page, type TestInfo } from '@playwright/test';
 
 import { dailyTarget } from '../../src/engine/seed';
 import { zagrebDate } from '../../src/engine/time';
@@ -22,6 +22,16 @@ test.beforeAll(async () => {
   test.skip(!alive, 'Worker nije pokrenut na :8787');
 });
 
+/**
+ * Jedinstven nastavak imena, i kad cetiri testa krenu u istoj milisekundi.
+ *
+ * Sam `Date.now()` nije dovoljan: dva projekta (chromium i mobile) startaju
+ * paralelno i dobiju isti niz, pa se onda traze po tudjem imenu lige.
+ */
+function uniqueSuffix(info: TestInfo): string {
+  return `${info.project.name.slice(0, 1)}${String(info.workerIndex)}${Date.now().toString(36).slice(-3)}`;
+}
+
 /** Otvara panel lige i upisuje nadimak. */
 async function signUp(page: Page, nickname: string): Promise<void> {
   await page.goto('/');
@@ -34,8 +44,12 @@ async function signUp(page: Page, nickname: string): Promise<void> {
   await page.getByRole('button', { name: 'Uđi' }).click();
 }
 
-test('dva igrača dijele ligu i vide ispravnu ljestvicu', async ({ browser }) => {
-  const suffix = Date.now().toString(36).slice(-4);
+test('dva igrača dijele ligu i vide ispravnu ljestvicu', async ({ browser }, info) => {
+  // Dva preglednika, dvije prijave, otvaranje i pridruživanje — to je četiri
+  // kruga do workera i natrag. Uz oba projekta paralelno ne stane u 30 s.
+  test.slow();
+
+  const suffix = uniqueSuffix(info);
 
   // Dva odvojena konteksta = dva odvojena localStoragea, kao dva preglednika.
   const one = await browser.newContext();
@@ -71,8 +85,8 @@ test('dva igrača dijele ligu i vide ispravnu ljestvicu', async ({ browser }) =>
   await two.close();
 });
 
-test('pogodak se sam preda ligi', async ({ page, context }) => {
-  const suffix = Date.now().toString(36).slice(-4);
+test('pogodak se sam preda ligi', async ({ page, context }, info) => {
+  const suffix = uniqueSuffix(info);
 
   await signUp(page, `Solo-${suffix}`);
   await page.getByLabel('Ime lige').fill(`Sam-${suffix}`);
@@ -91,10 +105,16 @@ test('pogodak se sam preda ligi', async ({ page, context }) => {
   const target = meta.countries[dailyTarget(zagrebDate(), 'world', meta.countries.length)];
   expect(target, 'meta mora postojati').toBeDefined();
 
+  // Promašaj mora biti bilo koja država koja danas nije meta — inače bi test
+  // jednom u 177 dana slučajno pogodio i nikad ne bi vidio promašaj.
+  const decoy = meta.countries.find((c) => c.name !== target?.name);
+  expect(decoy, 'bazen mora imati bar dvije države').toBeDefined();
+
   const input = page.getByLabel('Upiši državu');
-  await input.fill('Brazil');
+  await input.fill(decoy?.name ?? '');
   await input.press('Enter');
-  await expect(page.getByRole('listitem').filter({ hasText: 'Brazil' })).toHaveCount(1);
+  // Ljestvica lige je isto lista, pa se broji samo redak s tim imenom.
+  await expect(page.getByRole('listitem').filter({ hasText: decoy?.name ?? '' })).toHaveCount(1);
 
   await input.fill(target?.name ?? '');
   await input.press('Enter');

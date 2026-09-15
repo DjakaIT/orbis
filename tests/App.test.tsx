@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildIndex } from '../src/engine/search';
 import type { Place } from '../src/types';
@@ -37,8 +37,23 @@ vi.mock('../src/components/Globe', () => ({ default: () => null }));
 
 const { default: App } = await import('../src/App');
 
+/**
+ * Meta ovisi o danu, pa sat mora biti pinan — inace ovaj test prolazi ili pada
+ * ovisno o tome kad se pokrene. Za 2026-03-01 `dailyTarget` nad bazenom od cetiri
+ * daje indeks 1 (Beta), pa je Alfa promasaj na 100 km.
+ *
+ * Lazira se samo `Date`; `setTimeout` ostaje pravi jer userEvent ceka na njemu.
+ */
+const PINNED = new Date('2026-03-01T12:00:00Z');
+
 beforeEach(() => {
   localStorage.clear();
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(PINNED);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe('App', () => {
