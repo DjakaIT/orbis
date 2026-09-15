@@ -802,3 +802,81 @@ gasio se na 62 % — dakle cijeli iza neprozirne sfere, pa se nije vidio i plane
 je imao oštar rez prema papiru. Sada je vrhunac na 93 % kraće stranice, tik izvan
 ruba. Zvjezdano polje iz SPEC §6.1 je uklonjeno: napisano je za tamnu scenu, a
 scena je papir, i nitko ga nije uvozio — mrtav kod koji izgleda kao značajka.
+
+## 2026-09-15 — Podloga globusa se slika, ne izmišlja
+
+Traženo: „lijepi globus sa pravom teksturom, kao onaj koji se ima doma. Nađi ili
+napravi sličnu teksturu." SPEC §6.1 predviđa plosnate boje — jedan ton za more,
+jedan za kopno — pa je ovo odstupanje, i to svjesno.
+
+**Zašto napravljena, a ne nađena.** Rastersku podlogu nisam mogao uzeti ni iz
+jednog izvora koji projekt već koristi: `natural-earth-vector` daje samo
+vektore, a `three` u npm paketu ne nosi teksture iz svojih primjera
+(provjereno, `examples/` sadrži samo `jsm`). Rastersku adresu bih morao
+pogoditi, a SPEC §4.1 to izričito zabranjuje. Zato se podloga računa iz istih
+granica koje se ionako crtaju.
+
+**Model.** Dvije veličine, nijedna izmišljena:
+
+- **Udaljenost od obale** (dvoprolazni chamfer 3–4). U moru daje dubinu: plićak
+  uz obalu, tamnjenje do zasićenja na pučini. Na kopnu daje kontinentalnost.
+- **Geografska širina.** Temperatura: ekvator vlažan, iznad 46° tajga pa tundra.
+
+Suhoća je **umnožak** pojasa oko 25° i kontinentalnosti. Sam pojas bi pustinju
+stavio i na Floridu i na jug Kine, koji leže na širini Sahare ali uz more; tek
+drugi član razlikuje Saharu od Floride. To je i tvrdnja koju čuva
+`tests/render/basemap.test.ts`, jer bi popuštanje tog člana dalo globus koji i
+dalje „izgleda nekako u redu".
+
+Led ne dolazi iz širine nego iz podataka: Grenland i Antarktika se rasteriziraju
+u zasebnu masku. Nijedno nije u bazenu meta, pa svijetla kapa ne dira nijedan
+prag kontrasta.
+
+**Paleta je prigušena, i to je cijena.** Boja je u ovoj igri podatak (SPEC §2.1);
+fotografski živ planet bi se s njom natjecao. Tri praga se lančano stišću —
+gradijent mora imati 3:1 na vodi, svako kopno 3:1 na vodi, a pogodak 3:1 na
+svakom kopnu — što cijelo kopno zatvara u luminanciju 0,155–0,238. Raznolikost
+zato nosi **ton, ne svjetlina**: zelena, oker i sivozelena na istoj svjetlini
+čitaju se kao različiti krajolici, a nijedan ne nadglasa pogođenu državu. Tako
+rade i prigušene tematske karte, i to je ovdje razlog, ne stil.
+
+**Cijena u vremenu i bajtovima.** Podloga se slika na 1024 × 512 pa razvlači na
+2048 × 1024: klima i dubina nemaju detalja koji bi smanjenje izgubilo, a račun je
+četiri puta jeftiniji. Šum se uzorkuje na svaki drugi piksel jer mu je najsitnija
+oktava široka pet. Ukupno oko 70 ms jednom po učitavanju. U bundleu 1,7 KB gzip —
+ništa se ne preuzima.
+
+## 2026-09-15 — Sitne države dobivaju kolut, jer ispuna nije dovoljna
+
+Prijavljeno: „stisnuo sam Mauricijus, a karta je označila nešto iznad Brazila."
+
+Izmjereno, ne pretpostavljeno: obojana je **prava** država, na pravom mjestu.
+Skeniranjem teksture prije i poslije bojanja ispalo je da se promijenilo 3 × 4
+piksela, u rasponu 57,3–57,7° E i −19,9 do −20,4° S. To je Mauricijus, točno
+ondje gdje jest. Problem je što kugla na ekranu zauzima oko 500 px, pa na tu
+državu dolazi manje od jednog piksela: pokušaj se dogodi, a globus izgleda
+netaknuto. Igrač onda razumno zaključi da je označeno nešto drugo.
+
+Ispod praga od 22 piksela promjera država uz ispunu dobiva i kolut u boji
+udaljenosti. Prsten, ne puna točka — puna bi na malom zumu izgledala kao otok
+kojeg nema. Unutar koluta ostaje prava, točno obojana država.
+
+Prag čuva `tests/render/texture.test.ts` sa stvarnim dimenzijama: Mauricijus,
+Malta, Singapur i Maldivi moraju pasti ispod, Hrvatska iznad. Sam prag bez toga
+ne znači ništa.
+
+## 2026-09-15 — Liga je jedan gumb i kod
+
+Otvaranje lige je tražilo ime prije nego se išta dogodi, a pridruživanje je bio
+drugi obrazac ispod prvog. Za šestero prijatelja koji se poznaju ime lige nije
+podatak nego korak.
+
+Sada su dva gumba: „Napravi ligu" odmah vraća kod, a polje za kod se pokaže tek
+kad netko stisne „Imam kod". Ime i dalje postoji jer ljestvica treba naslov, ali
+ga poslužitelj izvede iz nadimka; poslano ime se i dalje poštuje, samo izostanak
+više nije greška.
+
+Kod je jedino što osnivač mora nekome proslijediti, pa ima svoju karticu ispod
+ljestvice, s gumbom za kopiranje — prije je stajao sitno, u rečenici u podnožju.
+Uvijek na istom mjestu: uvjetovati ga brojem članova znači da ga nema baš kad ga
+netko traži, a dvije kopije na ekranu znače da nijedna nije očita.

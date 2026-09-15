@@ -18,8 +18,16 @@ pnpm dev · pnpm data · pnpm check · pnpm build · pnpm dev:api
 - Pogodak je identitet mete, NIKAD `km === 0` — matrica je udaljenost među
   granicama, pa je svaki susjed nula kilometara
 - Niz meta je permutacija po krugu: u N dana svaka meta dolazi na red jednom
+- Podloga globusa se **računa** iz granica (render/basemap.ts), ne preuzima —
+  rastersku adresu se ne izmišlja, SPEC §4.1
+- Paleta podloge je prigušena namjerno: kopno mora stati u luminanciju
+  0,155–0,238 da pogodak i gradijent ostanu najglasniji. Mjeri tests/styles
+- Svaki pokušaj mora nešto pokazati: ispod 22 px promjera država dobiva i kolut
 
 ## Liga
+
+Tok je dva gumba: „Napravi ligu" (bez ijednog polja) i „Imam kod". Kod stoji u
+vlastitoj kartici ispod ljestvice. Ime lige izvodi poslužitelj iz nadimka.
 
 API je Netlifyjeva funkcija, spremište Netlify Blobs — nema Cloudflarea, nema D1,
 nema drugog servisa ni tokena. Odstupanje od SPEC §1, obrazloženo u DECISIONS.md.

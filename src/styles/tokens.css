@@ -40,8 +40,12 @@
    * more ostaje stvarno plavo, a pogodak postaje najsvjetlija stvar na kugli —
    * što SPEC §2.1 ionako traži. Mjeri tests/styles/contrast.test.ts.
    */
-  --ocean: #052352; /* duboko more */
-  --landmass: #6a7a52; /* kopno bez pogotka — 3.30:1 na moru */
+  --ocean: #052352; /* voda uz obalu — najsvjetlija voda, 3.27:1 za gradijent */
+  --sea-deep: #02102f; /* otvoreno more */
+  --landmass: #5b7849; /* vlažno kopno — 3.10:1 na vodi */
+  --land-arid: #91825a; /* suho kopno — najsvjetlije koje se može pogoditi */
+  --land-boreal: #6f7969; /* tajga i tundra */
+  --ice: #dde6e8; /* Grenland i Antarktika — nisu u bazenu meta */
   --hairline: #6ea3c4; /* granice i graticule na kugli */
   --stage-ink: #eef3f5; /* natpisi na kugli */
   /*
@@ -50,7 +54,7 @@
    * jer je canvas cita izravno — i sa zarezima, jer ih three.js trazi (bez njih
    * tiho vrati bijelu, vidi engine/color).
    */
-  --hit-stage: rgb(140, 239, 185); /* pogodena meta na kugli — 3.36:1 na kopnu */
+  --hit-stage: rgb(178, 248, 212); /* pogodena meta na kugli — 3.13:1 na najsvjetlijem kopnu */
   --stage: #052352; /* ikona i splash — kugla kad nema stranice oko nje */
 
   /* Atmosfera: meki oreol umjesto ploche pozadine. Ton prati more. */

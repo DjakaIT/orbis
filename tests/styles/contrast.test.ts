@@ -117,6 +117,24 @@ describe('grafika', () => {
     expect(contrast('--landmass', '--ocean')).toBeGreaterThanOrEqual(3);
   });
 
+  it('svaka boja kopna se odvaja od vode', () => {
+    /*
+     * Podloga vise nije jedna boja: kopno ide od vlaznog preko suhog do hladnog,
+     * a voda od plicaka do otvorenog mora. Obris kontinenta mora izdrzati svaku
+     * kombinaciju, pa se mjeri najgora — najtamnije kopno protiv najsvjetlije
+     * vode. Led je izuzet: Grenland i Antarktika nisu u bazenu meta.
+     */
+    for (const land of ['--landmass', '--land-arid', '--land-boreal']) {
+      const r = contrast(land, '--ocean');
+      expect(r, `${land}: ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('otvoreno more je tamnije od plicaka', () => {
+    // Obrnuto bi izgledalo kao da je more duboko uz obalu, a plitko na pucini.
+    expect(luminance(parse(token('--sea-deep')))).toBeLessThan(luminance(parse(token('--ocean'))));
+  });
+
   it('kopno je svjetlije od mora, kao na fotografiji planeta', () => {
     // Obrnuto bi bilo citljivo jednako, ali ne bi izgledalo kao Zemlja.
     expect(luminance(parse(token('--landmass')))).toBeGreaterThan(
@@ -124,13 +142,16 @@ describe('grafika', () => {
     );
   });
 
-  it('pogodak se izdvaja od kopna na koje se boja', () => {
+  it('pogodak se izdvaja od svakog kopna na koje se boja', () => {
     /*
      * Meta se boja usred drugog kopna, pa se mora vidjeti i prije nego se globus
      * okrene i prije nego se otvori kartica. Ovo je prag koji je paletu odlucio:
      * prva rucno odabrana kombinacija davala je 2,77:1, ispod WCAG 1.4.11.
      */
-    expect(contrast('--hit-stage', '--landmass')).toBeGreaterThanOrEqual(3);
+    for (const land of ['--landmass', '--land-arid', '--land-boreal']) {
+      const r = contrast('--hit-stage', land);
+      expect(r, `${land}: ${r.toFixed(2)}:1`).toBeGreaterThanOrEqual(3);
+    }
   });
 
   it('pogodak je najsvjetlija stvar na kugli', () => {

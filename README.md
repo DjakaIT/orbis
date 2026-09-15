@@ -108,6 +108,24 @@ sama provjerava zagrebački sat — fiksni UTC termin bi se ljeti i zimi raziša
 Nadimak nije lozinka: isti nadimak s novog uređaja je **novi** igrač. Povratak na
 staro članstvo ide kroz link `/v/:token`, koji se pokazuje jednom nakon prijave.
 
+## Globus
+
+Jedna sfera, jedna tekstura, jedan draw call. Podloga se **računa**, ne preuzima:
+Natural Earth ovdje daje samo vektore, a rasterska adresa se ne izmišlja (SPEC
+§4.1). Iz istih granica koje se ionako crtaju izvode se dvije veličine —
+udaljenost od obale i geografska širina — i iz njih dubina mora, klima kopna i
+ledene kape. Vidi `src/render/basemap.ts`.
+
+Paleta je namjerno prigušena. Tri praga se lančano stišću: gradijent udaljenosti
+treba 3:1 na vodi, svako kopno 3:1 na vodi, a pogodak 3:1 na svakom kopnu. Kopno
+je time zatvoreno u uzak raspon svjetline, pa raznolikost nosi ton — zelena, oker
+i sivozelena na istoj svjetlini. Tako pogođena država ostaje najglasnija stvar na
+kugli, što i jest smisao (SPEC §2.1).
+
+Države manje od 22 piksela teksture uz ispunu dobivaju kolut. Mauricijus zauzima
+3 × 4 piksela od 2048 × 1024; bez koluta se pogodak dogodi, a globus izgleda
+netaknuto.
+
 ## Tema
 
 Dvije podloge. Stranica je topli papir; globus i karta žive u vlastitoj tamnoj

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { plan, unwrap, type Ring } from '../../src/render/texture';
+import { bounds, MIN_VISIBLE_PX, plan, unwrap, type Ring } from '../../src/render/texture';
 
 /**
  * Crtanje prstenova preko ruba karte.
@@ -129,5 +129,66 @@ describe('običan prsten', () => {
 
   it('ispunjava se', () => {
     expect(winding(plan(croatia).points, 16, 45)).not.toBe(0);
+  });
+});
+
+describe('sitne države', () => {
+  /**
+   * Mauricijus se bojao točno, i to se nije vidjelo.
+   *
+   * Prijavljeno kao „stisnuo sam Mauricijus, a karta je označila nešto drugo".
+   * Izmjereno: država je promijenila 3 × 4 piksela od 2048 × 1024, na svom pravom
+   * mjestu (57,3–57,7° E). Kugla se na ekranu prikazuje na oko 500 px, pa na to
+   * dođe manje od jednog piksela — pokušaj se dogodio, a globus je ostao isti.
+   *
+   * Zato ispod praga ide i kolut. Ovdje se čuva prag: da stvarne veličine padnu
+   * s prave strane, jer sam prag bez toga nije ništa.
+   */
+
+  /** Pravokutnik u stupnjevima, kao gruba zamjena za obris države. */
+  function box(lon: number, lat: number, wDeg: number, hDeg: number): GeoJSON.Geometry {
+    return {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [lon, lat],
+          [lon + wDeg, lat],
+          [lon + wDeg, lat + hDeg],
+          [lon, lat + hDeg],
+          [lon, lat],
+        ],
+      ],
+    };
+  }
+
+  const widthPx = (g: GeoJSON.Geometry): number => {
+    const b = bounds(g);
+    return Math.max(b.x1 - b.x0, b.y1 - b.y0);
+  };
+
+  it('Mauricijus je ispod praga vidljivosti', () => {
+    // Oko 0,35° × 0,45° — stvarne dimenzije iz Natural Eartha.
+    expect(widthPx(box(57.3, -20.5, 0.35, 0.45))).toBeLessThan(MIN_VISIBLE_PX);
+  });
+
+  it('Malta, Singapur i Maldivi također', () => {
+    expect(widthPx(box(14.2, 35.8, 0.3, 0.2))).toBeLessThan(MIN_VISIBLE_PX);
+    expect(widthPx(box(103.6, 1.2, 0.4, 0.2))).toBeLessThan(MIN_VISIBLE_PX);
+    expect(widthPx(box(72.9, 3.2, 0.6, 1.2))).toBeLessThan(MIN_VISIBLE_PX);
+  });
+
+  it('Hrvatska je iznad njega, i ne dobiva kolut', () => {
+    // Kolut preko države koja se ionako vidi bio bi šum, ne oznaka.
+    expect(widthPx(box(13.5, 42.4, 5.4, 4.1))).toBeGreaterThan(MIN_VISIBLE_PX);
+  });
+
+  it('prag je iznad piksela, ali daleko ispod države', () => {
+    /*
+     * Prag mora ostati između dva reda veličine: veći od šuma jednog piksela,
+     * manji od najmanje države koja se sama vidi. Bez toga bi ili sitne ostale
+     * nevidljive ili bi kolutovi pali po pola karte.
+     */
+    expect(MIN_VISIBLE_PX).toBeGreaterThan(4);
+    expect(MIN_VISIBLE_PX).toBeLessThan(widthPx(box(13.5, 42.4, 5.4, 4.1)));
   });
 });
