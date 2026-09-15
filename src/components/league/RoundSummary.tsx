@@ -39,7 +39,8 @@ export default function RoundSummary({ round, name }: { round: ClosedRound; name
       </header>
 
       <p className={styles.winner}>
-        Pobjednik: <strong>{winner.nickname}</strong> s {winner.points} bodova
+        Pobjednik: <span className={styles.winnerName}>{winner.nickname}</span> s {winner.points}{' '}
+        bodova
       </p>
 
       <ol className={styles.board}>

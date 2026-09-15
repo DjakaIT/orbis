@@ -21,9 +21,6 @@ body {
   color: var(--ink);
   font-family: var(--font);
   font-size: var(--t-base);
-  font-variation-settings:
-    'wdth' 100,
-    'opsz' 14;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }

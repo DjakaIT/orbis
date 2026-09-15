@@ -20,7 +20,8 @@
   --error: oklch(0.65 0.17 25);
 
   /* Tipografija */
-  --font: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --font: 'Bricolage', system-ui, sans-serif;
+  --font-display: 'Bricolage Display', 'Bricolage', system-ui, sans-serif;
 
   /* Modularna skala, omjer 1.25, baza 16px */
   --t-xs: 0.64rem;

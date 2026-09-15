@@ -158,5 +158,11 @@
 }
 
 .winner {
+  color: var(--ink-muted);
   font-size: var(--t-sm);
+}
+
+/* Naglasak ide bojom, ne debljinom: rez tijela je pinan na 400 i bold bi bio lažan. */
+.winnerName {
+  color: var(--ink);
 }

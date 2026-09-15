@@ -20,6 +20,8 @@ import mapshaper from 'mapshaper';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 
+import { buildFont } from './build-font';
+import { buildIcons } from './build-icons';
 import { buildHr, writeMissingPopReport } from './build-hr';
 import { NATURAL_EARTH, fetchSource, readCached } from './fetch-sources';
 
@@ -323,6 +325,13 @@ async function main(): Promise<void> {
     JSON.stringify({ outline: croatia.outline, counties: croatia.counties }),
   );
   await writeMissingPopReport(HERE, croatia.dropped);
+
+  // Font se podskupljuje na kraju: abecedu cita iz upravo zapisanih podataka.
+  console.warn('Font →');
+  await buildFont();
+
+  console.warn('Ikone →');
+  await buildIcons();
 }
 
 function round(x: number): number {

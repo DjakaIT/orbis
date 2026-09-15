@@ -31,3 +31,11 @@ Thumbs.db
 
 # Lokalni D1 i wrangler stanje
 worker/.wrangler
+
+# Podskupljeni font — generira ga `pnpm data`
+src/styles/fonts
+
+# Generirane ikone i OG slika
+public/icon-*.png
+public/apple-touch-icon.png
+public/og.png
