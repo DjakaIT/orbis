@@ -250,9 +250,14 @@ describe.skipIf(!built)('budzeti iz SPEC §9.5', () => {
     });
   }
 
-  it('prvi load u modu svijet ≤ 280 KB', () => {
-    // SPEC trazi 250 KB. Razlika je tocno zbroj dva odstupanja iznad — React i
-    // three.js — i nijedno se ne moze skinuti bez promjene stacka iz §1.
+  it('prvi load u modu svijet ≤ 300 KB', () => {
+    /*
+     * SPEC trazi 250 KB. Razlika su tri stavke, sve zabiljezene u DECISIONS.md:
+     * React, three.js, i od 2026-09-15 bogatiji podaci — bazen je narastao sa 177
+     * na 199 drzava jer 110m izvor uopce nije imao Andoru, Monako, San Marino ni
+     * ostale male drzave. Granice i matrica zajedno nose +24 KB; to je cijena
+     * toga da igra sadrzi svaku drzavu svijeta.
+     */
     const first = [
       'index.html',
       ...assets('.css').filter((f) => f.includes('index-')),
@@ -263,7 +268,7 @@ describe.skipIf(!built)('budzeti iz SPEC §9.5', () => {
       'data/world-meta.json',
       'data/aliases.json',
     ];
-    expect(sum(first)).toBeLessThanOrEqual(280);
+    expect(sum(first)).toBeLessThanOrEqual(300);
   });
 
   it('font se preloada, ne ceka na CSS', () => {

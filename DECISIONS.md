@@ -454,3 +454,41 @@ Ton sada ide od 28° prema −100°, što je isti kraj kao 260° samo s druge st
 kruga: crvena → ružičasta → ljubičasta → indigo. Krajevi su i dalje oni iz SPEC
 §5.5; mijenja se put između njih, i zelene na njemu nema. Test prolazi cijelim
 rasponom u sva tri moda i traži da svaka točka ostane barem 60° od tona `--hit`.
+
+## 2026-09-15 — Izvor granica je Natural Earth 50m, ne 110m
+
+Prijavljeno iz igre: Andora se ne može pogoditi. Provjereno — nije je bilo u bazenu,
+kao ni Monaka, San Marina, Lihtenštajna, Malte, Singapura, Vatikana, Nauru, Tuvalua,
+Maldiva ni Barbadosa.
+
+Uzrok je rezolucija izvora. **110m je najgrublji sloj Natural Eartha i male države
+iz njega jednostavno ispadnu** — ima 177 zapisa, 50m ima 242. Ništa nije puklo ni
+javilo grešku; tih država naprosto nije bilo. Izvor je sada 50m.
+
+**Filtar je promijenjen iz „ima ISO kod" u „vlada sama sobom".** Prije su u bazenu
+bili i teritoriji — Portoriko, Guam, Grenland, Bermudi — koji nisu odgovor na pitanje
+„koja je država". Kriterij je `SOVEREIGNT === ADMIN`. NE-ovo polje `TYPE` za ovo ne
+valja: Izrael je ondje `Disputed`, a Kazahstan i Kuba `Sovereignty`, pa bi filtar po
+njemu izbacio tri prave države. Antarktika je izuzeta imenom — jedina je koja prolazi
+filtar a nema ni stanovništvo ni glavni grad.
+
+Bazen je **199 država** umjesto 177. Glavni gradovi su usput narasli sa 164 na 192,
+jer su gradovi mikrodržava cijelo vrijeme bili u izvoru — samo ih popis država nije
+imao na što spojiti.
+
+**Cijena.** Pojednostavljivanje je pojačano s 8% na 5%, jer 50m nosi puno više
+točaka: tekstura globusa je 2048 px široka, gdje jedan piksel pokriva oko 19 km na
+ekvatoru, pa se gušće ionako ne vidi. Mjereno, 8% daje 33,6 KB gzipano, 5% daje 27,9.
+
+| Asset              | Prije   | Sada    | Budžet |
+| ------------------ | ------- | ------- | ------ |
+| `world-topo.json`  | 13,0 KB | 27,9 KB | 40 KB  |
+| `world-matrix.bin` | 28,6 KB | 36,4 KB | 40 KB  |
+| Prvi load, svijet  | 268 KB  | 292 KB  | 250 KB |
+
+Oba podatkovna budžeta i dalje drže. Prvi load je probijen i prije ovoga; +24 KB je
+cijena toga da igra sadrži svaku državu svijeta, i to je razmjena koju vrijedi platiti.
+
+**Posljedica:** niz meta je opet drugi, jer se bazen promijenio. Kao i prije, ništa
+ne lomi dok igra nije u pogonu — nakon puštanja u rad bazen se više ne smije mijenjati
+bez svjesne odluke, jer pomiče sve mete.

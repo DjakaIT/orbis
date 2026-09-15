@@ -8,5 +8,5 @@ i pipeline ce ga preuzeti.
 
 | ISO | Prikazuje se kao |
 | --- | --- |
-| CYN | N. Cyprus |
 | SOL | Somaliland |
+| CYN | N. Cyprus |

@@ -23,9 +23,17 @@ export interface Source {
   manual?: string;
 }
 
+/**
+ * Granice drzava. **50m, ne 110m.**
+ *
+ * 110m je najgrublji sloj i iz njega jednostavno ispadnu male drzave: Andora,
+ * Monako, San Marino, Lihtenstajn, Malta, Singapur, Vatikan i jos desetak. Ondje
+ * ih nema, pa ih nije bilo ni u igri. 50m ima svih 242 zapisa i 3 MB se skida
+ * jednom u cache.
+ */
 export const NATURAL_EARTH: Source = {
-  file: 'ne_110m_admin_0_countries.geojson',
-  url: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson',
+  file: 'ne_50m_admin_0_countries.geojson',
+  url: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson',
 };
 
 /**

@@ -45,7 +45,16 @@ interface NeProps {
   ADM0_A3: string;
   ISO_A2_EH: string;
   NAME: string;
+  /** Tko je suveren. Jednak `ADMIN` znaci da drzava vlada sama sobom. */
+  SOVEREIGNT: string;
+  ADMIN: string;
 }
+
+/**
+ * Antarktika nije drzava. Jedini je zapis koji prolazi filtar suverenosti a nema
+ * ni stanovnistvo ni glavni grad, pa kao dnevna meta nema smisla.
+ */
+const NOT_A_COUNTRY = new Set(['ATA']);
 
 interface Country {
   id: number;
@@ -223,12 +232,19 @@ async function main(): Promise<void> {
   if (!source) throw new Error('Natural Earth nije dostupan');
 
   console.warn('Pojednostavljivanje →');
-  // keep-shapes je obavezan: bez njega male otocne drzave nestanu. SPEC §4.2.
+  /*
+   * keep-shapes je obavezan: bez njega male otocne drzave nestanu. SPEC §4.2.
+   *
+   * 5%, ne 8%: izvor je sada 50m i nosi puno vise tocaka nego 110m. Tekstura
+   * globusa je 2048 px siroka, gdje jedan piksel pokriva oko 19 km na ekvatoru —
+   * gusce od toga se ionako ne vidi. Mjereno: 8% daje 33,6 KB gzipano, 5% daje
+   * 27,9 KB, a razlika se na globusu ne raspoznaje.
+   */
   const simplified = await mapshaper.applyCommands(
     [
       '-i input.geojson',
-      '-simplify visvalingam 8% keep-shapes',
-      '-filter-fields ISO_A3,ISO_A3_EH,ADM0_A3,ISO_A2_EH,NAME',
+      '-simplify visvalingam 5% keep-shapes',
+      '-filter-fields ISO_A3,ISO_A3_EH,ADM0_A3,ISO_A2_EH,NAME,SOVEREIGNT,ADMIN',
       '-o format=topojson quantization=1e4 world-topo.json',
     ].join(' '),
     { 'input.geojson': await readCached(NATURAL_EARTH.file) },
@@ -258,12 +274,22 @@ async function main(): Promise<void> {
 
     /*
      * SPEC §4.2 filtrira `ISO_A3 !== "-99"`, ali u Natural Earthu -99 imaju i
-     * Francuska i Norveska — taj filtar izbacuje dvije velike europske drzave
-     * i daje 172 umjesto ocekivanih 177. ISO_A3_EH ih vraca; za preostale tri
-     * sporne (Sj. Cipar, Somaliland, Kosovo) pada na ADM0_A3.
+     * Francuska i Norveska — taj filtar izbacuje dvije velike europske drzave.
+     * ISO_A3_EH ih vraca; za sporne (Sj. Cipar, Somaliland, Kosovo) pada na ADM0_A3.
      */
     const iso = p.ISO_A3_EH !== '-99' ? p.ISO_A3_EH : p.ADM0_A3;
     if (!iso || iso === '-99') continue;
+
+    /*
+     * U bazen ulaze samo drzave, ne i teritoriji: Portoriko, Guam, Grenland,
+     * Bermudi i jos 24 ovise o nekom drugom i nisu odgovor na „koja je drzava".
+     *
+     * Kriterij je `SOVEREIGNT === ADMIN` — drzava koja vlada sama sobom. NE-ovo
+     * polje `TYPE` za ovo ne valja: Izrael je ondje „Disputed", a Kazahstan i
+     * Kuba „Sovereignty", pa bi filtar po njemu izbacio tri prave drzave.
+     */
+    if (p.SOVEREIGNT !== p.ADMIN) continue;
+    if (NOT_A_COUNTRY.has(iso)) continue;
 
     const alpha2 = p.ISO_A2_EH;
     const name = alpha2 !== '-99' ? hr[alpha2] : undefined;

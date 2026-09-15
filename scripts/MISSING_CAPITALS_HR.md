@@ -4,7 +4,7 @@ Generira `pnpm data`. Ovi gradovi zadrzavaju naziv iz Natural Eartha jer CLDR
 za njih nema hrvatski egzonim. Vecina ih ni ne treba — Zagreb, Madrid i Ottawa
 se u hrvatskom pisu jednako — ali popis stoji da odstupanje bude vidljivo.
 
-Ukupno: 120 od 164.
+Ukupno: 144 od 192.
 
 | Grad | Drzava |
 | --- | --- |
@@ -13,17 +13,20 @@ Ukupno: 120 od 164.
 | Tirana | Albanija |
 | Abu Dhabi | Ujedinjeni Arapski Emirati |
 | Buenos Aires | Argentina |
+| Saint John's | Antigva i Barbuda |
 | Canberra | Australija |
 | Baku | Azerbajdžan |
 | Bujumbura | Burundi |
 | Cotonou | Benin |
 | Ouagadougou | Burkina Faso |
 | Dhaka | Bangladeš |
+| Manama | Bahrein |
 | Nassau | Bahami |
 | Sarajevo | Bosna i Hercegovina |
 | Minsk | Bjelorusija |
 | Belmopan | Belize |
 | Brasília | Brazil |
+| Bridgetown | Barbados |
 | Bandar Seri Begawan | Brunej |
 | Thimphu | Butan |
 | Gaborone | Bocvana |
@@ -35,9 +38,12 @@ Ukupno: 120 od 164.
 | Yaoundé | Kamerun |
 | Kinshasa | Kongo - Kinshasa |
 | Brazzaville | Kongo - Brazzaville |
+| Moroni | Komori |
+| Praia | Zelenortska Republika |
 | San José | Kostarika |
 | Havana | Kuba |
 | Berlin | Njemačka |
+| Roseau | Dominika |
 | Santo Domingo | Dominikanska Republika |
 | Quito | Ekvador |
 | Asmara | Eritreja |
@@ -45,6 +51,7 @@ Ukupno: 120 od 164.
 | Tallinn | Estonija |
 | Helsinki | Finska |
 | Suva | Fidži |
+| Palikir | Mikronezija |
 | Libreville | Gabon |
 | London | Ujedinjeno Kraljevstvo |
 | Tbilisi | Gruzija |
@@ -53,6 +60,7 @@ Ukupno: 120 od 164.
 | Banjul | Gambija |
 | Bissau | Gvineja Bisau |
 | Malabo | Ekvatorska Gvineja |
+| St. George's | Grenada |
 | Georgetown | Gvajana |
 | Tegucigalpa | Honduras |
 | Zagreb | Hrvatska |
@@ -65,22 +73,30 @@ Ukupno: 120 od 164.
 | Nur-Sultan | Kazahstan |
 | Nairobi | Kenija |
 | Phnom Penh | Kambodža |
+| South Tarawa | Kiribati |
+| Basseterre | Sveti Kristofor i Nevis |
 | Pristina | Kosovo |
 | Kuwait City | Kuvajt |
 | Vientiane | Laos |
 | Beirut | Libanon |
 | Monrovia | Liberija |
 | Tripoli | Libija |
+| Castries | Sveta Lucija |
+| Vaduz | Lihtenštajn |
 | Colombo | Šri Lanka |
 | Maseru | Lesoto |
 | Vilnius | Litva |
 | Riga | Latvija |
 | Rabat | Maroko |
 | Antananarivo | Madagaskar |
+| Malé | Maldivi |
+| Majuro | Maršalovi Otoci |
 | Bamako | Mali |
+| Valletta | Malta |
 | Podgorica | Crna Gora |
 | Maputo | Mozambik |
 | Nouakchott | Mauretanija |
+| Port Louis | Mauricijus |
 | Lilongwe | Malavi |
 | Kuala Lumpur | Malezija |
 | Windhoek | Namibija |
@@ -96,6 +112,7 @@ Ukupno: 120 od 164.
 | Panama City | Panama |
 | Lima | Peru |
 | Manila | Filipini |
+| Melekeok | Palau |
 | Port Moresby | Papua Nova Gvineja |
 | Doha | Katar |
 | Kigali | Ruanda |
@@ -104,6 +121,7 @@ Ukupno: 120 od 164.
 | Honiara | Salomonovi Otoci |
 | Freetown | Sijera Leone |
 | San Salvador | Salvador |
+| San Marino | San Marino |
 | Hargeisa | Somaliland |
 | Mogadishu | Somalija |
 | Juba | Južni Sudan |
@@ -112,19 +130,25 @@ Ukupno: 120 od 164.
 | Ljubljana | Slovenija |
 | Stockholm | Švedska |
 | Mbabane | Esvatini |
+| Victoria | Sejšeli |
 | Bangkok | Tajland |
 | Dili | Timor-Leste |
+| Nuku'alofa | Tonga |
 | Port of Spain | Trinidad i Tobago |
 | Tunis | Tunis |
 | Ankara | Turska |
+| Funafuti | Tuvalu |
 | Taipei | Tajvan |
 | Dar es Salaam | Tanzanija |
 | Kampala | Uganda |
 | Montevideo | Urugvaj |
 | Washington | Sjedinjene Američke Države |
+| Vatican City | Vatikan |
+| Kingstown | Sveti Vincent i Grenadini |
 | Caracas | Venezuela |
 | Hanoi | Vijetnam |
 | Port Vila | Vanuatu |
+| Apia | Samoa |
 | Sanaa | Jemen |
 | Lusaka | Zambija |
 | Harare | Zimbabve |
@@ -144,12 +168,6 @@ nisu isti. Dvojben odgovor u kvizu je gori od nikakvog, pa ispadaju iz bazena.
 Nemaju suvereni glavni grad (Antarktika, prekomorski teritoriji, sporna
 podrucja), pa ispadaju iz bazena. To nije rupa u podacima.
 
-- ATA Antarktika
-- ATF Francuski Južni Teritoriji
 - CYN N. Cyprus
 - ESH Zapadna Sahara
-- FLK Falklandski Otoci
-- GRL Grenland
-- NCL Nova Kaledonija
-- PRI Portoriko
-- PSE Palestinsko područje
+- NRU Nauru
