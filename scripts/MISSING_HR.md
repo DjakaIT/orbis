@@ -7,6 +7,6 @@ Ako za neki postoji ustaljen hrvatski egzonim, dopuni ga u `scripts/hr-names.jso
 i pipeline ce ga preuzeti.
 
 | ISO | Prikazuje se kao |
-| --- | ---------------- |
-| CYN | N. Cyprus        |
-| SOL | Somaliland       |
+| --- | --- |
+| CYN | N. Cyprus |
+| SOL | Somaliland |

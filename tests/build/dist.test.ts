@@ -69,10 +69,21 @@ describe.skipIf(!built)('PWA manifest', () => {
   });
 
   it('boje se slazu s --void iz tokens.css', () => {
-    // Razlicit theme_color i pozadina stranice daju bljesak pri pokretanju.
-    expect(manifest.theme_color.toLowerCase()).toBe('#080b14');
-    expect(manifest.background_color.toLowerCase()).toBe('#080b14');
-    expect(text('index.html')).toContain('content="#080B14"');
+    /*
+     * Razlicit theme_color i pozadina stranice daju bljesak pri pokretanju.
+     * Vrijednost se cita iz tokena, ne upisuje ovdje — inace bi svaka promjena
+     * palete trazila da netko sjeti promijeniti i ovaj test.
+     */
+    const tokens = readFileSync(
+      join(import.meta.dirname, '..', '..', 'src', 'styles', 'tokens.css'),
+      'utf8',
+    );
+    const background = /--void:\s*(#[0-9a-fA-F]{6});/.exec(tokens)?.[1]?.toLowerCase();
+    expect(background, 'tokens.css nema --void').toBeTruthy();
+
+    expect(manifest.theme_color.toLowerCase()).toBe(background);
+    expect(manifest.background_color.toLowerCase()).toBe(background);
+    expect(text('index.html').toLowerCase()).toContain(`content="${background ?? ''}"`);
   });
 
   it('svaka ikona postoji i ima tocno onu velicinu koju tvrdi', () => {

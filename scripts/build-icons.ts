@@ -6,6 +6,7 @@
  * i u istim tokenima iz §2.2.
  */
 
+import { readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,13 +15,35 @@ import { deflateSync } from 'node:zlib';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, '..', 'public');
 
-/** Tokeni iz src/styles/tokens.css. */
-export const VOID: RGB = [0x08, 0x0b, 0x14];
-export const OCEAN: RGB = [0x10, 0x18, 0x2b];
-export const HAIRLINE: RGB = [0x2c, 0x3a, 0x57];
-export const INK: RGB = [0xe6, 0xea, 0xf2];
-
 export type RGB = [number, number, number];
+
+/**
+ * Paleta se cita iz tokens.css, ne prepisuje.
+ *
+ * Ikona i aplikacija moraju biti iste boje; prijelaz s plavo-crne na zemljanu
+ * paletu inace ostavi ikonu u staroj, i to se vidi tek na launcheru.
+ */
+function palette(): Record<string, RGB> {
+  const css = readFileSync(join(HERE, '..', 'src', 'styles', 'tokens.css'), 'utf8');
+  const read = (name: string): RGB => {
+    const hex = new RegExp(`--${name}:\\s*#([0-9a-fA-F]{6});`).exec(css)?.[1];
+    if (!hex) throw new Error(`tokens.css nema --${name} kao hex`);
+    return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)) as RGB;
+  };
+  return {
+    void: read('void'),
+    ocean: read('ocean'),
+    hairline: read('hairline'),
+    ink: read('ink'),
+  };
+}
+
+const TOKENS = palette();
+
+export const VOID: RGB = TOKENS.void ?? [0, 0, 0];
+export const OCEAN: RGB = TOKENS.ocean ?? [0, 0, 0];
+export const HAIRLINE: RGB = TOKENS.hairline ?? [0, 0, 0];
+export const INK: RGB = TOKENS.ink ?? [0, 0, 0];
 
 class Bitmap {
   readonly width: number;

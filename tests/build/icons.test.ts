@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import { INK, OCEAN, VOID, icon, og } from '../../scripts/build-icons';
@@ -154,5 +157,38 @@ describe('OG slika', () => {
       expect(channelDistance(png.at(x, 0), VOID)).toBe(0);
       expect(channelDistance(png.at(x, 629), VOID)).toBe(0);
     }
+  });
+});
+
+describe('paleta', () => {
+  /**
+   * Ikona i aplikacija moraju biti iste boje. Prije se paleta prepisivala u
+   * `build-icons.ts` rukom, pa bi prijelaz na novu ostavio ikonu u staroj — a to
+   * se vidi tek na launcheru, kad je vec instalirana.
+   */
+  const TOKENS = readFileSync(
+    join(import.meta.dirname, '..', '..', 'src', 'styles', 'tokens.css'),
+    'utf8',
+  );
+
+  function hex(name: string): string {
+    const value = new RegExp(`--${name}:\\s*#([0-9a-fA-F]{6});`).exec(TOKENS)?.[1];
+    if (!value) throw new Error(`tokens.css nema --${name}`);
+    return value.toLowerCase();
+  }
+
+  function asHex(rgb: readonly number[]): string {
+    return rgb.map((c) => c.toString(16).padStart(2, '0')).join('');
+  }
+
+  it('boje ikone dolaze iz tokens.css, ne iz kopije', () => {
+    expect(asHex(VOID)).toBe(hex('void'));
+    expect(asHex(OCEAN)).toBe(hex('ocean'));
+    expect(asHex(INK)).toBe(hex('ink'));
+  });
+
+  it('pozadina nacrtane ikone je stvarno --void', () => {
+    const png = decodePng(icon(192, 0.06));
+    expect(asHex(png.at(0, 0))).toBe(hex('void'));
   });
 });

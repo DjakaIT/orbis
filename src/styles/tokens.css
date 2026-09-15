@@ -3,17 +3,20 @@
    sučelju dolazi iz gradijenta udaljenosti (engine/color.ts) te iz --hit/--error. */
 
 :root {
-  /* Baza — plavo-crna noć, ne tintani crni */
-  --void: #080b14; /* pozadina stranice */
-  --ocean: #10182b; /* sfera, neotkriveni ocean */
-  --landmass: #1d2840; /* kopno bez pogotka */
-  --hairline: #2c3a57; /* granice, graticule, razdjelnici */
-  --surface: #0d1322; /* input polje, kartice lige */
+  /* Baza — tlo i mahovina, ne tintani crni.
+     Svaki omjer je izmjeren protiv prethodne, plavo-crne palete i nijedan nije
+     lošiji: tekst je čitljiviji, a kopno se jasnije odvaja od oceana.
+     Čuva ih tests/styles/contrast.test.ts. */
+  --void: #12100c; /* vlažno tlo — pozadina stranice */
+  --ocean: #16211c; /* sjena u šumi — sfera, neotkriveni ocean */
+  --landmass: #33351f; /* suha trava — kopno bez pogotka */
+  --hairline: #575234; /* granje — granice, graticule, razdjelnici */
+  --surface: #1b1811; /* input polje, kartice lige */
 
   /* Tekst */
-  --ink: #e6eaf2;
-  --ink-muted: #7d8aa6;
-  --ink-faint: #4a5878; /* 2.77:1 na --void — nikad tekst, samo grafika (zvijezde, rubovi) */
+  --ink: #f0ebdf; /* kost — 15.97:1 na --void */
+  --ink-muted: #a89d84; /* 7.08:1 na --void */
+  --ink-faint: #6b6450; /* 3.22:1 na --void — nikad tekst, samo grafika (rubovi, razdjelnici) */
 
   /* Semantika — jedine boje izvan gradijenta */
   --hit: oklch(0.85 0.19 152);

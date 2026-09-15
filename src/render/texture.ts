@@ -26,9 +26,9 @@ export function readTokens(el: Element = document.documentElement): Tokens {
   const get = (name: string, fallback: string): string =>
     s.getPropertyValue(name).trim() || fallback;
   return {
-    ocean: get('--ocean', '#10182B'),
-    landmass: get('--landmass', '#1D2840'),
-    hairline: get('--hairline', '#2C3A57'),
+    ocean: get('--ocean', '#16211C'),
+    landmass: get('--landmass', '#33351F'),
+    hairline: get('--hairline', '#575234'),
     // --hit je oklch u CSS-u; canvas ga ne prima pouzdano, pa ide sRGB ekvivalent.
     hit: 'rgb(88 224 148)',
   };
