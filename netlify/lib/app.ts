@@ -144,12 +144,18 @@ export function createApp(store: Store): Hono<AppEnv> {
 
   /* -------------------------------------------------------------------- lige */
 
+  /**
+   * Otvaranje lige je jedan klik: nema obrasca, nema imena za smisliti.
+   *
+   * Ime je i dalje ondje jer ljestvica treba naslov, ali ga poslužitelj izvede
+   * iz nadimka. Tko ga ipak posalje, dobije svoje.
+   */
   app.post('/api/leagues', requirePlayer, async (c) => {
     const me = c.get('player');
     const body = await c.req.json<{ name?: unknown }>().catch(() => ({ name: undefined }));
-    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    const given = typeof body.name === 'string' ? body.name.trim() : '';
+    const name = given || `${me.nickname} i ekipa`;
 
-    if (!name) return c.json({ error: 'Ime lige je obavezno' }, 400);
     if (name.length > MAX_NAME) return c.json({ error: 'Ime lige je predugo' }, 400);
 
     // Kod je 6 znakova iz 31-slovne abecede; sudar je malo vjerojatan, ali nije nemoguć.

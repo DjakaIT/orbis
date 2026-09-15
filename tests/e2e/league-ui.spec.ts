@@ -12,6 +12,17 @@ import { expect, test, type Page } from '@playwright/test';
  * `tests/league/`, protiv spremišta u memoriji.
  */
 
+/*
+ * Duži rok po testu nego zadanih 30 s.
+ *
+ * Panel lige ne ovisi ni o podacima svijeta ni o globusu, ali svaki `goto('/')`
+ * svejedno digne WebGL kontekst koji ovim testovima ne treba — a to je ovdje
+ * najskuplja stvar na stranici. Sami prođu za ~4 s; pod paralelnim paketom, gdje
+ * se četiri globusa otimaju za GPU, znaju probiti 30 s. Rok je zato vezan uz
+ * stvarni trošak stranice, a nijedna tvrdnja nije olabavljena.
+ */
+test.describe.configure({ timeout: 60_000 });
+
 interface Standing {
   playerId: string;
   nickname: string;
@@ -56,7 +67,7 @@ async function stubApi(page: Page): Promise<{ posted: { url: string; body: unkno
       return json({ player_id: 'p-Daniel', nickname: 'Daniel', leagues: [] });
     }
     if (url.endsWith('/api/leagues')) {
-      return json({ league_id: 'l1', code: 'ABCDEF', name: 'Ekipa' }, 201);
+      return json({ league_id: 'l1', code: 'ABCDEF', name: 'Daniel i ekipa' }, 201);
     }
     if (url.endsWith('/rounds')) {
       return json({ rounds: [] });
@@ -66,7 +77,7 @@ async function stubApi(page: Page): Promise<{ posted: { url: string; body: unkno
     }
     if (url.includes('/api/leagues/')) {
       return json({
-        name: 'Ekipa',
+        name: 'Daniel i ekipa',
         code: 'ABCDEF',
         round_id: '2026-09-18',
         closes_at: Date.now() + 86_400_000,
@@ -110,29 +121,60 @@ test('prijava šalje nadimak i pokazuje link za povrat', async ({ page }) => {
   expect(api.posted[0]?.body).toEqual({ nickname: 'Daniel' });
 });
 
-test('otvorena liga prikazuje kod i ljestvicu', async ({ page }) => {
+test('liga se otvara jednim klikom, bez ijednog polja', async ({ page }) => {
   const api = await stubApi(page);
   await signUp(page);
 
-  await page.getByLabel('Ime lige').fill('Ekipa');
-  await page.getByRole('button', { name: 'Otvori' }).click();
+  // Nema obrasca: prije je ovdje trebalo smisliti i upisati ime lige.
+  await expect(page.getByLabel('Ime lige')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Napravi ligu' }).click();
 
-  await expect(page.getByText('Ekipa')).toBeVisible({ timeout: 15_000 });
-  // Kod se diktira preko telefona, pa mora biti vidljiv. SPEC §7.4.
-  await expect(page.getByText('ABCDEF')).toBeVisible();
+  await expect(page.getByText('Daniel i ekipa')).toBeVisible({ timeout: 15_000 });
 
-  await expect(page.getByRole('listitem').filter({ hasText: 'Daniel' })).toHaveCount(1);
-  await expect(page.getByRole('listitem').filter({ hasText: 'Marta' })).toHaveCount(1);
+  const posted = api.posted.find((p) => p.url.endsWith('/api/leagues'));
+  expect(posted).toBeDefined();
+  // Bez imena u tijelu — poslužitelj ga izvodi iz nadimka.
+  expect(posted?.body).toEqual({});
+});
 
-  expect(api.posted.some((p) => p.url.endsWith('/api/leagues'))).toBe(true);
+test('nakon otvaranja kod stoji velik, s gumbom za kopiranje', async ({ page }) => {
+  await stubApi(page);
+  await signUp(page);
+  await page.getByRole('button', { name: 'Napravi ligu' }).click();
+
+  /*
+   * Kod je jedino što osnivač mora proslijediti da liga postoji, pa se traži u
+   * vlastitoj kartici, a ne u rečenici u podnožju gdje je prije stajao.
+   */
+  const invite = page.getByRole('region', { name: 'Kod lige' });
+  await expect(invite).toBeVisible({ timeout: 15_000 });
+  await expect(invite.getByText('ABCDEF')).toBeVisible();
+  await expect(invite.getByRole('button', { name: 'Kopiraj' })).toBeVisible();
+});
+
+test('ulazak u tuđu ligu je kod i ništa više', async ({ page }) => {
+  const api = await stubApi(page);
+  await signUp(page);
+
+  // Polje za kod se ne pokazuje dok netko ne kaže da ga ima.
+  await expect(page.getByLabel('Kod lige')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Imam kod' }).click();
+
+  await page.getByLabel('Kod lige').fill('abcdef');
+  await page.getByRole('button', { name: 'Uđi' }).click();
+
+  await expect(page.getByRole('listitem').filter({ hasText: 'Marta' })).toHaveCount(1, {
+    timeout: 15_000,
+  });
+  // Mala slova se šalju kao velika — kod se diktira, ne prepisuje točno.
+  expect(api.posted.some((p) => p.url.includes('/api/leagues/ABCDEF/join'))).toBe(true);
 });
 
 test('kvačica pokazuje tko je odigrao, i prije nego se vide bodovi', async ({ page }) => {
   await stubApi(page);
   await signUp(page);
-  await page.getByLabel('Ime lige').fill('Ekipa');
-  await page.getByRole('button', { name: 'Otvori' }).click();
-  await expect(page.getByText('Ekipa')).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Napravi ligu' }).click();
+  await expect(page.getByText('Daniel i ekipa')).toBeVisible({ timeout: 15_000 });
 
   const daniel = page.getByRole('listitem').filter({ hasText: 'Daniel' });
   const marta = page.getByRole('listitem').filter({ hasText: 'Marta' });

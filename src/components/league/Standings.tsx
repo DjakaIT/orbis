@@ -42,10 +42,6 @@ export default function Standings({ view, meId }: { view: LeagueView; meId: stri
       {!view.revealed && (
         <p className={styles.note}>Tuđi današnji rezultati otključavaju se kad sam odigraš.</p>
       )}
-
-      <p className={styles.share}>
-        Pozovi ekipu: <code className={styles.codeText}>{view.code}</code>
-      </p>
     </section>
   );
 }

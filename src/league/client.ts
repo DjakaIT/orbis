@@ -80,8 +80,9 @@ export function me(token: string): Promise<Me> {
   return call<Me>('/me', { token });
 }
 
-export function createLeague(token: string, name: string): Promise<NewLeague> {
-  return call<NewLeague>('/leagues', { method: 'POST', token, body: { name } });
+/** Ime je neobavezno — bez njega ga poslužitelj izvede iz nadimka. */
+export function createLeague(token: string, name?: string): Promise<NewLeague> {
+  return call<NewLeague>('/leagues', { method: 'POST', token, body: name ? { name } : {} });
 }
 
 export function joinLeague(

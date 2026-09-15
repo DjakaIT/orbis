@@ -166,3 +166,62 @@
 .winnerName {
   color: var(--ink);
 }
+
+/* Dva gumba jedan do drugog: otvori ligu ili uđi u tuđu. Ništa treće. */
+.choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+/* Drugi izbor je tiši od prvog — bez okvira, samo tekst. */
+.secondary {
+  flex-shrink: 0;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+}
+
+.secondary:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.secondary:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+/* Kod je jedino što osnivač mora proslijediti, pa je najveće u panelu. */
+.invite {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  padding: var(--s-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.inviteLead {
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+}
+
+.inviteRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: center;
+}
+
+.bigCode {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: var(--t-xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+}

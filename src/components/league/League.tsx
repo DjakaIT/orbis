@@ -17,11 +17,11 @@ import { now } from '../../engine/time';
 import { useGame } from '../../state/context';
 import { load, patch } from '../../state/persist';
 import type { Player } from '../../types';
-import CreateLeague from './CreateLeague';
-import JoinLeague from './JoinLeague';
+import Invite from './Invite';
 import Onboard from './Onboard';
 import RoundSummary from './RoundSummary';
 import Standings from './Standings';
+import Start from './Start';
 import styles from './League.module.css';
 
 interface LeagueSnapshot {
@@ -184,12 +184,13 @@ export default function League() {
     }
   }
 
-  async function onCreate(name: string): Promise<void> {
+  async function onCreate(): Promise<void> {
     if (!player) return;
     setBusy(true);
     setError(null);
     try {
-      const created = await createLeague(player.token, name);
+      // Bez imena: poslužitelj ga izvede iz nadimka. Jedan klik, pa kod.
+      const created = await createLeague(player.token);
       setCode(created.code);
       patch({ lastLeagueCode: created.code });
     } catch (err) {
@@ -240,12 +241,20 @@ export default function League() {
         <>
           {lastRound && <RoundSummary round={lastRound} name={view.name} />}
           <Standings view={view} meId={player.id} />
+          {/*
+           * Kod stoji uvijek i samo ovdje, ispod ljestvice. Uvjetovati ga brojem
+           * članova znači da ga netko traži baš kad ga nema, a dvije kopije na
+           * ekranu znače da nijedna nije očita.
+           */}
+          <Invite code={view.code} />
         </>
       ) : (
-        <>
-          <CreateLeague busy={busy} error={error} onSubmit={(n) => void onCreate(n)} />
-          <JoinLeague busy={busy} error={error} onSubmit={(c) => void onJoin(c)} />
-        </>
+        <Start
+          busy={busy}
+          error={error}
+          onCreate={() => void onCreate()}
+          onJoin={(c) => void onJoin(c)}
+        />
       )}
     </div>
   );

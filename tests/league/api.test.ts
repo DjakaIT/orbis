@@ -152,9 +152,33 @@ describe('liga', () => {
     expect((await get(`/api/leagues/${code}`, stranger.token)).status).toBe(403);
   });
 
-  it('ime lige je obavezno i ograničeno', async () => {
+  it('liga se otvara bez ijednog podatka', async () => {
+    /*
+     * Jedan klik, bez obrasca. Za šestero prijatelja ime lige nije podatak nego
+     * prepreka, pa ga poslužitelj izvede iz nadimka.
+     */
     const { token } = await signUp('Daniel');
-    expect((await post('/api/leagues', { name: '  ' }, token)).status).toBe(400);
+
+    const res = await post('/api/leagues', {}, token);
+    expect(res.status).toBe(201);
+    expect(res.json.name).toBe('Daniel i ekipa');
+    expect(String(res.json.code)).toHaveLength(6);
+  });
+
+  it('prazno ime nije greška nego izostanak imena', async () => {
+    const { token } = await signUp('Daniel');
+    const res = await post('/api/leagues', { name: '   ' }, token);
+    expect(res.status).toBe(201);
+    expect(res.json.name).toBe('Daniel i ekipa');
+  });
+
+  it('poslano ime se poštuje', async () => {
+    const { token } = await signUp('Daniel');
+    expect((await post('/api/leagues', { name: 'Ekipa' }, token)).json.name).toBe('Ekipa');
+  });
+
+  it('predugo ime je i dalje greška', async () => {
+    const { token } = await signUp('Daniel');
     expect((await post('/api/leagues', { name: 'x'.repeat(41) }, token)).status).toBe(400);
   });
 });
