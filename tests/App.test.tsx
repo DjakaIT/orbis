@@ -39,12 +39,12 @@ const { default: App } = await import('../src/App');
 
 /**
  * Meta ovisi o danu, pa sat mora biti pinan — inace ovaj test prolazi ili pada
- * ovisno o tome kad se pokrene. Za 2026-03-01 `dailyTarget` nad bazenom od cetiri
- * daje indeks 1 (Beta), pa je Alfa promasaj na 100 km.
+ * ovisno o tome kad se pokrene. Za 2026-03-03 `dailyTarget` nad bazenom od cetiri
+ * daje indeks 1 (Beta), pa je Alfa promasaj na 100 km, Gama na 400 i Delta na 500.
  *
  * Lazira se samo `Date`; `setTimeout` ostaje pravi jer userEvent ceka na njemu.
  */
-const PINNED = new Date('2026-03-01T12:00:00Z');
+const PINNED = new Date('2026-03-03T12:00:00Z');
 
 beforeEach(() => {
   localStorage.clear();

@@ -340,3 +340,37 @@ Lighthouse, mobilna emulacija: **Performance 92** (cilj ≥ 95), **Accessibility
 Testovi u `tests/build/dist.test.ts` čuvaju svaku od ovih brojki. Gdje je budžet
 probijen, test se drži stropa zabilježenog ovdje umjesto da se pravi da je budžet
 postignut — probije li se i strop, pada.
+
+## 2026-09-15 — Niz meta je slijed permutacija, ne hash po danu
+
+Traženo: „svaki dan mora biti različit, da se prođu SVE države svijeta". Stari
+račun to nije davao. Izmjereno na bazenu od 177: u prvih 177 dana pojavilo se
+**119 država**, 58 ih se nije pojavilo nijednom, a neke po tri puta. Ni nakon
+dvije godine jedna država nije došla na red.
+
+Uzrok je u samoj metodi: indeks se birao hashom datuma, uz izbjegavanje ponavljanja
+unatrag 30 dana. Hash je ravnomjeran u granici, ali ne u konačnom prozoru — nema
+ničega što bi jamčilo da svaka meta dođe na red.
+
+Zamjena: niz je slijed krugova kroz cijeli bazen. Svaki krug je Fisher–Yates
+permutacija sijana iz `${mode}:${SALT}:${cycle}`, pa u `N` dana svaka meta dolazi
+točno jednom. Nakon toga: 177 od 177, svaka jednom.
+
+`SALT` i `EPOCH` su nepromijenjeni, ali **niz meta jest drugi** — kao i pri
+prethodnoj promjeni, to ništa ne lomi jer još nije u pogonu, a nakon puštanja u
+rad se više ne smije dirati.
+
+**Jamstvo od 30 dana i dalje vrijedi, ali samo iznad granice.** Unutar kruga
+ponavljanja nema po konstrukciji; jedini rizik je prijelaz, pa se prvih 30 mjesta
+novog kruga očisti od svega što je bilo u zadnjih 30 dana prethodnog. Rep se čita
+iz **podešenog** poretka prethodnog kruga — prva verzija čitala ga je iz sirovog i
+test s bazenom od 60 odmah je našao razmak od 21 dana.
+
+Ispod `2 × 30` mjesta jamstvo se kosi samo sa sobom: da svaka meta dođe na red
+jednom u `N` dana a razmak ostane veći od 30, nijedna se ne bi smjela pomaknuti
+unaprijed za više od `N − 30` mjesta — pri `N = 31` to dopušta samo identitet,
+dakle isti poredak svaki krug. Ondje pokrivenost pobjeđuje. Stvarni bazeni su 71,
+177 i 624; izmjereni najmanji razmak pri 71 je 34 dana.
+
+Usput je nestao hod od epohe do današnjeg dana: krug se računa dijeljenjem, pa je
+posao `O(N)` po krugu umjesto `O(dana)`.
