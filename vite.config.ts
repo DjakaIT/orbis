@@ -113,6 +113,7 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,json,bin,woff2,png}'],
+        // Zastave i podaci modova idu kroz runtime cache, vidi `runtimeCaching`.
         /*
          * Precache nosi samo ono bez cega se prvo otvaranje ne moze dogoditi.
          *
@@ -122,7 +123,14 @@ export default defineConfig(({ mode }) => ({
          * pravilu ispod: dohvate se pri odabiru moda i od tada su offline. OG slika
          * je za previewe koje generiraju tudi posluzitelji, pa na uredaju ne treba.
          */
-        globIgnores: ['**/data/hr-*.json', '**/data/capitals.json', 'og.png', 'stats.html'],
+        globIgnores: [
+          '**/data/hr-*.json',
+          '**/data/capitals.json',
+          // 197 zastava je 1,3 MB; u partiji ih se pokaze tek nekoliko.
+          'flags/**',
+          'og.png',
+          'stats.html',
+        ],
         // Bez ovoga bi se dnevni podaci dohvaćali ponovno pri svakom otvaranju.
         runtimeCaching: [
           {

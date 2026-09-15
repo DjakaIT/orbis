@@ -39,3 +39,6 @@ src/styles/fonts
 public/icon-*.png
 public/apple-touch-icon.png
 public/og.png
+
+# Zastave — generira ih `pnpm data`
+public/flags

@@ -7,6 +7,7 @@
  *   world-topo.json    pojednostavljene granice, topojson
  *   world-meta.json    imena, ISO kodovi, centroidi (samo za smjer strelice)
  *   capitals.json      glavni gradovi: naziv, drzava, koordinate
+ *   ../flags/*.svg     zastave drzava, po alpha-2 kodu
  *   world-matrix.bin   Uint16Array(N*N), minimalna udaljenost granica u km
  *   aliases.json       rucni dodaci za pretragu
  */
@@ -21,6 +22,7 @@ import mapshaper from 'mapshaper';
 import { feature } from 'topojson-client';
 import type { Topology } from 'topojson-specification';
 
+import { buildFlags } from './build-flags';
 import { buildFont } from './build-font';
 import { buildIcons } from './build-icons';
 import { buildCapitals, writeMissingCapitalsReport } from './build-capitals';
@@ -59,6 +61,12 @@ const NOT_A_COUNTRY = new Set(['ATA']);
 interface Country {
   id: number;
   iso: string;
+  /**
+   * ISO 3166-1 alpha-2. Sluzi samo za zastavicu: par regionalnih indikatora iz
+   * dva slova daje emoji zastavu, pa se nijedna slika ne prenosi. Prazno kad
+   * izvor nema valjan kod — tada zastave jednostavno nema.
+   */
+  a2: string;
   name: string;
   lat: number;
   lon: number;
@@ -264,6 +272,7 @@ async function main(): Promise<void> {
 
   interface Entry {
     iso: string;
+    a2: string;
     name: string;
     shape: Shape;
   }
@@ -295,7 +304,12 @@ async function main(): Promise<void> {
     const name = alpha2 !== '-99' ? hr[alpha2] : undefined;
     if (!name) missing.push({ iso, name: p.NAME });
 
-    entries.push({ iso, name: name ?? p.NAME, shape: toShape(ringsOf(f.geometry)) });
+    entries.push({
+      iso,
+      a2: alpha2 && alpha2 !== '-99' ? alpha2 : '',
+      name: name ?? p.NAME,
+      shape: toShape(ringsOf(f.geometry)),
+    });
   }
 
   // Poredak mora biti stabilan: on odreduje indeks mete. Natural Earth ne jamci
@@ -327,7 +341,7 @@ async function main(): Promise<void> {
 
   const countries: Country[] = entries.map((e, id) => {
     const { lat, lon } = centroidLatLon(e.shape);
-    return { id, iso: e.iso, name: e.name, lat: round(lat), lon: round(lon) };
+    return { id, iso: e.iso, a2: e.a2, name: e.name, lat: round(lat), lon: round(lon) };
   });
 
   await mkdir(OUT, { recursive: true });
@@ -340,6 +354,17 @@ async function main(): Promise<void> {
 
   await writeMissingReport(missing);
   await report(n, triangle, entries);
+
+  console.warn('Zastave →');
+  const flags = await buildFlags(
+    countries.map((c) => c.a2),
+    join(HERE, '..', 'public', 'flags'),
+  );
+  console.warn(`  ${String(flags.written)} zastava · ${String(Math.round(flags.bytes / 1024))} KB`);
+  console.warn(
+    `  najveca: ${flags.largest.code} ${String(Math.round(flags.largest.bytes / 1024))} KB`,
+  );
+  if (flags.missing.length > 0) console.warn(`  bez zastave: ${flags.missing.join(', ')}`);
 
   console.warn('Glavni gradovi →');
   await fetchSource(NE_PLACES);

@@ -1,4 +1,5 @@
-import { distanceColor } from '../engine/color';
+import { distanceColor, proximity } from '../engine/color';
+import { flagSrc } from '../engine/flag';
 import { arrow, formatKm } from '../engine/distance';
 import { useGame } from '../state/context';
 import { sortedGuesses } from '../state/reducer';
@@ -48,6 +49,15 @@ export default function GuessList() {
             ·
           </span>
           <span className={latest.hit ? styles.liveHit : undefined}>{verdict(latest)}</span>
+          {!latest.hit && (
+            <>
+              <span className={styles.liveSep} aria-hidden="true">
+                ·
+              </span>
+              {/* Kilometri su tocni, postotak je osjetljiv: koliko je to na ovoj skali. */}
+              <span>{proximity(latest.km, state.mode)}% blizu</span>
+            </>
+          )}
           {latest.trend !== 'first' && !latest.hit && (
             <>
               <span className={styles.liveSep} aria-hidden="true">
@@ -68,6 +78,17 @@ export default function GuessList() {
               style={{ background: distanceColor(g.km, state.mode, g.hit) }}
               aria-hidden="true"
             />
+            {/*
+              Zastava se cita brze od imena i kaze o kojoj je drzavi rijec.
+              `alt` je prazan jer ime stoji odmah do nje — citac ekrana bi inace
+              svaki redak procitao dvaput. Lijeno, jer ih se u partiji pokaze
+              tek nekoliko.
+            */}
+            <span className={styles.flag}>
+              {flagSrc(g.a2) && (
+                <img src={flagSrc(g.a2) ?? ''} alt="" width={20} height={15} loading="lazy" />
+              )}
+            </span>
             <span className={styles.name}>{g.name}</span>
             <span className={g.neighbour ? styles.kmWord : styles.km}>
               {g.neighbour ? 'susjedna' : formatKm(g.km)}

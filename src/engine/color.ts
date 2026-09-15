@@ -10,6 +10,18 @@ import type { Mode } from './seed';
 /** Najveća smislena udaljenost po modu; iznad toga gradijent je zasićen. */
 const MAX_KM: Record<Mode, number> = { world: 20000, capitals: 20000, hr: 400 };
 
+/**
+ * Koliko je pokusaj blizu mete, 0–100.
+ *
+ * Kilometri su tocni ali ih je tesko osjetiti: je li 4 300 km blizu ovisi o tome
+ * koliko je velik svijet u kojem se igra. Postotak je ista brojka na istoj skali
+ * kao i boja, pa se udaljenost moze procitati i bez raspoznavanja nijanse.
+ */
+export function proximity(km: number, mode: Mode): number {
+  const t = Math.min(Math.max(km, 0) / MAX_KM[mode], 1);
+  return Math.round((1 - t) * 100);
+}
+
 interface Lch {
   l: number;
   c: number;
@@ -90,6 +102,10 @@ const clamp255 = (x: number): number => Math.max(0, Math.min(255, Math.round(x *
 /**
  * OKLCh → sRGB. Koeficijenti su Björn Ottossonova matrica OKLab→LMS→linearni sRGB.
  * Boje izvan sRGB gamuta se odsijecaju po kanalu.
+ *
+ * Zapis je sa zarezima, ne razmacima. Canvas 2D prihvaća oba, ali three.js parsira
+ * boju vlastitim regexom koji traži zareze — bez njih tiho vrati bijelu, pa je
+ * trag na globusu bio bijel umjesto u boji udaljenosti.
  */
 export function oklchToRgb(l: number, c: number, hDeg: number): string {
   const h = (hDeg * Math.PI) / 180;
@@ -108,7 +124,7 @@ export function oklchToRgb(l: number, c: number, hDeg: number): string {
   const g = -1.2684380046 * lc + 2.6097574011 * mc - 0.3413193965 * sc;
   const bl = -0.0041960863 * lc - 0.7034186147 * mc + 1.707614701 * sc;
 
-  return `rgb(${String(clamp255(toSrgb(r)))} ${String(clamp255(toSrgb(g)))} ${String(clamp255(toSrgb(bl)))})`;
+  return `rgb(${String(clamp255(toSrgb(r)))}, ${String(clamp255(toSrgb(g)))}, ${String(clamp255(toSrgb(bl)))})`;
 }
 
 /**

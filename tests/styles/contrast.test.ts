@@ -36,12 +36,12 @@ function parse(value: string): Rgb {
   }
 
   // `distanceRgb` vraca rgb() jer canvas ne prima oklch pouzdano.
-  const plain = /rgb\((\d+) (\d+) (\d+)\)/.exec(value);
+  const plain = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(value);
   if (plain) return [Number(plain[1]), Number(plain[2]), Number(plain[3])];
 
   const ok = /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/.exec(value);
   if (!ok) throw new Error(`Nepoznat zapis boje: ${value}`);
-  const rgb = /rgb\((\d+) (\d+) (\d+)\)/.exec(
+  const rgb = /rgb\((\d+),\s*(\d+),\s*(\d+)\)/.exec(
     oklchToRgb(Number(ok[1]), Number(ok[2]), Number(ok[3])),
   );
   if (!rgb) throw new Error(`oklchToRgb nije vratio rgb(): ${value}`);

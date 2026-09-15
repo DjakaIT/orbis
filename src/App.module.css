@@ -8,16 +8,32 @@
 }
 
 /*
- * Scena je tamni instrument položen na papir: globus i karta ostaju čitljivi u
- * svojoj vlastitoj svjetlini, a stranica oko njih je svijetla. Sjena ju odvaja
- * od papira bolje nego bilo koja linija.
+ * Bez okvira. Planet stoji na papiru, a ne u crnoj kutiji — oko njega je samo
+ * atmosfera, meki oreol koji se gubi u ništa. Kutija je zatvarala Zemlju u
+ * prozorčić; ovako je stranica nebo oko nje.
  */
 .stage {
+  position: relative;
   min-height: 260px;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  background: var(--stage);
-  box-shadow: var(--shadow-stage);
+}
+
+.stage::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 48%,
+    color-mix(in srgb, var(--halo) 26%, transparent) 0%,
+    color-mix(in srgb, var(--halo) 10%, transparent) 42%,
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+.stage > * {
+  position: relative;
+  z-index: 1;
 }
 
 .stagePlaceholder {

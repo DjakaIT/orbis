@@ -19,7 +19,15 @@ export interface CapitalsData {
 
 interface CapitalsFile {
   n: number;
-  capitals: { id: number; code: string; name: string; country: string; lat: number; lon: number }[];
+  capitals: {
+    id: number;
+    code: string;
+    a2?: string;
+    name: string;
+    country: string;
+    lat: number;
+    lon: number;
+  }[];
 }
 
 let promise: Promise<CapitalsData> | null = null;
@@ -41,6 +49,8 @@ async function fetchCapitals(): Promise<CapitalsData> {
   const places: Place[] = file.capitals.map((c) => ({
     id: c.id,
     code: c.code,
+    // Grad nosi zastavu svoje drzave — to je jedina zastava koju grad ima.
+    a2: c.a2 ?? '',
     name: c.name,
     lat: c.lat,
     lon: c.lon,

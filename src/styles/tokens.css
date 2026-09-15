@@ -21,12 +21,19 @@
   --hit: oklch(0.52 0.15 152);
   --error: oklch(0.55 0.19 25);
 
-  /* — Scena: tamni instrument na papiru — */
-  --stage: #12100c; /* okvir u kojem žive globus i karta */
-  --ocean: #16211c; /* sfera, neotkriveni ocean */
-  --landmass: #33351f; /* kopno bez pogotka */
-  --hairline: #575234; /* granice i graticule na sceni */
-  --stage-ink: #f0ebdf; /* natpisi unutar scene */
+  /* — Planet: Zemlja kakva se vidi iz orbite, bez okvira oko sebe — */
+  --ocean: #06171f; /* duboko modro more */
+  --landmass: #2b3a26; /* kopno bez pogotka */
+  --hairline: #2b586b; /* granice i graticule na kugli */
+  --stage-ink: #eef3f5; /* natpisi na kugli */
+  --stage: #06171f; /* ikona i splash — kugla kad nema stranice oko nje */
+
+  /* Atmosfera: meki oreol umjesto ploche pozadine. */
+  --halo: #7fb4c4;
+
+  /* — Karta Hrvatske: crta se na papiru, pa ima svoje boje — */
+  --map-land: #d8e3d2;
+  --map-line: #9db39a;
 
   /* Dubina. Na papiru hijerarhiju nosi sjena, ne linija. */
   --shadow-sm: 0 1px 2px rgb(28 26 21 / 6%);

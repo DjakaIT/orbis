@@ -4,7 +4,7 @@ import GuessInput from './components/GuessInput';
 import GuessList from './components/GuessList';
 import Header from './components/Header';
 import ModeToggle from './components/ModeToggle';
-import ShareSheet from './components/ShareSheet';
+import Result from './components/Result';
 import TierToggle from './components/TierToggle';
 import { readDeepLink } from './league/client';
 import { useGame } from './state/context';
@@ -81,7 +81,7 @@ function Board({ mode, onMode, tier, onTier }: BoardProps) {
           {mode === 'hr' && <TierToggle tier={tier} onChange={onTier} />}
           <GuessInput />
           <GuessList />
-          <ShareSheet />
+          <Result />
 
           {leagueOpen && (
             <Suspense fallback={null}>

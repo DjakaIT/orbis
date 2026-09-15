@@ -1,0 +1,114 @@
+/*
+ * Pobjeda je jedini trenutak kad sučelje smije podići glas. Podiže ga plohom i
+ * mjerilom, ne bojom — zelena ostaje rezervirana za samu oznaku pogotka.
+ */
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-6) var(--s-4) var(--s-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  animation: arrive 420ms var(--ease);
+}
+
+/*
+ * Ploha dolazi kao materijal, ne kao prozirnost koja raste: mjerilo i pomak
+ * zajedno, pa se čini da je stigla, a ne da se upalila.
+ */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+.crest {
+  font-size: var(--t-2xl);
+  line-height: 1;
+}
+
+.flag {
+  /* Zastava je jedina slika ovdje; neka bude dovoljno velika da se pročita. */
+  width: 72px;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  box-shadow:
+    var(--shadow-sm),
+    0 0 0 1px rgb(28 26 21 / 10%);
+  object-fit: cover;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--t-xl);
+  font-weight: 600;
+  /* Velik tekst treba stisnuti, ne razmaknuti. */
+  letter-spacing: var(--track-display);
+  line-height: var(--leading-display);
+}
+
+.line {
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+  letter-spacing: var(--track-small);
+}
+
+.sep {
+  padding: 0 var(--s-2);
+  color: var(--ink-faint);
+}
+
+.share {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  width: 100%;
+  margin-top: var(--s-2);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+}
+
+.preview {
+  margin: 0;
+  color: var(--ink-muted);
+  font-family: inherit;
+  font-size: var(--t-sm);
+  line-height: 1.4;
+  text-align: left;
+}
+
+.button {
+  flex-shrink: 0;
+  padding: var(--s-2) var(--s-4);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: var(--t-sm);
+  transition:
+    background-color var(--press) var(--ease),
+    transform var(--press) var(--ease);
+}
+
+.button:hover {
+  background: color-mix(in oklab, var(--ink) 88%, var(--paper));
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+/* Vidljiv samo čitaču ekrana — rečenica umjesto niza odvojenih komadića. */
+.sr {
+  position: absolute;
+  overflow: hidden;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  white-space: nowrap;
+}

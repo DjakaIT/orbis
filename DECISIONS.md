@@ -537,3 +537,69 @@ a ne kao namjera. Skala je sada 6 / 10 / 14 px i pill za segmente.
 
 **Cijena.** Lighthouse Performance je 87–90 umjesto 91; razlika je geometrija iz
 50m izvora, ne tema. Accessibility, Best Practices i SEO ostaju 100.
+
+## 2026-09-15 — Planet bez okvira, trag pokušaja, zastave i trenutak pobjede
+
+Traženo: maknuti crni kvadrat iza Zemlje, više motiva planeta, linije koje povezuju
+pokušaje od grada do grada, zastave, i da se pobjeda jasnije vidi.
+
+**Okvir je nestao.** Globus je bio u tamnoj zaobljenoj ploči — kutija je zatvarala
+Zemlju u prozorčić. Sada planet stoji izravno na papiru, uz meki oreol atmosfere
+umjesto plohe. Renderer je ionako bio `alpha: true`, pa je trebalo samo maknuti
+pozadinu.
+
+Posljedica: karta Hrvatske crta se na prozirnom canvasu, pa bez tamne ploče iza
+sebe treba svoje boje — svijetlo kopno (`--map-land`) i tamni natpisi. Globus ih
+ne dijeli; on je kugla u vlastitoj svjetlini.
+
+**Zvijezde su maknute iz scene**, što odstupa od SPEC §6.1. Zvijezde su noćno nebo;
+na papiru bi bile tamne mrlje. Funkcija ostaje jer je točna za tamnu podlogu.
+
+**More je modro, kopno zeleno.** Paleta je birana mjerenjem, ne dojmom: pogođene
+države crtaju se **preko kopna**, pa gradijent mora imati kontrast prema kopnu, a
+ne samo prema oceanu. Svjetlije, „zemljanije" kopno taj kontrast ruši. Rješenje je
+bilo zatamniti more umjesto posvijetliti kopno — sve tri brojke time nadmašuju
+prethodnu paletu:
+
+|                            | prije | sada |
+| -------------------------- | ----- | ---- |
+| kopno / ocean              | 1,32  | 1,51 |
+| granica / ocean            | 2,10  | 2,36 |
+| gradijent / kopno, najgori | 2,68  | 2,58 |
+
+**Trag pokušaja** ide po velikoj kružnici — najkraćem putu po kugli, istom onom
+koji mjeri udaljenost. Ravna crta između dvije točke probila bi sferu, pa se hoda
+slerpom. Grupa je dijete sfere, pa se okreće s njom, a dio traga na drugoj strani
+planeta nestaje iza njega jer je sfera neprozirna.
+
+Trag je jedne boje, ne u boji udaljenosti: put nije udaljenost. Udaljenost već nose
+ispuna države i traka u listi, a obojan trag preko obojane države jednostavno
+nestane. Crta se samo u modu gradova, gdje je meta točka.
+
+**Zastave su slike, ne emoji.** Emoji zastava (par regionalnih indikatora) bila bi
+besplatna, ali se **na Windowsu ne prikazuje** — ondje nijedan sistemski rez nema
+te glifove, pa Chrome ispiše gola dva slova. Provjereno u pregledniku. Zato
+`pnpm data` skida prave SVG-ove iz `lipis/flag-icons` (MIT, same zastave javno
+dobro) u `public/flags`, po istom obrascu kao i ostali izvori — ništa se ne skida
+u runtimeu i nijedan CDN nije u igri.
+
+197 zastava je 1,3 MB, ali medijan je **0,7 KB** i samo ih 11 prelazi 30 KB. Nisu u
+precacheu nego na `runtimeCaching` pravilu: zastava se dohvati kad se ta država
+prvi put pogodi i od tada je offline.
+
+Zastava je zasićena boja izvan gradijenta, što odstupa od SPEC §2.1. Odstupanje je
+svjesno: zastava nosi podatak — koja je ovo država — i čita se brže od imena.
+
+**Trenutak pobjede** je bio samo boja na globusu i redak s nulom kilometara; igrač
+je morao zaključiti da je gotovo. Sada je kartica: zastava, ime mete u naslovnom
+rezu, iz koliko pokušaja i koliki je niz. Namjerno bez `role="status"` — pogodak
+već objavljuje živo područje u listi, a dva živa područja na isti događaj znače da
+se sve pročita dvaput.
+
+**Postotak blizine** uz kilometre. Kilometri su točni ali ih je teško osjetiti: je
+li 4 300 km blizu ovisi o tome koliko je velik svijet u kojem se igra.
+
+**Usput nađen bug:** `distanceRgb` je vraćao `rgb(r g b)` s razmacima. Canvas 2D to
+prihvaća, pa je tekstura globusa bila točna — ali three.js parsira boju vlastitim
+regexom koji traži zareze i bez njih **tiho vrati bijelu**. Trag je zato bio bijel.
+Zapis je sada sa zarezima, a test to izričito traži.

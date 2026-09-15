@@ -60,6 +60,24 @@ export default function Globe() {
       else g.paint(place.code, color);
     }
 
+    /*
+     * Trag kroz pokusaje, kronoloski. Crta se samo u modu glavnih gradova: ondje
+     * je meta tocka pa put od grada do grada nesto znaci, dok su u modu svijet
+     * drzave vec obojane i linija bi preko njih bila buka.
+     *
+     * Redoslijed je onaj kojim je igrac upisivao, ne poredak prikaza — put ima
+     * smisla samo kronoloski.
+     */
+    if (state.mode === 'capitals') {
+      const path = [...state.guesses]
+        .sort((a, b) => a.ordinal - b.ordinal)
+        .flatMap((guess) => {
+          const place = places[guess.id];
+          return place ? [{ lat: place.lat, lon: place.lon }] : [];
+        });
+      g.setTrail(path, readTokens().stageInk);
+    }
+
     if (state.solved && state.target !== null) {
       const target = places[state.target];
       if (target) g.centreOn(target.lat, target.lon);

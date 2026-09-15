@@ -6,11 +6,15 @@
  * `three/examples` donosi zoom, pan i inerciju koje ne trebamo.
  */
 
+import type { Material } from 'three';
 import {
   BufferAttribute,
   BufferGeometry,
   CanvasTexture,
   Color,
+  Group,
+  Line,
+  LineBasicMaterial,
   Mesh,
   MeshBasicMaterial,
   PerspectiveCamera,
@@ -19,10 +23,17 @@ import {
   Scene,
   SphereGeometry,
   SRGBColorSpace,
+  Vector3,
   WebGLRenderer,
 } from 'three';
 
 import { GlobeTexture, type Tokens } from './texture';
+
+/** Koliko se tocaka uzme po luku izmedu dva pokusaja. */
+const ARC_STEPS = 48;
+/** Trag i tocke lebde tik iznad povrsine, da ih sfera ne proguta. */
+const TRAIL_RADIUS = 1.004;
+const NODE_RADIUS = 1.006;
 
 const STAR_COUNT = 800;
 const STAR_RADIUS = 40;
@@ -52,6 +63,8 @@ export class Globe {
   private readonly scene = new Scene();
   private readonly camera: PerspectiveCamera;
   private readonly sphere: Mesh;
+  /** Trag pokusaja. Dijete sfere, pa se okrece zajedno s njom. */
+  private readonly trail = new Group();
   private readonly texture: CanvasTexture;
   private readonly painter: GlobeTexture;
 
@@ -88,12 +101,43 @@ export class Globe {
       new SphereGeometry(1, 96, 96),
       new MeshBasicMaterial({ map: this.texture }),
     );
+    this.sphere.add(this.trail);
     this.scene.add(this.sphere);
-    this.scene.add(stars(tokens.hairline));
 
     this.attach();
     this.resize();
     this.loop();
+  }
+
+  /**
+   * Trag kroz pokusaje, kronoloski, od prvog do zadnjeg.
+   *
+   * Luk ide po velikoj kruznici — najkraci put po kugli, isti onaj koji mjeri
+   * udaljenost. Ravna crta izmedu dvije tocke probila bi sferu i izasla s druge
+   * strane, pa se hoda slerpom kroz `ARC_STEPS` koraka.
+   *
+   * Grupa je dijete sfere, pa nasljeduje njezinu rotaciju i drzi se kopna. Sfera
+   * je neprozirna i dubinski test radi, pa dio traga na drugoj strani planeta
+   * nestaje iza njega — tocno kako i treba.
+   *
+   * Trag je jedne boje, ne u boji udaljenosti. Put nije udaljenost: udaljenost
+   * vec nosi ispuna drzave i traka u listi, a obojan trag preko obojane drzave
+   * jednostavno nestane. Ovako je linija chrome, a boja ostaje podatak.
+   */
+  setTrail(path: { lat: number; lon: number }[], color: string): void {
+    this.trail.clear();
+    if (path.length === 0) return;
+
+    for (const point of path) {
+      this.trail.add(node(point, NODE_RADIUS, color));
+    }
+
+    for (let i = 1; i < path.length; i++) {
+      const from = path[i - 1];
+      const to = path[i];
+      if (!from || !to) continue;
+      this.trail.add(arc(from, to, color));
+    }
   }
 
   /** Crta osnovnu teksturu. Zove se jednom, kad podaci stignu. */
@@ -172,6 +216,7 @@ export class Globe {
     cancelAnimationFrame(this.frame);
     this.detach();
     this.texture.dispose();
+    disposeTrail(this.trail);
     this.sphere.geometry.dispose();
     (this.sphere.material as MeshBasicMaterial).dispose();
     this.renderer.dispose();
@@ -250,8 +295,112 @@ function clamp(x: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, x));
 }
 
-/** 800 tocaka ravnomjerno po sferi radijusa 40. SPEC §6.1. */
-function stars(color: string): Points {
+/**
+ * Tocka na sferi iz zemljopisnih koordinata, u lokalnom sustavu `SphereGeometry`.
+ *
+ * Mora pratiti isto mapiranje kojim se slika tekstura, inace bi trag stajao
+ * pokraj drzave koju oznacava: `u = (lon + 180) / 360` i `v = (90 - lat) / 180`,
+ * a three slaze vrh kao `(-cos φ sin θ, cos θ, sin φ sin θ)`.
+ */
+function onSphere(lat: number, lon: number, radius: number): Vector3 {
+  const phi = ((lon + 180) * Math.PI) / 180;
+  const theta = ((90 - lat) * Math.PI) / 180;
+  return new Vector3(
+    -Math.cos(phi) * Math.sin(theta) * radius,
+    Math.cos(theta) * radius,
+    Math.sin(phi) * Math.sin(theta) * radius,
+  );
+}
+
+/** Mala oznaka na mjestu pokusaja. */
+function node(point: { lat: number; lon: number }, radius: number, color: string): Points {
+  const geometry = new BufferGeometry();
+  const p = onSphere(point.lat, point.lon, radius);
+  geometry.setAttribute('position', new BufferAttribute(new Float32Array([p.x, p.y, p.z]), 3));
+  return new Points(
+    geometry,
+    new PointsMaterial({ color: new Color(color), size: 0.038, sizeAttenuation: true }),
+  );
+}
+
+/** Luk velike kruznice izmedu dva pokusaja. */
+function arc(
+  from: { lat: number; lon: number },
+  to: { lat: number; lon: number },
+  color: string,
+): Line {
+  const a = onSphere(from.lat, from.lon, 1).normalize();
+  const b = onSphere(to.lat, to.lon, 1).normalize();
+
+  const positions = new Float32Array((ARC_STEPS + 1) * 3);
+  for (let i = 0; i <= ARC_STEPS; i++) {
+    // Slerp, ne linearna interpolacija: ova druga bi presjekla kuglu.
+    const point = slerp(a, b, i / ARC_STEPS).multiplyScalar(TRAIL_RADIUS);
+    positions[i * 3] = point.x;
+    positions[i * 3 + 1] = point.y;
+    positions[i * 3 + 2] = point.z;
+  }
+
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new BufferAttribute(positions, 3));
+  return new Line(
+    geometry,
+    new LineBasicMaterial({ color: new Color(color), transparent: true, opacity: 0.85 }),
+  );
+}
+
+/**
+ * Sferna interpolacija dvaju jedinicnih vektora.
+ *
+ * Kad su gotovo poklopljeni ili gotovo suprotni, `sin` u nazivniku ide u nulu i
+ * racun se raspada; tada se pada na linearnu interpolaciju, gdje je razlika
+ * ionako ispod piksela.
+ */
+function slerp(a: Vector3, b: Vector3, t: number): Vector3 {
+  const dot = clamp(a.dot(b), -1, 1);
+  const omega = Math.acos(dot);
+  const sin = Math.sin(omega);
+  if (sin < 1e-6) return a.clone().lerp(b, t).normalize();
+
+  return a
+    .clone()
+    .multiplyScalar(Math.sin((1 - t) * omega) / sin)
+    .add(b.clone().multiplyScalar(Math.sin(t * omega) / sin));
+}
+
+/**
+ * Otpusta geometriju i materijal svakog djeteta traga.
+ *
+ * `material` je u tipovima unija jednog materijala i niza, pa se normalizira —
+ * ovdje je uvijek jedan, ali tip to ne zna i ne treba mu vjerovati na rijec.
+ */
+function disposeTrail(group: Group): void {
+  for (const child of group.children) {
+    if (!(child instanceof Line) && !(child instanceof Points)) continue;
+
+    /*
+     * `Line` i `Points` su u tipovima generici, pa im pristup poljima bez
+     * argumenata tipa ispadne `any`. Anotacija je ovdje tvrdnja o onome sto
+     * ova funkcija sama slaze nekoliko redaka iznad.
+     */
+    const geometry = child.geometry as BufferGeometry;
+    const material = child.material as Material | Material[];
+
+    geometry.dispose();
+    for (const one of Array.isArray(material) ? material : [material]) one.dispose();
+  }
+  group.clear();
+}
+
+/**
+ * 800 tocaka ravnomjerno po sferi radijusa 40. SPEC §6.1.
+ *
+ * Vise se ne dodaje u scenu: zvijezde su nocno nebo, a stranica je od prelaska
+ * na svijetlu temu papir — na njemu bi bile tamne mrlje, ne zvijezde. Atmosferu
+ * sada nosi oreol u CSS-u. Funkcija ostaje jer je rjesenje tocno za tamnu
+ * podlogu i splash zaslon. Vidi DECISIONS.md.
+ */
+export function stars(color: string): Points {
   const positions = new Float32Array(STAR_COUNT * 3);
   for (let i = 0; i < STAR_COUNT; i++) {
     // Ravnomjerno po povrsini: z uniformno, kut uniformno. Bez toga se

@@ -13,7 +13,7 @@ import type { Place } from '../types';
 
 interface WorldMeta {
   n: number;
-  countries: { id: number; iso: string; name: string; lat: number; lon: number }[];
+  countries: { id: number; iso: string; a2?: string; name: string; lat: number; lon: number }[];
 }
 
 export interface Aliases {
@@ -85,6 +85,7 @@ async function fetchWorld(): Promise<WorldData> {
   const places: Place[] = meta.countries.map((c) => ({
     id: c.id,
     code: c.iso,
+    a2: c.a2 ?? '',
     name: c.name,
     lat: c.lat,
     lon: c.lon,

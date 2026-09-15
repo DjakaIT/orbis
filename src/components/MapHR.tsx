@@ -20,9 +20,21 @@ export default function MapHR() {
     const el = canvas.current;
     if (!el || !geometry || !places) return;
 
-    const tokens = readTokens();
-    // Natpisi su unutar tamne scene, pa uzimaju njezinu tintu, ne tintu stranice.
-    const ink = getComputedStyle(document.documentElement).getPropertyValue('--stage-ink').trim();
+    /*
+     * Karta se crta izravno na papir, bez tamnog okvira iza sebe, pa ima svoje
+     * boje: svijetlo kopno i tamni natpisi. Globus ih ne dijeli — on je kugla u
+     * svojoj vlastitoj svjetlini.
+     */
+    const page = getComputedStyle(document.documentElement);
+    const read = (name: string, fallback: string): string =>
+      page.getPropertyValue(name).trim() || fallback;
+
+    const tokens = {
+      ...readTokens(),
+      landmass: read('--map-land', '#D8E3D2'),
+      hairline: read('--map-line', '#9DB39A'),
+    };
+    const ink = read('--ink', '#1C1A15');
 
     const points: MapPoint[] = state.guesses.flatMap((g) => {
       const place = places[g.id];

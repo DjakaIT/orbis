@@ -9,6 +9,8 @@ export interface Place {
   id: number;
   /** ISO3 za drzave, sifra naselja za Hrvatsku. */
   code: string;
+  /** ISO 3166-1 alpha-2, za zastavicu. Prazno gdje zastave nema. */
+  a2?: string;
   name: string;
   /** Centroid. Za drzave sluzi samo za smjer strelice, nikad za udaljenost. */
   lat: number;
@@ -37,6 +39,8 @@ export interface Guess {
   neighbour: boolean;
   /** Priblizava li se igrac meti u odnosu na prethodni pokusaj. */
   trend: Trend;
+  /** Alpha-2 kod drzave, za zastavu. Prazno gdje zastave nema. */
+  a2: string;
 }
 
 /** Stanje jedne partije, po modu. */

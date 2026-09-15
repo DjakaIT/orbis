@@ -21,6 +21,8 @@ export interface Capital {
   id: number;
   /** ISO3 države kojoj je grad glavni — ujedno i ključ prema `world-meta.json`. */
   code: string;
+  /** Alpha-2 iste države, za zastavicu. */
+  a2: string;
   name: string;
   /** Hrvatski naziv države, za očitanje u sučelju. */
   country: string;
@@ -46,6 +48,8 @@ interface PlaceFeature {
 
 interface Country {
   iso: string;
+  /** ISO 3166-1 alpha-2, za zastavicu grada — grad nosi zastavu svoje drzave. */
+  a2?: string;
   name: string;
 }
 
@@ -186,6 +190,7 @@ export function buildCapitals(geojson: string, countries: Country[]): CapitalsRe
     capitals.push({
       id: capitals.length,
       code: country.iso,
+      a2: country.a2 ?? '',
       name: croatian ?? source,
       country: country.name,
       lat: round(lat),

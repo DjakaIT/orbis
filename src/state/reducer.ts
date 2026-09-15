@@ -152,6 +152,7 @@ function describe(
      */
     neighbour: !hit && km === 0 && data.matrix !== null,
     trend: trendOf(km, previousKm),
+    a2: from.a2 ?? '',
   };
 }
 

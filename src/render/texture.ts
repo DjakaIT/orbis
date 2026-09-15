@@ -18,6 +18,8 @@ export interface Tokens {
   landmass: string;
   hairline: string;
   hit: string;
+  /** Svijetla tinta na kugli — natpisi i trag pokusaja. */
+  stageInk: string;
 }
 
 /** Citanje tokena iz CSS-a drzi boje na jednom mjestu — tokens.css. */
@@ -26,11 +28,13 @@ export function readTokens(el: Element = document.documentElement): Tokens {
   const get = (name: string, fallback: string): string =>
     s.getPropertyValue(name).trim() || fallback;
   return {
-    ocean: get('--ocean', '#16211C'),
-    landmass: get('--landmass', '#33351F'),
-    hairline: get('--hairline', '#575234'),
+    ocean: get('--ocean', '#06171F'),
+    landmass: get('--landmass', '#2B3A26'),
+    hairline: get('--hairline', '#2B586B'),
+    stageInk: get('--stage-ink', '#EEF3F5'),
     // --hit je oklch u CSS-u; canvas ga ne prima pouzdano, pa ide sRGB ekvivalent.
-    hit: 'rgb(88 224 148)',
+    // Zarezi su obavezni: three bez njih tiho vrati bijelu. Vidi engine/color.
+    hit: 'rgb(88, 224, 148)',
   };
 }
 
