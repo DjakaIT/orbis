@@ -5,7 +5,10 @@ compatibility_date = "2026-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "orbis-db"
-database_id = "local"   # popuni nakon `wrangler d1 create orbis-db`
+# ⚠ "local" je placeholder i vrijedi SAMO za `wrangler dev`. Prije `wrangler deploy`
+# ovdje mora stajati pravi id koji ispiše `wrangler d1 create orbis-db` — inace
+# deploy padne jer baza s tim id-em na Cloudflareu ne postoji.
+database_id = "local"
 migrations_dir = "migrations"
 
 [triggers]
@@ -13,4 +16,8 @@ crons = ["0 * * * 5"]   # petkom svaki sat; handler provjerava zagrebački sat
 
 [vars]
 # Popis odvojen zarezom. Frontend je na Netlifyju — upisi stvarnu domenu.
+#
+# Kad API ide kroz Netlify proxy (ORBIS_API_URL, vidi netlify.toml), sve je na
+# istom originu i CORS ni ne dolazi do izrazaja. Ovo pokriva izravan poziv na
+# workers.dev, npr. iz deploy previewa.
 ALLOWED_ORIGIN = "https://orbis-urbis.netlify.app"
