@@ -62,11 +62,16 @@ test('zastave su slike, ne dva slova', async ({ page }) => {
   await expect(flag).toBeVisible();
   await expect(flag).toHaveAttribute('src', '/flags/de.svg');
 
-  // Slika se mora stvarno ucitati, ne samo postojati u DOM-u.
-  const loaded = await flag.evaluate(
-    (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
-  );
-  expect(loaded).toBe(true);
+  /*
+   * Slika se mora stvarno ucitati, ne samo postojati u DOM-u. Mjeri se u petlji:
+   * `toBeVisible()` ceka da element ude u raspored, ne da preglednik dekodira
+   * SVG, pa je jedno mjerenje odmah nakon toga utrka s mrezom — i gubila ju je.
+   */
+  await expect
+    .poll(() => flag.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0), {
+      timeout: 10_000,
+    })
+    .toBe(true);
 
   // Prazan `alt`: ime drzave stoji odmah do zastave i citac bi ga citao dvaput.
   await expect(flag).toHaveAttribute('alt', '');

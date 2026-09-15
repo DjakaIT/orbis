@@ -728,3 +728,77 @@ Sada ih ništa ne može preskočiti: API se vozi protiv spremišta u memoriji
 (`tests/e2e/league-offline.spec.ts`) jer je i to stanje koje igrač može vidjeti.
 Uvjetni `skipIf` ostaje samo tamo gdje ovisi o artefaktu koji se može izgraditi
 (`dist/`), ne o procesu koji netko mora upaliti.
+
+## 2026-09-15 — Australije nije bilo jer teritorij nosi ISO svoje države
+
+Prijavljeno: Australija se ne vidi na globusu. Nije bila u pitanju ni projekcija
+ni simplifikacija — bila je prepisana.
+
+Natural Earth prekomorskim teritorijima daje ISO kod njihove države, pa su tri
+feature-a nosila `AUS`: Australija, Indian Ocean Territories i Ashmore and
+Cartier Islands. `shapesByIso` je gradio mapu s `set`, pa je pobjeđivao zadnji
+u datoteci — a to je Ashmore and Cartier, četverokut od četiri točke usred
+Indijskog oceana. Kontinenta jednostavno nije bilo.
+
+Popravak je **spajanje, ne biranje**: geometrije s istim kodom slažu se u jedan
+MultiPolygon. To je i geografski točno — teritorij jest kopno te države, pa ga
+pogodak treba obojati zajedno s ostatkom. Provjereno nad cijelim skupom: to je
+jedini sudar ISO kodova u 242 feature-a, i jedini s gubitkom.
+
+Test u `tests/engine/load.test.ts` gradi topologiju s istim redoslijedom i pada
+na starom kodu. Prva verzija tog testa bila je zelena iz krivog razloga:
+`feature()` rekonstruira koordinate **iz lukova** i ignorira `coordinates`
+upisan na geometriju, pa su svi oblici bili prazni — a dva prazna poligona su i
+dalje dva. Sada testna topologija ima prave lukove.
+
+## 2026-09-15 — Antarktika se crtala izvrnuto: odmotavanje prstena koji obilazi kuglu
+
+Prijavljeno: Antarktika izgleda kao čudna mrlja. Na snimci se vidjelo točno što:
+zeleni prsten oko plave sredine — kontinent naopako.
+
+`unwrap` postoji zbog Rusije i Fidžija, koji **križe** antimeridijan: bez
+odmotavanja longitude dobiju vodoravnu crtu preko cijele karte. Antarktika ga ne
+križi nego **obilazi kuglu**. Njezin obalni prsten ide od −180 do 180 i zatvara
+se po dnu karte, skokom s `(180, −90)` na `(−180, −90)`. Odmotavanje taj skok
+ne prepoznaje kao zatvaranje nego kao nastavak prema istoku i doda još jedan
+krug: raspon naraste s 360° na 386°, put presiječe sam sebe, namotaji se ponište
+i nonzero fill ostavi unutrašnjost praznom.
+
+Takvom prstenu sirove koordinate su već ispravne, jer skok preko ±180 leži na
+lat −90 — vodoravna crta koju povuče **jest** donji rub karte. Zato se prsten
+čiji odmotani raspon prelazi puni krug crta sirovo i bez kopija. U cijelom skupu
+je takav točno jedan.
+
+`tests/render/texture.test.ts` računa namotaj oko točke — isto pravilo koje
+canvas koristi za `fill()` — i tvrdi oboje: da je unutrašnjost ispunjena, i da
+bi odmotana verzija dala nulu. Broj točaka i raspon longitude bili su uredni i
+dok se kontinent crtao naopako, pa bi test koji gleda samo njih prošao.
+
+## 2026-09-15 — Paleta globusa: plavo more i zemljano kopno, mjereno a ne birano
+
+Traženo: „globus da izgleda lijepo, plavi sa zemljanim kontinentima". Prijašnji
+ocean `#06171F` i kopno `#2B3A26` davali su omjer 1,26:1 — na ekranu crna
+lopta bez obrisa, iako je test tražio tek 1,25:1. Prag je podignut na 3:1, koliko
+WCAG 1.4.11 traži za grafiku, jer obris kontinenta jest grafički element.
+
+Boje nisu birane na oko. Tri praga se stišću jedan o drugi: gradijent udaljenosti
+treba 3:1 na moru (drži more tamnim), kopno 3:1 na moru (tjera kopno gore), a
+pogodak 3:1 na kopnu (tjerao bi kopno dolje). Prva ručna kombinacija je na
+zadnjem pala na 2,77:1, a stiskanje mora u tamnije mu je oduzelo upravo plavu
+koja se tražila.
+
+Izlaz nije bio u podlozi nego u pogotku: on se smije posvijetliti. Pogodak na
+kugli je zato dobio svoj token, `--hit-stage`, odvojen od `--hit` — na papiru
+zelena mora biti tamna da nosi tekst, na moru svijetla da se vidi. Posvijetljen
+na `rgb(140, 239, 185)` prolazi 3,36:1 na kopnu i usput postaje najsvjetlija
+stvar na kugli, što SPEC §2.1 ionako traži. More je ostalo `#052352`.
+
+Plava je u ovoj računici jeftina: u luminanciji nosi 7,2 %, pa se kanal može
+gurnuti visoko a da boja ostane dovoljno tamna za gradijent. Test to sada i
+izričito traži — da more ostane plavo, a ne samo tamno.
+
+**Uz to:** atmosfera je pomaknuta na rub kugle. Oreol je bio najjači u sredini i
+gasio se na 62 % — dakle cijeli iza neprozirne sfere, pa se nije vidio i planet
+je imao oštar rez prema papiru. Sada je vrhunac na 93 % kraće stranice, tik izvan
+ruba. Zvjezdano polje iz SPEC §6.1 je uklonjeno: napisano je za tamnu scenu, a
+scena je papir, i nitko ga nije uvozio — mrtav kod koji izgleda kao značajka.

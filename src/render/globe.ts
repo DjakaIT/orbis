@@ -35,8 +35,6 @@ const ARC_STEPS = 48;
 const TRAIL_RADIUS = 1.004;
 const NODE_RADIUS = 1.006;
 
-const STAR_COUNT = 800;
-const STAR_RADIUS = 40;
 const AUTO_ROTATE = 0.0026; // ≈ 0,15° po frameu
 const DRAG_SENSITIVITY = 0.005;
 const MAX_PITCH = Math.PI / 2 - 0.05;
@@ -390,30 +388,4 @@ function disposeTrail(group: Group): void {
     for (const one of Array.isArray(material) ? material : [material]) one.dispose();
   }
   group.clear();
-}
-
-/**
- * 800 tocaka ravnomjerno po sferi radijusa 40. SPEC §6.1.
- *
- * Vise se ne dodaje u scenu: zvijezde su nocno nebo, a stranica je od prelaska
- * na svijetlu temu papir — na njemu bi bile tamne mrlje, ne zvijezde. Atmosferu
- * sada nosi oreol u CSS-u. Funkcija ostaje jer je rjesenje tocno za tamnu
- * podlogu i splash zaslon. Vidi DECISIONS.md.
- */
-export function stars(color: string): Points {
-  const positions = new Float32Array(STAR_COUNT * 3);
-  for (let i = 0; i < STAR_COUNT; i++) {
-    // Ravnomjerno po povrsini: z uniformno, kut uniformno. Bez toga se
-    // tocke zgusnu oko polova.
-    const z = 2 * ((i + 0.5) / STAR_COUNT) - 1;
-    const r = Math.sqrt(1 - z * z);
-    const phi = i * 2.399963; // zlatni kut
-    positions[i * 3] = STAR_RADIUS * r * Math.cos(phi);
-    positions[i * 3 + 1] = STAR_RADIUS * r * Math.sin(phi);
-    positions[i * 3 + 2] = STAR_RADIUS * z;
-  }
-
-  const geometry = new BufferGeometry();
-  geometry.setAttribute('position', new BufferAttribute(positions, 3));
-  return new Points(geometry, new PointsMaterial({ color: new Color(color), size: 0.22 }));
 }

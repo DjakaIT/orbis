@@ -104,20 +104,46 @@ async function fetchWorld(): Promise<WorldData> {
  * Topojson → geometrije po ISO3. Kljuc se bira istom logikom kao u pipelineu:
  * ISO_A3_EH kad je valjan, inace ADM0_A3 (Natural Earth ima -99 i za Francusku
  * i za Norvesku — vidi scripts/build-data.ts).
+ *
+ * Vise feature-a moze dijeliti isti kod: prekomorski teritorij nosi ISO svoje
+ * drzave. Zato se **spajaju**, ne prepisuju. Prije je pobjedivao onaj zadnji u
+ * datoteci, pa je `AUS` bio Ashmore and Cartier Islands — cetiri tocke usred
+ * mora — a cijela Australija se nije crtala. Spajanje je i geografski tocno:
+ * pogodak oboji svu kopnenu masu te drzave, ukljucujuci Tasmaniju.
  */
-function shapesByIso(topo: Topology): Map<string, GeoJSON.Geometry> {
+export function shapesByIso(topo: Topology): Map<string, GeoJSON.Geometry> {
   const layerName = Object.keys(topo.objects)[0];
   if (!layerName) throw new Error('topojson nema slojeva');
   const layer = topo.objects[layerName];
   if (!layer) throw new Error('topojson nema slojeva');
 
   const fc = feature(topo, layer as GeometryCollection) as GeoJSON.FeatureCollection;
-  const out = new Map<string, GeoJSON.Geometry>();
+  const parts = new Map<string, GeoJSON.Position[][][]>();
+
   for (const f of fc.features) {
     const p = f.properties as { ISO_A3_EH?: string; ADM0_A3?: string } | null;
     if (!p) continue;
     const iso = p.ISO_A3_EH && p.ISO_A3_EH !== '-99' ? p.ISO_A3_EH : p.ADM0_A3;
-    if (iso) out.set(iso, f.geometry);
+    if (!iso) continue;
+
+    const g = f.geometry;
+    const polygons =
+      g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : [];
+    if (polygons.length === 0) continue;
+
+    const existing = parts.get(iso);
+    if (existing) existing.push(...polygons);
+    else parts.set(iso, [...polygons]);
+  }
+
+  const out = new Map<string, GeoJSON.Geometry>();
+  for (const [iso, polygons] of parts) {
+    out.set(
+      iso,
+      polygons.length === 1 && polygons[0]
+        ? { type: 'Polygon', coordinates: polygons[0] }
+        : { type: 'MultiPolygon', coordinates: polygons },
+    );
   }
   return out;
 }

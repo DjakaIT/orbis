@@ -17,16 +17,28 @@
   min-height: 260px;
 }
 
+/*
+ * Atmosfera. Oreol mora biti najjači **na rubu kugle** i gasiti se prema van —
+ * unutra ga ionako nitko ne vidi jer je sfera neprozirna. Prije je bio najjači u
+ * sredini i gasio se na 62 %, dakle cijeli iza planeta; na ekranu se nije vidjelo
+ * ništa i Zemlja je imala oštar rez prema papiru.
+ *
+ * `closest-side` veže 100 % uz polovicu kraće stranice, a upravo ta stranica
+ * određuje i koliko je kugla velika: pri fov-u od 38° i kameri na z = 3,2 rub
+ * sfere pada na 91 % te polovice. Zato je vrhunac na 93 %, tik izvan ruba, i
+ * omjer se ne mijenja s oblikom prozora.
+ */
 .stage::before {
   content: '';
   position: absolute;
   z-index: 0;
   inset: 0;
   background: radial-gradient(
-    circle at 50% 48%,
-    color-mix(in srgb, var(--halo) 26%, transparent) 0%,
-    color-mix(in srgb, var(--halo) 10%, transparent) 42%,
-    transparent 62%
+    circle closest-side at 50% 48%,
+    color-mix(in srgb, var(--halo) 16%, transparent) 80%,
+    color-mix(in srgb, var(--halo) 34%, transparent) 93%,
+    color-mix(in srgb, var(--halo) 12%, transparent) 108%,
+    transparent 130%
   );
   pointer-events: none;
 }

@@ -83,9 +83,16 @@ async function stubApi(page: Page): Promise<{ posted: { url: string; body: unkno
 
 async function signUp(page: Page): Promise<void> {
   await page.goto('/');
-  await expect(page.getByLabel('Upiši državu')).toBeEnabled({ timeout: 15_000 });
 
-  await page.getByRole('button', { name: 'Liga' }).click();
+  /*
+   * Ne ceka se da igra bude spremna. Liga je svoj panel i ne ovisi o podacima
+   * svijeta ni o globusu; cekanje na `Upiši državu` je ovdje samo vezalo test
+   * uz ucitavanje 1 MB podataka i WebGL kontekst, pa je pod punim paketom znalo
+   * probiti rok. Ceka se ono sto se stvarno koristi.
+   */
+  const liga = page.getByRole('button', { name: 'Liga' });
+  await expect(liga).toBeVisible({ timeout: 15_000 });
+  await liga.click();
   const nickname = page.getByLabel('Nadimak');
   await expect(nickname).toBeVisible();
   await nickname.fill('Daniel');

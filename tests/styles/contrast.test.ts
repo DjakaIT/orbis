@@ -73,6 +73,9 @@ function contrastWith(color: string, background: string): number {
   return ((light ?? 0) + 0.05) / ((dark ?? 0) + 0.05);
 }
 
+/** 21 tocka po skali: krajevi i devetnaest koraka izmedu njih. */
+const steps = Array.from({ length: 21 }, (_, i) => i / 20);
+
 describe('tekst', () => {
   const cases: [string, string][] = [
     ['--ink', '--paper'],
@@ -105,8 +108,61 @@ describe('grafika', () => {
   });
 
   it('kopno se odvaja od oceana', () => {
-    // Globus je jedna tekstura; da su ova dva ista, ne bi se vidio nijedan obris.
-    expect(contrast('--landmass', '--ocean')).toBeGreaterThan(1.25);
+    /*
+     * Prag je bio 1,25 i prolazio je dok se na ekranu vidjela crna lopta: ocean
+     * #06171F i kopno #2B3A26 dali su 1,26:1. Formalno „vidi se", stvarno ne.
+     * Sada vrijedi isti prag koji WCAG 1.4.11 trazi za graficke elemente — 3:1 —
+     * jer obris kontinenta jest graficki element, i to najvazniji na kugli.
+     */
+    expect(contrast('--landmass', '--ocean')).toBeGreaterThanOrEqual(3);
+  });
+
+  it('kopno je svjetlije od mora, kao na fotografiji planeta', () => {
+    // Obrnuto bi bilo citljivo jednako, ali ne bi izgledalo kao Zemlja.
+    expect(luminance(parse(token('--landmass')))).toBeGreaterThan(
+      luminance(parse(token('--ocean'))),
+    );
+  });
+
+  it('pogodak se izdvaja od kopna na koje se boja', () => {
+    /*
+     * Meta se boja usred drugog kopna, pa se mora vidjeti i prije nego se globus
+     * okrene i prije nego se otvori kartica. Ovo je prag koji je paletu odlucio:
+     * prva rucno odabrana kombinacija davala je 2,77:1, ispod WCAG 1.4.11.
+     */
+    expect(contrast('--hit-stage', '--landmass')).toBeGreaterThanOrEqual(3);
+  });
+
+  it('pogodak je najsvjetlija stvar na kugli', () => {
+    /*
+     * SPEC §2.1: „kad pogodi metu i ona zasvijetli zeleno, to je najsvjetlija
+     * stvar koju je vidio otkad je otvorio stranicu." Gradijent je jedina druga
+     * zasicena boja ondje, pa je dovoljno nadmasiti njegov najsvjetliji korak.
+     */
+    const hit = luminance(parse(token('--hit-stage')));
+    for (const mode of ['world', 'capitals', 'hr'] as const) {
+      for (const t of steps) {
+        const km = t * (mode === 'hr' ? 400 : 20000);
+        expect(
+          luminance(parse(distanceRgb(km, mode))),
+          `${mode} ${String(Math.round(km))} km`,
+        ).toBeLessThan(hit);
+      }
+    }
+  });
+
+  it('pogodak se vidi i na moru, za otocne drzave', () => {
+    expect(contrast('--hit-stage', '--ocean')).toBeGreaterThanOrEqual(3);
+  });
+
+  it('more je stvarno plavo, ne tek tamno', () => {
+    /*
+     * Ovo cuva namjeru koju omjeri ne mogu izraziti. Plavi kanal nosi tek 7,2 %
+     * luminancije, pa se smije gurnuti visoko a da boja ostane dovoljno tamna za
+     * gradijent — ali upravo zato ga je lako i zaboraviti.
+     */
+    const [r, g, b] = parse(token('--ocean'));
+    expect(b).toBeGreaterThan(Math.max(r, g) * 2);
   });
 
   it('granice se vide na oceanu i na kopnu', () => {
@@ -124,8 +180,6 @@ describe('gradijent udaljenosti', () => {
    * Dvije podloge, dvije skale: sucelje je na papiru, scena globusa je tamna.
    * WCAG 1.4.11 trazi 3:1 za graficke elemente.
    */
-  const steps = Array.from({ length: 21 }, (_, i) => i / 20);
-
   it('traka u sucelju se vidi na papiru po cijeloj skali', () => {
     for (const mode of ['world', 'capitals', 'hr'] as const) {
       for (const t of steps) {

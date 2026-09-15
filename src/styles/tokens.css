@@ -22,14 +22,39 @@
   --error: oklch(0.55 0.19 25);
 
   /* — Planet: Zemlja kakva se vidi iz orbite, bez okvira oko sebe — */
-  --ocean: #06171f; /* duboko modro more */
-  --landmass: #2b3a26; /* kopno bez pogotka */
-  --hairline: #2b586b; /* granice i graticule na kugli */
+  /*
+   * Planet, ne tamna kugla. Prijašnji ocean je bio gotovo crn (#06171F) i kopno
+   * tek nijansu svjetlije — omjer 1,26:1, pa se na ekranu vidjela crna lopta bez
+   * obrisa. More je sada stvarno plavo, a kopno zemljano i **svjetlije** od mora,
+   * kako je i na fotografiji planeta.
+   *
+   * Plava je ovdje jeftina: u luminanciji nosi samo 7,2 %, pa se kanal može
+   * gurnuti visoko a da boja ostane tamna.
+   *
+   * Tri praga se ovdje stišću jedan o drugi: gradijent udaljenosti treba 3:1 na
+   * moru (drži more tamnim), kopno 3:1 na moru (tjera kopno gore), a pogodak 3:1
+   * na kopnu (tjerao bi kopno dolje). Prva ručna kombinacija je na zadnjem pala
+   * na 2,77:1, a stiskanje mora u još tamnije mu je oduzelo plavu.
+   *
+   * Rješenje nije bilo u podlozi nego u pogotku: on se smije posvijetliti. Tako
+   * more ostaje stvarno plavo, a pogodak postaje najsvjetlija stvar na kugli —
+   * što SPEC §2.1 ionako traži. Mjeri tests/styles/contrast.test.ts.
+   */
+  --ocean: #052352; /* duboko more */
+  --landmass: #6a7a52; /* kopno bez pogotka — 3.30:1 na moru */
+  --hairline: #6ea3c4; /* granice i graticule na kugli */
   --stage-ink: #eef3f5; /* natpisi na kugli */
-  --stage: #06171f; /* ikona i splash — kugla kad nema stranice oko nje */
+  /*
+   * Pogodak na kugli je svoja boja, ne --hit. Na papiru zelena mora biti tamna
+   * da nosi tekst; na moru mora biti svijetla da se vidi. Zapisana je kao rgb()
+   * jer je canvas cita izravno — i sa zarezima, jer ih three.js trazi (bez njih
+   * tiho vrati bijelu, vidi engine/color).
+   */
+  --hit-stage: rgb(140, 239, 185); /* pogodena meta na kugli — 3.36:1 na kopnu */
+  --stage: #052352; /* ikona i splash — kugla kad nema stranice oko nje */
 
-  /* Atmosfera: meki oreol umjesto ploche pozadine. */
-  --halo: #7fb4c4;
+  /* Atmosfera: meki oreol umjesto ploche pozadine. Ton prati more. */
+  --halo: #6fa8d0;
 
   /* — Karta Hrvatske: crta se na papiru, pa ima svoje boje — */
   --map-land: #d8e3d2;

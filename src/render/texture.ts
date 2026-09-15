@@ -32,9 +32,8 @@ export function readTokens(el: Element = document.documentElement): Tokens {
     landmass: get('--landmass', '#2B3A26'),
     hairline: get('--hairline', '#2B586B'),
     stageInk: get('--stage-ink', '#EEF3F5'),
-    // --hit je oklch u CSS-u; canvas ga ne prima pouzdano, pa ide sRGB ekvivalent.
-    // Zarezi su obavezni: three bez njih tiho vrati bijelu. Vidi engine/color.
-    hit: 'rgb(88, 224, 148)',
+    // Svoj token, ne --hit: --hit je oklch i kalibriran za papir. Vidi tokens.css.
+    hit: get('--hit-stage', 'rgb(140, 239, 185)'),
   };
 }
 
@@ -43,7 +42,7 @@ export const project = (lon: number, lat: number, w = W, h = H): [number, number
   ((90 - lat) / 180) * h,
 ];
 
-type Ring = number[][];
+export type Ring = number[][];
 
 function ringsOf(geometry: GeoJSON.Geometry): Ring[] {
   if (geometry.type === 'Polygon') return geometry.coordinates;
@@ -84,8 +83,44 @@ export function unwrap(ring: Ring): { points: [number, number][]; min: number; m
   return { points, min, max };
 }
 
-function tracePath(ctx: CanvasRenderingContext2D, ring: Ring, shift: number): void {
-  const { points } = unwrap(ring);
+/**
+ * Prsten koji nakon odmotavanja pokriva vise od punog kruga ne krizi
+ * antimeridijan nego **obilazi kuglu**.
+ *
+ * U cijelom skupu je takav tocno jedan: Antarktika. Njezin obalni prsten ide od
+ * -180 do 180 i zatvara se po dnu karte, skokom s (180, -90) na (-180, -90).
+ * Odmotavanje taj skok ne vidi kao zatvaranje nego kao nastavak prema istoku, pa
+ * doda jos jedan krug — raspon naraste na 386°, put presjece sam sebe i namotaji
+ * se ponište. Nonzero fill tada ostavi unutrasnjost prazna: kontinent se crta
+ * **izvrnuto**, kao zeleni prsten oko plave sredine.
+ *
+ * Takvom prstenu sirove koordinate su vec ispravne: skok preko ±180 lezi na
+ * lat -90, pa vodoravna crta koju povuce jest donji rub karte.
+ */
+const FULL_LAP = 350;
+
+/** Tocke prstena i kopije koje treba nacrtati da rub karte ostane cijel. */
+export function plan(ring: Ring): { points: [number, number][]; shifts: number[] } {
+  const { points, min, max } = unwrap(ring);
+
+  if (max - min > FULL_LAP) {
+    const raw: [number, number][] = [];
+    for (const p of ring) {
+      const lon = p[0];
+      const lat = p[1];
+      if (lon === undefined || lat === undefined) continue;
+      raw.push([lon, lat]);
+    }
+    return { points: raw, shifts: [0] };
+  }
+
+  const shifts = [0];
+  if (max > 180) shifts.push(-360);
+  if (min < -180) shifts.push(360);
+  return { points, shifts };
+}
+
+function tracePath(ctx: CanvasRenderingContext2D, points: [number, number][], shift: number): void {
   ctx.beginPath();
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
@@ -97,15 +132,6 @@ function tracePath(ctx: CanvasRenderingContext2D, ring: Ring, shift: number): vo
   ctx.closePath();
 }
 
-/** Koje kopije poligona treba nacrtati da prijelaz preko ruba karte ostane cijel. */
-function shiftsFor(ring: Ring): number[] {
-  const { min, max } = unwrap(ring);
-  const shifts = [0];
-  if (max > 180) shifts.push(-360);
-  if (min < -180) shifts.push(360);
-  return shifts;
-}
-
 function drawGeometry(
   ctx: CanvasRenderingContext2D,
   geometry: GeoJSON.Geometry,
@@ -114,8 +140,9 @@ function drawGeometry(
   lineWidth = BORDER_WIDTH,
 ): void {
   for (const ring of ringsOf(geometry)) {
-    for (const shift of shiftsFor(ring)) {
-      tracePath(ctx, ring, shift);
+    const { points, shifts } = plan(ring);
+    for (const shift of shifts) {
+      tracePath(ctx, points, shift);
       if (fill) {
         ctx.fillStyle = fill;
         ctx.fill();
