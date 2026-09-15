@@ -5,6 +5,9 @@ import type { Mode } from './seed';
 
 const SITE = 'orbis.hr';
 
+/** Znak moda u prvom retku, da se iz chata vidi koja je igra. */
+const BADGE: Record<Mode, string> = { world: '🌍', capitals: '🏛', hr: '🇭🇷' };
+
 /** „4 pokušaja", ali „1 pokušaj". */
 export function guessNoun(n: number): string {
   return n % 10 === 1 && n % 100 !== 11 ? 'pokušaj' : 'pokušaja';
@@ -29,6 +32,6 @@ export function shareText(
   const [, month, day] = date.split('-');
   const short = `${String(Number(day))}.${String(Number(month))}.`;
   const squares = guesses.map((g) => distanceSquare(g.km, mode, g.hit)).join('');
-  const globe = mode === 'world' ? '🌍' : '🇭🇷';
+  const globe = BADGE[mode];
   return `Orbis ${globe} ${short} — ${String(guesses.length)} ${guessNoun(guesses.length)}\n${squares}\n${site}`;
 }

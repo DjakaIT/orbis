@@ -86,6 +86,26 @@ describe('distanceColor', () => {
     expect(farH).toBeGreaterThan(255);
   });
 
+  it('nijedna tocka gradijenta nije zelena kao pogodak', () => {
+    /*
+     * `--hit` je na tonu 152°. Kad je gradijent isao drugim smjerom, kroz taj
+     * ton je prolazio na oko 10 700 km — na globusu je drzava udaljena tisucama
+     * kilometara izgledala kao pogodak. Teza §2.1 je da je pogodak jedina zelena
+     * na ekranu, pa ton mora zaobici cijeli zeleni raspon.
+     */
+    for (const mode of ['world', 'capitals', 'hr'] as const) {
+      for (let step = 0; step <= 100; step++) {
+        const km = (step / 100) * (mode === 'hr' ? 400 : 20000);
+        const [, , h] = lch(distanceColor(km, mode));
+        const distance = Math.min(Math.abs(h - 152), 360 - Math.abs(h - 152));
+        expect(
+          distance,
+          `${mode} na ${String(Math.round(km))} km ima ton ${String(h)}`,
+        ).toBeGreaterThan(60);
+      }
+    }
+  });
+
   it('hrvatska skala je gusca: 300 km je ondje daleko, u svijetu blizu', () => {
     expect(distanceColor(300, 'hr')).not.toBe(distanceColor(300, 'world'));
     const [, , hrH] = lch(distanceColor(300, 'hr'));

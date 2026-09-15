@@ -2,6 +2,7 @@ import { useId, useMemo, useRef, useState } from 'react';
 
 import { suggest, type SearchEntry } from '../engine/search';
 import { useGame } from '../state/context';
+import type { Mode } from '../types';
 import styles from './GuessInput.module.css';
 
 /**
@@ -10,6 +11,13 @@ import styles from './GuessInput.module.css';
  * Uvijek vidljivo bez scrolla; dropdown ide prema gore kad je polje u donjoj
  * polovici ekrana, inace ga tipkovnica prekrije na mobitelu.
  */
+/** Sto se upisuje u kojem modu. Ujedno i `aria-label` polja. */
+const LABEL: Record<Mode, string> = {
+  world: 'Upiši državu',
+  capitals: 'Upiši glavni grad',
+  hr: 'Upiši naselje',
+};
+
 export default function GuessInput() {
   const { state, guess, index } = useGame();
   const [value, setValue] = useState('');
@@ -20,8 +28,8 @@ export default function GuessInput() {
   const field = useRef<HTMLInputElement>(null);
   const listId = useId();
   const disabled = state.solved || state.status !== 'ready';
-  // U modu Hrvatska se ne upisuje država nego naselje.
-  const label = state.mode === 'world' ? 'Upiši državu' : 'Upiši naselje';
+  // Svaki mod ima svoju metu, pa i svoju uputu.
+  const label = LABEL[state.mode];
 
   // Prijedlozi su izvedeni iz unosa — računaju se u renderu, ne u efektu.
   const options = useMemo<SearchEntry[]>(

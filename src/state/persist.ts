@@ -27,8 +27,9 @@ export function emptyState(): Persisted {
   return {
     v: 1,
     world: null,
+    capitals: null,
     hr: null,
-    stats: { world: emptyStats(), hr: emptyStats() },
+    stats: { world: emptyStats(), capitals: emptyStats(), hr: emptyStats() },
     player: null,
     lastLeagueCode: null,
     prefs: { sortBy: 'distance' },
@@ -108,8 +109,15 @@ function migrate(parsed: unknown): Persisted | null {
     ...base,
     ...state,
     v: 1,
+    /*
+     * `v` ostaje 1: dodavanje moda je cisto prosirenje. Stariji zapis nema
+     * `capitals` ni njegovu statistiku, pa ih dobije prazne iz `base`, a sve
+     * ostalo mu ostaje. Podizanje verzije ovdje bi obrisalo tude streakove, sto
+     * SPEC §8 izricito zabranjuje.
+     */
     stats: {
       world: { ...base.stats.world, ...state.stats?.world },
+      capitals: { ...base.stats.capitals, ...state.stats?.capitals },
       hr: { ...base.stats.hr, ...state.stats?.hr },
     },
     prefs: { ...base.prefs, ...state.prefs },
@@ -125,7 +133,7 @@ function migrate(parsed: unknown): Persisted | null {
 function rollOver(state: Persisted, today: DateString): Persisted {
   const next = { ...state, stats: { ...state.stats } };
 
-  for (const mode of ['world', 'hr'] as const) {
+  for (const mode of ['world', 'capitals', 'hr'] as const) {
     const round: Round | null = next[mode];
     if (!round || round.date === today) continue;
 

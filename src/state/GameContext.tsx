@@ -17,7 +17,7 @@ import type { HrGeometry } from '../render/mapHR';
 import type { Mode, Persisted, Place, Tier } from '../types';
 import { GameCtx, type GameValue } from './context';
 import { load, patch } from './persist';
-import { initialState, reducer, toRound } from './reducer';
+import { initialState, reducer, toRound, type GameState } from './reducer';
 
 /** Sve što jedan mod treba da bi se odigrao. */
 interface Loaded {
@@ -43,6 +43,21 @@ async function loadMode(mode: Mode, tier: Tier): Promise<Loaded> {
     };
   }
 
+  if (mode === 'capitals') {
+    // Isti chunk-po-modu obrazac: bazen gradova se ne dohvaća dok se ne zatreba.
+    const { loadCapitals } = await import('./../data/loadCapitals');
+    const d = await loadCapitals();
+    return {
+      mode,
+      places: d.places,
+      index: d.index,
+      // Gradovi su točke, pa je haversine dovoljan — matrica ne treba. SPEC §4.4.
+      matrix: null,
+      shapes: d.shapes,
+      geometry: null,
+    };
+  }
+
   /*
    * Dinamički import, ne statički: hrvatski podaci i `d3-geo` idu u zaseban
    * chunk koji se dohvaća tek kad igrač odabere mod. SPEC §10, faza 2.
@@ -62,7 +77,16 @@ async function loadMode(mode: Mode, tier: Tier): Promise<Loaded> {
 /** Spremljena partija vrijedi samo za svoj mod i, u Hrvatskoj, svoju razinu. */
 function roundFor(p: Persisted, mode: Mode, tier: Tier) {
   if (mode === 'world') return p.world;
+  if (mode === 'capitals') return p.capitals;
   return p.hr?.tier === tier ? p.hr : null;
+}
+
+/** Partija se sprema u polje svog moda; Hrvatska uz to nosi i razinu. */
+function roundPatch(mode: Mode, tier: Tier, state: GameState): Partial<Persisted> {
+  const round = toRound(state);
+  if (mode === 'world') return { world: round };
+  if (mode === 'capitals') return { capitals: round };
+  return { hr: { ...round, tier } };
 }
 
 interface ProviderProps {
@@ -116,7 +140,7 @@ export function GameProvider({ mode, tier, children }: ProviderProps) {
     if (state.status !== 'ready') return;
     // patch, ne save: ligu pise drugi dio aplikacije u isti kljuc.
     persisted.current = patch({
-      ...(mode === 'world' ? { world: toRound(state) } : { hr: { ...toRound(state), tier } }),
+      ...roundPatch(mode, tier, state),
       stats: state.stats,
       prefs: { sortBy: state.sortBy },
     });

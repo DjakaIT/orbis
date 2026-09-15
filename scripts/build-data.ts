@@ -6,6 +6,7 @@
  * Proizvodi:
  *   world-topo.json    pojednostavljene granice, topojson
  *   world-meta.json    imena, ISO kodovi, centroidi (samo za smjer strelice)
+ *   capitals.json      glavni gradovi: naziv, drzava, koordinate
  *   world-matrix.bin   Uint16Array(N*N), minimalna udaljenost granica u km
  *   aliases.json       rucni dodaci za pretragu
  */
@@ -22,8 +23,9 @@ import type { Topology } from 'topojson-specification';
 
 import { buildFont } from './build-font';
 import { buildIcons } from './build-icons';
+import { buildCapitals, writeMissingCapitalsReport } from './build-capitals';
 import { buildHr, writeMissingPopReport } from './build-hr';
-import { NATURAL_EARTH, fetchSource, readCached } from './fetch-sources';
+import { NATURAL_EARTH, NE_PLACES, fetchSource, readCached } from './fetch-sources';
 
 const require = createRequire(import.meta.url);
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -312,6 +314,18 @@ async function main(): Promise<void> {
 
   await writeMissingReport(missing);
   await report(n, triangle, entries);
+
+  console.warn('Glavni gradovi →');
+  await fetchSource(NE_PLACES);
+  const capitals = buildCapitals(await readCached(NE_PLACES.file), countries);
+  console.warn(`  ${String(capitals.capitals.length)} gradova`);
+  console.warn(`  bez hrvatskog naziva: ${String(capitals.withoutCroatianName.length)}`);
+  console.warn(`  drzava bez glavnog grada: ${String(capitals.withoutCapital.length)}`);
+  await writeFile(
+    join(OUT, 'capitals.json'),
+    JSON.stringify({ n: capitals.capitals.length, capitals: capitals.capitals }),
+  );
+  await writeMissingCapitalsReport(HERE, capitals);
 
   console.warn('Hrvatska →');
   const croatia = await buildHr();

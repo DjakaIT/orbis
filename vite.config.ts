@@ -116,13 +116,13 @@ export default defineConfig(({ mode }) => ({
         /*
          * Precache nosi samo ono bez cega se prvo otvaranje ne moze dogoditi.
          *
-         * HR podaci se ne preuzimaju dok se mod ne odabere — to je kriterij faze 2,
-         * a service worker bi ih inace povukao u pozadini pri prvom posjetu. Ostaju
-         * na `runtimeCaching` pravilu ispod: dohvate se pri odabiru moda i od tada
-         * su offline. OG slika je za previewe koje generiraju tudi posluzitelji,
-         * pa na uredaju nikome ne treba.
+         * Podaci modova koji se biraju — Hrvatska i glavni gradovi — ne preuzimaju
+         * se dok se mod ne odabere; to je kriterij faze 2, a service worker bi ih
+         * inace povukao u pozadini pri prvom posjetu. Ostaju na `runtimeCaching`
+         * pravilu ispod: dohvate se pri odabiru moda i od tada su offline. OG slika
+         * je za previewe koje generiraju tudi posluzitelji, pa na uredaju ne treba.
          */
-        globIgnores: ['**/data/hr-*.json', 'og.png', 'stats.html'],
+        globIgnores: ['**/data/hr-*.json', '**/data/capitals.json', 'og.png', 'stats.html'],
         // Bez ovoga bi se dnevni podaci dohvaćali ponovno pri svakom otvaranju.
         runtimeCaching: [
           {

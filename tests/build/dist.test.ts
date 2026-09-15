@@ -169,10 +169,11 @@ describe.skipIf(!built)('service worker', () => {
     expect(urls).toContain('data/world-meta.json');
   });
 
-  it('ne precachea HR podatke', () => {
-    // Kriterij faze 2: HR podaci se ne preuzimaju dok se mod ne odabere.
-    // Precache bi ih povukao u pozadini pri prvom posjetu i to bi prekrsio.
+  it('ne precachea podatke modova koji se biraju', () => {
+    // Kriterij faze 2: podaci se ne preuzimaju dok se mod ne odabere. Precache
+    // bi ih povukao u pozadini pri prvom posjetu i to bi prekrsio.
     expect(urls.filter((u) => u.includes('hr-'))).toEqual([]);
+    expect(urls.filter((u) => u.includes('capitals'))).toEqual([]);
   });
 
   it('ne precachea OG sliku', () => {

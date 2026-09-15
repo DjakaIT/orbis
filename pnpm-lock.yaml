@@ -227,6 +227,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^5.0.0
         version: 5.0.0(vitest@5.0.0)
+      cldr-dates-full:
+        specifier: ^48.2.0
+        version: 48.2.0(cldr-numbers-full@48.2.0(cldr-core@48.2.0))
       cldr-localenames-full:
         specifier: ^48.2.0
         version: 48.2.0(cldr-core@48.2.0)
@@ -2428,8 +2431,18 @@ packages:
   cldr-core@48.2.0:
     resolution: {integrity: sha512-zfmLothncSwfv2jlevoSrgI2VGgH8SDGHXst6jUEotHA8nq9Igeg9jzdJDFtBso9pgJuG89DK16TzrmZDdo2Bg==}
 
+  cldr-dates-full@48.2.0:
+    resolution: {integrity: sha512-zMrKvjMO414HDftLr6vKH1fNQHakFNe+F1h4S0eg+zmL4WRi9pI41fxB3UrTJDY42MEM87jCuAw/qlqCgYKcAQ==}
+    peerDependencies:
+      cldr-numbers-full: 48.2.0
+
   cldr-localenames-full@48.2.0:
     resolution: {integrity: sha512-4o0paYDz0UXhfhChAVFkmVl2CP0YTSEqE6WrC0fNafaSC5u5DAXphxH3SZ1Ujczarikr8DToKZfiok6EqWLdNQ==}
+    peerDependencies:
+      cldr-core: 48.2.0
+
+  cldr-numbers-full@48.2.0:
+    resolution: {integrity: sha512-0EQ+UkVDsyXOlxnWnL1RIENVZFqCnb04D1Yrku0obnOyttbuZz8tHmUd5c5AEvhGS/Gg2zI4fTaCm51LSGITog==}
     peerDependencies:
       cldr-core: 48.2.0
 
@@ -6647,7 +6660,15 @@ snapshots:
 
   cldr-core@48.2.0: {}
 
+  cldr-dates-full@48.2.0(cldr-numbers-full@48.2.0(cldr-core@48.2.0)):
+    dependencies:
+      cldr-numbers-full: 48.2.0(cldr-core@48.2.0)
+
   cldr-localenames-full@48.2.0(cldr-core@48.2.0):
+    dependencies:
+      cldr-core: 48.2.0
+
+  cldr-numbers-full@48.2.0(cldr-core@48.2.0):
     dependencies:
       cldr-core: 48.2.0
 

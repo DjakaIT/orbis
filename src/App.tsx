@@ -18,6 +18,9 @@ import styles from './App.module.css';
  * glavne dretve pri učitavanju. Odgoda ga skida s kritične putanje: polje za
  * unos je spremno prije nego što se WebGL uopće inicijalizira, a globus upada
  * u isti okvir koji mu i inače drži mjesto.
+ *
+ * Isti globus služi i modu glavnih gradova: pogođeni grad boji državu kojoj
+ * pripada, jer `code` svakog grada jest ISO kod te države.
  */
 const Globe = lazy(() => import('./components/Globe'));
 
@@ -64,7 +67,7 @@ function Board({ mode, onMode, tier, onTier }: BoardProps) {
       <main className={styles.body}>
         <div className={styles.stage}>
           <Suspense fallback={<div className={styles.stagePlaceholder} />}>
-            {mode === 'world' ? <Globe /> : <MapHR />}
+            {mode === 'hr' ? <MapHR /> : <Globe />}
           </Suspense>
         </div>
 

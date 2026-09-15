@@ -68,6 +68,7 @@ export interface Player {
 export interface Persisted {
   v: 1;
   world: Round | null;
+  capitals: Round | null;
   hr: (Round & { tier: Tier }) | null;
   stats: Record<Mode, ModeStats>;
   player: Player | null;

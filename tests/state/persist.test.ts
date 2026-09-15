@@ -48,7 +48,7 @@ describe('prijelaz dana', () => {
     save({
       ...emptyState(),
       world: { date: '2026-09-13', guesses: [1], solved: false, startedAt: 5 },
-      stats: { world: stats, hr: emptyState().stats.hr },
+      stats: { ...emptyState().stats, world: stats },
     });
 
     const next = load(TODAY);
@@ -62,7 +62,7 @@ describe('prijelaz dana', () => {
     save({
       ...emptyState(),
       world: { date: '2026-09-13', guesses: [1], solved: true, startedAt: 5 },
-      stats: { world: stats, hr: emptyState().stats.hr },
+      stats: { ...emptyState().stats, world: stats },
     });
 
     const next = load(TODAY);
@@ -76,7 +76,7 @@ describe('prijelaz dana', () => {
     save({
       ...emptyState(),
       world: { date: '2026-09-11', guesses: [1], solved: true, startedAt: 5 },
-      stats: { world: stats, hr: emptyState().stats.hr },
+      stats: { ...emptyState().stats, world: stats },
     });
 
     expect(load(TODAY).stats.world.streak).toBe(0);
@@ -87,7 +87,7 @@ describe('prijelaz dana', () => {
     save({
       ...emptyState(),
       world: { date: '2026-09-13', guesses: [], solved: false, startedAt: 5 },
-      stats: { world: stats, hr: emptyState().stats.hr },
+      stats: { ...emptyState().stats, world: stats },
     });
 
     const next = load(TODAY);

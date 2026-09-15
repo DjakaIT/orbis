@@ -27,7 +27,11 @@ const NO_REPEAT_DAYS = 30;
  */
 const EPOCH: DateString = '2026-01-01';
 
-export type Mode = 'world' | 'hr';
+/**
+ * Tri neovisna bazena meta. Svaki ima svoj niz, svoju partiju i svoj streak.
+ * Glavni gradovi su odvojen mod, ne tezina moda svijet — meta je grad, ne drzava.
+ */
+export type Mode = 'world' | 'capitals' | 'hr';
 
 function xmur3(str: string): () => number {
   let h = 1779033703 ^ str.length;

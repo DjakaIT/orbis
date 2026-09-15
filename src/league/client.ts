@@ -1,5 +1,7 @@
 /** Klijent API-ja lige. `fetch` je dovoljan — nema axiosa. SPEC §1. */
 
+import type { Mode } from '../types';
+
 import type { ClosedRound, LeagueView, Me, NewLeague, NewPlayer, ScoreResult } from './types';
 
 /*
@@ -83,7 +85,7 @@ const MAX_ELAPSED_MS = 3_600_000;
  */
 export function submitScore(
   token: string,
-  score: { puzzleDate: string; mode: 'world' | 'hr'; guesses: number; elapsedMs: number },
+  score: { puzzleDate: string; mode: Mode; guesses: number; elapsedMs: number },
 ): Promise<ScoreResult> {
   return call<ScoreResult>('/scores', {
     method: 'POST',

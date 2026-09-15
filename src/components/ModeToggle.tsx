@@ -3,6 +3,7 @@ import styles from './ModeToggle.module.css';
 
 const MODES: { id: Mode; label: string }[] = [
   { id: 'world', label: 'Svijet' },
+  { id: 'capitals', label: 'Gradovi' },
   { id: 'hr', label: 'Hrvatska' },
 ];
 

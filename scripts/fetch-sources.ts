@@ -29,6 +29,16 @@ export const NATURAL_EARTH: Source = {
 };
 
 /**
+ * Glavni gradovi. Isti izvor i ista licenca kao granice drzava — Natural Earth,
+ * public domain. Sloj nosi `FEATURECLA = 'Admin-0 capital'` uz koordinate i ISO
+ * kod drzave, pa se spaja na vec izgradjen popis drzava.
+ */
+export const NE_PLACES: Source = {
+  file: 'ne_110m_populated_places.geojson',
+  url: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_populated_places.geojson',
+};
+
+/**
  * DGU Registar prostornih jedinica. URL nije stabilan i mijenja se izmedu izdanja,
  * pa je ovo pokusaj, a ne obecanje.
  */
@@ -103,6 +113,7 @@ export async function readCached(file: string): Promise<string> {
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replaceAll('\\', '/'))) {
   console.warn('Izvori →');
   await fetchSource(NATURAL_EARTH);
+  await fetchSource(NE_PLACES);
   await fetchSource(GEONAMES_HR);
   await fetchSource(DGU_PLACES);
   console.warn('Gotovo.');

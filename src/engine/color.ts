@@ -8,7 +8,7 @@
 import type { Mode } from './seed';
 
 /** Najveća smislena udaljenost po modu; iznad toga gradijent je zasićen. */
-const MAX_KM: Record<Mode, number> = { world: 20000, hr: 400 };
+const MAX_KM: Record<Mode, number> = { world: 20000, capitals: 20000, hr: 400 };
 
 interface Lch {
   l: number;
@@ -25,7 +25,19 @@ function ramp(km: number, mode: Mode): Lch {
   return {
     l: 0.78 - t * 0.34, // blizu = svjetlije
     c: 0.2 - t * 0.09, // blizu = zasićenije
-    h: 28 + t * 232, // crvena → narančasta → … → indigo
+    /*
+     * Ton ide od 28° prema −100°, što je isti kraj kao 260° samo s druge strane
+     * kruga: crvena → ružičasta → ljubičasta → indigo. Krajevi su oni iz SPEC
+     * §5.5; mijenja se put između njih.
+     *
+     * Suprotni smjer prolazi kroz zelenu na 152°, a to je točno boja `--hit`.
+     * Na globusu je izgledalo kao da je pogođena i država udaljena tisućama
+     * kilometara — što je izravno protiv teze §2.1 da je pogodak jedina zelena
+     * na ekranu. DECISIONS.md je taj rizik zabilježio još u fazi 1, s ovim
+     * zahvatom kao najmanjim popravkom; zemljana paleta ga je izoštrila jer je
+     * i kopno sada zeleno.
+     */
+    h: (((28 - t * 128) % 360) + 360) % 360,
   };
 }
 

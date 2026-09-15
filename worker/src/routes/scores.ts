@@ -6,6 +6,9 @@ import { isTodayOrYesterday, roundIdFor } from '../../../src/engine/time';
 import { player, requirePlayer, type App } from '../auth';
 import { closeIfEveryoneDone, isClosed } from '../rounds';
 
+/** Modovi koje liga prima. Mora pratiti CHECK ogranicenje u shemi baze. */
+const MODES = ['world', 'capitals', 'hr'];
+
 const MIN_ELAPSED_MS = 1_000;
 const MAX_ELAPSED_MS = 3_600_000;
 
@@ -23,7 +26,7 @@ scores.post('/scores', requirePlayer, async (c) => {
   const body = await c.req.json<Body>().catch((): Body => ({}));
 
   const puzzleDate = typeof body.puzzle_date === 'string' ? body.puzzle_date : '';
-  const mode = body.mode === 'world' || body.mode === 'hr' ? body.mode : null;
+  const mode = MODES.includes(String(body.mode)) ? String(body.mode) : null;
   const guesses = Number(body.guesses);
   const elapsedMs = Number(body.elapsed_ms);
 
