@@ -22,19 +22,22 @@ export default function TierToggle({
   return (
     <div className={styles.wrap}>
       <span className={styles.label}>Razina</span>
-      {TIERS.map((t) => (
-        <button
-          key={t.id}
-          type="button"
-          aria-pressed={tier === t.id}
-          className={`${styles.tier} ${tier === t.id ? styles.on : ''}`.trim()}
-          onClick={() => {
-            onChange(t.id);
-          }}
-        >
-          {t.label}
-        </button>
-      ))}
+      {/* Ista stvar izgleda isto: staza pa segmenti, kao i traka modova. */}
+      <div className={styles.track}>
+        {TIERS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            aria-pressed={tier === t.id}
+            className={`${styles.tier} ${tier === t.id ? styles.on : ''}`.trim()}
+            onClick={() => {
+              onChange(t.id);
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

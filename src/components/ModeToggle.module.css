@@ -1,20 +1,40 @@
+/*
+ * Segmentirani kontroler. Odabrani mod je ploha koja pluta iznad udubljene
+ * pozadine — odnos se vidi bez čitanja, a boja ostaje slobodna za podatak.
+ */
 .wrap {
   display: flex;
-  gap: var(--s-3);
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--ink) 6%, var(--paper));
 }
 
 .tab {
-  padding: 0;
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--radius-pill);
   color: var(--ink-muted);
   font-size: var(--t-sm);
+  letter-spacing: var(--track-small);
+  white-space: nowrap;
+  transition:
+    color var(--press) var(--ease),
+    background-color var(--move) var(--ease),
+    box-shadow var(--move) var(--ease);
 }
 
-.tab:hover {
+.tab:hover:not(.on) {
   color: var(--ink);
+}
+
+/* Povratna informacija ide na pritisak, ne na otpuštanje. */
+.tab:active {
+  transform: scale(0.96);
+  transition: transform var(--press) var(--ease);
 }
 
 .on {
+  background: var(--raised);
+  box-shadow: var(--shadow-sm);
   color: var(--ink);
-  /* Aktivni mod nosi tanku podvlaku, ne boju — boja je rezervirana za podatak. */
-  box-shadow: inset 0 -1px 0 0 var(--ink);
 }

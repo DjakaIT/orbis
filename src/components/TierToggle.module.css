@@ -1,26 +1,47 @@
 .wrap {
   display: flex;
-  align-items: baseline;
-  gap: var(--s-3);
-  padding-bottom: var(--s-3);
+  align-items: center;
+  gap: var(--s-2);
   font-size: var(--t-sm);
 }
 
 .label {
   color: var(--ink-muted);
+  letter-spacing: var(--track-small);
 }
 
+.track {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--ink) 6%, var(--paper));
+}
+
+/* Isti segmentirani obrazac kao modovi — ista stvar izgleda isto. */
 .tier {
-  padding: 0;
+  padding: var(--s-1) var(--s-3);
+  border-radius: var(--radius-pill);
   color: var(--ink-muted);
   font-size: var(--t-sm);
+  letter-spacing: var(--track-small);
+  transition:
+    color var(--press) var(--ease),
+    background-color var(--move) var(--ease),
+    box-shadow var(--move) var(--ease);
 }
 
-.tier:hover {
+.tier:hover:not(.on) {
   color: var(--ink);
+}
+
+.tier:active {
+  transform: scale(0.96);
+  transition: transform var(--press) var(--ease);
 }
 
 .on {
+  background: var(--raised);
+  box-shadow: var(--shadow-sm);
   color: var(--ink);
-  box-shadow: inset 0 -1px 0 0 var(--ink);
 }

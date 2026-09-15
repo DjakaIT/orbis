@@ -141,8 +141,8 @@ export default defineConfig(({ mode }) => ({
         short_name: 'Orbis',
         description: 'Dnevna geografska igra',
         lang: 'hr',
-        theme_color: '#12100C',
-        background_color: '#12100C',
+        theme_color: '#F7F4ED',
+        background_color: '#F7F4ED',
         display: 'standalone',
         start_url: '/',
         icons: [

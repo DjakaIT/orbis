@@ -17,13 +17,31 @@ interface Lch {
 }
 
 /**
+ * Podloga na kojoj boja završi. Ton i zasićenje nose podatak jednako na obje;
+ * mijenja se samo svjetlina, jer ista boja ne može biti čitljiva i na tamnom
+ * oceanu i na svijetlom papiru.
+ *
+ * Mjereno prema WCAG pragu od 3:1 za grafiku: na sceni raspon 0.78 → 0.56 drži
+ * najmanje 3.5:1 po cijeloj skali, na papiru raspon 0.64 → 0.40 drži 3.4:1.
+ * Prijašnjih 0.78 → 0.44 palo je na 2.1:1 na dalekom kraju — indigo se gubio u
+ * oceanu, i to je bila tiha rupa i prije prelaska na svijetlu temu.
+ */
+export type Surface = 'stage' | 'paper';
+
+const LIGHTNESS: Record<Surface, { from: number; to: number }> = {
+  stage: { from: 0.78, to: 0.56 },
+  paper: { from: 0.64, to: 0.4 },
+};
+
+/**
  * Odvojena skala za Hrvatsku je nužna: na svjetskoj skali cijela Hrvatska
  * bila bi jedna te ista crvena.
  */
-function ramp(km: number, mode: Mode): Lch {
+function ramp(km: number, mode: Mode, surface: Surface): Lch {
   const t = Math.min(Math.max(km, 0) / MAX_KM[mode], 1);
+  const { from, to } = LIGHTNESS[surface];
   return {
-    l: 0.78 - t * 0.34, // blizu = svjetlije
+    l: from - t * (from - to), // blizu = svjetlije
     c: 0.2 - t * 0.09, // blizu = zasićenije
     /*
      * Ton ide od 28° prema −100°, što je isti kraj kao 260° samo s druge strane
@@ -49,7 +67,8 @@ function ramp(km: number, mode: Mode): Lch {
  */
 export function distanceColor(km: number, mode: Mode, hit = false): string {
   if (hit) return 'var(--hit)';
-  const { l, c, h } = ramp(km, mode);
+  // Sučelje je na papiru; scena ima svoju skalu, vidi `distanceRgb`.
+  const { l, c, h } = ramp(km, mode, 'paper');
   return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(1)})`;
 }
 
@@ -58,7 +77,8 @@ export function distanceColor(km: number, mode: Mode, hit = false): string {
  * pouzdano u svim preglednicima, a tekstura globusa se crta upravo na canvasu.
  */
 export function distanceRgb(km: number, mode: Mode): string {
-  const { l, c, h } = ramp(km, mode);
+  // Canvas je uvijek unutar tamne scene — globus i karta Hrvatske.
+  const { l, c, h } = ramp(km, mode, 'stage');
   return oklchToRgb(l, c, h);
 }
 

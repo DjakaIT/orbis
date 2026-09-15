@@ -21,7 +21,8 @@ export default function MapHR() {
     if (!el || !geometry || !places) return;
 
     const tokens = readTokens();
-    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim();
+    // Natpisi su unutar tamne scene, pa uzimaju njezinu tintu, ne tintu stranice.
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--stage-ink').trim();
 
     const points: MapPoint[] = state.guesses.flatMap((g) => {
       const place = places[g.id];

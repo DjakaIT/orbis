@@ -1,26 +1,37 @@
 /* Orbis — dizajn tokeni. SPEC §2.2.
    Boja je isključivo informacija, nikad dekoracija: jedina zasićena boja u
-   sučelju dolazi iz gradijenta udaljenosti (engine/color.ts) te iz --hit/--error. */
+   sučelju dolazi iz gradijenta udaljenosti (engine/color.ts) te iz --hit/--error.
+
+   Dvije podloge, dvije obitelji boja. Stranica je topli papir; scena u koju
+   ulaze globus i karta ostaje tamna, jer je to instrument koji se gleda, a ne
+   papir po kojem se čita. Svaki omjer čuva tests/styles/contrast.test.ts. */
 
 :root {
-  /* Baza — tlo i mahovina, ne tintani crni.
-     Svaki omjer je izmjeren protiv prethodne, plavo-crne palete i nijedan nije
-     lošiji: tekst je čitljiviji, a kopno se jasnije odvaja od oceana.
-     Čuva ih tests/styles/contrast.test.ts. */
-  --void: #12100c; /* vlažno tlo — pozadina stranice */
-  --ocean: #16211c; /* sjena u šumi — sfera, neotkriveni ocean */
-  --landmass: #33351f; /* suha trava — kopno bez pogotka */
-  --hairline: #575234; /* granje — granice, graticule, razdjelnici */
-  --surface: #1b1811; /* input polje, kartice lige */
+  /* — Stranica: topli papir — */
+  --paper: #f7f4ed; /* pozadina stranice */
+  --surface: #fffdf7; /* polje za unos, kartice lige */
+  --raised: #ffffff; /* ono što pluta: odabrani segment, gumb */
+  --rule: #e6e0d2; /* razdjelnici — tihi, jer razmak već odvaja */
 
-  /* Tekst */
-  --ink: #f0ebdf; /* kost — 15.97:1 na --void */
-  --ink-muted: #a89d84; /* 7.08:1 na --void */
-  --ink-faint: #6b6450; /* 3.22:1 na --void — nikad tekst, samo grafika (rubovi, razdjelnici) */
+  --ink: #1c1a15; /* 15.8:1 na --paper */
+  --ink-muted: #645d4c; /* 5.9:1 na --paper */
+  --ink-faint: #8f8776; /* 3.2:1 — nikad tekst, samo grafika i razdjelnici */
 
-  /* Semantika — jedine boje izvan gradijenta */
-  --hit: oklch(0.85 0.19 152);
-  --error: oklch(0.65 0.17 25);
+  /* Semantika. Tamnije nego na tamnoj podlozi: zelena mora nositi tekst na papiru. */
+  --hit: oklch(0.52 0.15 152);
+  --error: oklch(0.55 0.19 25);
+
+  /* — Scena: tamni instrument na papiru — */
+  --stage: #12100c; /* okvir u kojem žive globus i karta */
+  --ocean: #16211c; /* sfera, neotkriveni ocean */
+  --landmass: #33351f; /* kopno bez pogotka */
+  --hairline: #575234; /* granice i graticule na sceni */
+  --stage-ink: #f0ebdf; /* natpisi unutar scene */
+
+  /* Dubina. Na papiru hijerarhiju nosi sjena, ne linija. */
+  --shadow-sm: 0 1px 2px rgb(28 26 21 / 6%);
+  --shadow-md: 0 1px 2px rgb(28 26 21 / 5%), 0 6px 16px -6px rgb(28 26 21 / 12%);
+  --shadow-stage: 0 2px 6px rgb(28 26 21 / 8%), 0 18px 40px -20px rgb(28 26 21 / 35%);
 
   /* Tipografija */
   --font: 'Bricolage', system-ui, sans-serif;
@@ -35,6 +46,20 @@
   --t-xl: 1.953rem;
   --t-2xl: 2.441rem;
 
+  /*
+   * Razmak slova ovisi o veličini, nikad jedna vrijednost za sve: velik tekst
+   * treba negativan jer se slova s rastom čine razmaknutima, sitan treba blago
+   * pozitivan da ostane čitljiv. Prored ide obrnuto od veličine.
+   */
+  --track-display: -0.02em;
+  --track-title: -0.01em;
+  --track-body: 0;
+  --track-small: 0.01em;
+
+  --leading-display: 1.05;
+  --leading-title: 1.2;
+  --leading-body: 1.5;
+
   /* Prostor, skala od 4px */
   --s-1: 0.25rem;
   --s-2: 0.5rem;
@@ -45,5 +70,24 @@
   --s-12: 3rem;
   --s-16: 4rem;
 
-  --radius: 2px; /* gotovo oštro — instrument, ne kartica */
+  /*
+   * Zaobljenja. SPEC §2.2 traži 2px — „instrument, ne kartica" — a to je bilo
+   * točno dok je sve bilo tamno i odvojeno tankim linijama. Na papiru se ploha
+   * odvaja zaobljenjem i sjenom, pa oštar kut djeluje kao greška, ne kao namjera.
+   * Vidi DECISIONS.md.
+   */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /*
+   * Trajanja. Kratko jer je odziv osnova svega: povratna informacija ide na
+   * pritisak, ne na otpuštanje.
+   */
+  --press: 100ms;
+  --move: 220ms;
+
+  /* Kritično prigušen — dolazi do cilja bez odskoka. */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
 }

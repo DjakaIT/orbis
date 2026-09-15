@@ -11,17 +11,18 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   min-height: 100svh;
-  background: var(--void);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--font);
   font-size: var(--t-base);
-  line-height: 1.5;
+  letter-spacing: var(--track-body);
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -37,24 +38,44 @@ button,
 select {
   font: inherit;
   color: inherit;
+  letter-spacing: inherit;
 }
 
 button {
   background: none;
   border: none;
   cursor: pointer;
+  /* Dvostruki dodir ne smije zumirati; on je ovdje samo odgoda. */
+  touch-action: manipulation;
 }
 
 /* Fokus mora biti vidljiv tipkovnicom. SPEC §11.3 t. 8. */
 :focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 :focus:not(:focus-visible) {
   outline: none;
 }
 
+/*
+ * Odziv je temelj: povratna informacija ide na pritisak, ne na otpuštanje.
+ * Čekanje na `click` djeluje mrtvo.
+ */
+@media (hover: hover) {
+  button:hover:not(:disabled) {
+    transition:
+      background-color var(--press) var(--ease),
+      color var(--press) var(--ease);
+  }
+}
+
+/*
+ * Tri neovisna signala, ne jedan. Smanjeno gibanje ne znači bez povratne
+ * informacije, nego blažu: prijelaz prozirnosti umjesto pomaka.
+ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -63,5 +84,20 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  /* Prozirne plohe postaju pune; zamućenje otpada. */
+  :root {
+    --glass: var(--paper);
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --ink-muted: #46402f;
+    --ink-faint: #6b6453;
+    --rule: #b9b09a;
   }
 }

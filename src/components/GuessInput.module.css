@@ -5,11 +5,25 @@
 .input {
   width: 100%;
   padding: var(--s-3) var(--s-4);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--surface);
+  box-shadow: var(--shadow-sm);
   color: var(--ink);
   font-size: var(--t-base);
+  transition:
+    border-color var(--press) var(--ease),
+    box-shadow var(--press) var(--ease);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--ink-faint);
+}
+
+.input:focus {
+  border-color: var(--ink);
+  box-shadow: var(--shadow-md);
+  outline: none;
 }
 
 .input::placeholder {
@@ -17,21 +31,32 @@
 }
 
 .input:disabled {
+  background: color-mix(in oklab, var(--ink) 4%, var(--paper));
+  border-color: transparent;
+  box-shadow: none;
   color: var(--ink-muted);
   cursor: default;
 }
 
+/*
+ * Prijedlozi izlaze iz polja, ne niotkuda: `transform-origin` je na rubu uz koji
+ * se otvaraju, pa se vidi odakle su došli i kamo se vraćaju.
+ */
 .options {
   position: absolute;
   z-index: 2;
   right: 0;
   left: 0;
   margin: var(--s-1) 0 0;
-  padding: 0;
-  border: 1px solid var(--hairline);
+  padding: var(--s-1);
+  overflow: hidden;
+  border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--surface);
+  box-shadow: var(--shadow-md);
   list-style: none;
+  transform-origin: top center;
+  animation: unfold var(--move) var(--ease);
 }
 
 /* Na mobitelu dropdown ide prema gore ako input nije u gornjoj polovici
@@ -40,18 +65,32 @@
   top: auto;
   bottom: 100%;
   margin: 0 0 var(--s-1);
+  transform-origin: bottom center;
+}
+
+@keyframes unfold {
+  from {
+    opacity: 0;
+    transform: scaleY(0.96);
+  }
 }
 
 .option {
   display: block;
   width: 100%;
-  padding: var(--s-2) var(--s-4);
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--radius-sm);
   text-align: left;
+  transition: background-color var(--press) var(--ease);
 }
 
 .option:hover,
 .active {
-  background: var(--landmass);
+  background: color-mix(in oklab, var(--ink) 7%, var(--surface));
+}
+
+.option:active {
+  background: color-mix(in oklab, var(--ink) 12%, var(--surface));
 }
 
 .unknown {

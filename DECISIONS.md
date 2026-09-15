@@ -492,3 +492,48 @@ cijena toga da igra sadrži svaku državu svijeta, i to je razmjena koju vrijedi
 **Posljedica:** niz meta je opet drugi, jer se bazen promijenio. Kao i prije, ništa
 ne lomi dok igra nije u pogonu — nakon puštanja u rad bazen se više ne smije mijenjati
 bez svjesne odluke, jer pomiče sve mete.
+
+## 2026-09-15 — Svijetla tema: papir za stranicu, tamna scena za globus
+
+Traženo: svjetlija tema i ugodniji UX, uz priloženi `apple-design` vodič.
+
+**Dvije podloge, ne jedna.** Stranica je topli papir, ali globus i karta ostaju u
+svojoj tamnoj sceni — zaobljenoj plohi sa sjenom, položenoj na papir. Razlog nije
+estetski nego mjerljiv: karta Hrvatske crta se na prozirnom canvasu i njezini
+natpisi koriste tintu, pa bi na svijetloj podlozi tamnozeleno kopno i tamni natpis
+pali jedno na drugo. Scena zadržava odnose koji su ondje već radili.
+
+Tokeni su zato podijeljeni: stranica ima `--paper`, `--surface`, `--rule`, `--ink*`;
+scena ima `--stage`, `--ocean`, `--landmass`, `--hairline`, `--stage-ink`. Prije je
+jedan `--hairline` služio i kao graticula na globusu i kao razdjelnik u sučelju.
+
+**Gradijent udaljenosti ima dvije skale svjetline.** Ton i zasićenje nose podatak
+jednako na obje podloge; mijenja se samo svjetlina, jer ista boja ne može biti
+čitljiva i na tamnom oceanu i na svijetlom papiru. Mjereno prema pragu 3:1 iz WCAG
+1.4.11: scena 0.78 → 0.56 drži najmanje 3.5:1, papir 0.64 → 0.40 drži 3.4:1.
+
+Usput je zatvorena i starija rupa: raspon 0.78 → 0.44 padao je na **2.1:1** na
+dalekom kraju — indigo se gubio u oceanu i prije nego što je tema postala svijetla.
+
+**Zaobljenja odstupaju od SPEC §2.2.** Ondje je `--radius: 2px`, uz obrazloženje
+„instrument, ne kartica". To je bilo točno dok je sve bilo tamno i odvojeno tankim
+linijama. Na papiru plohu odvaja zaobljenje i sjena, pa oštar kut djeluje kao greška
+a ne kao namjera. Skala je sada 6 / 10 / 14 px i pill za segmente.
+
+**Iz `apple-design` vodiča primijenjeno:**
+
+- Odziv ide na pritisak, ne na otpuštanje — `:active` na svakom gumbu, 100 ms.
+- Modovi i razina su segmentirani kontroleri: odabrano pluta iznad udubljene staze,
+  pa se odnos vidi bez čitanja i boja ostaje slobodna za podatak.
+- Zaglavlje je prozirni sloj sa zamućenjem i rub se topi u gradijentu umjesto tvrde
+  linije — sadržaj klizi ispod njega.
+- Prijedlozi izlaze iz polja: `transform-origin` je na rubu uz koji se otvaraju.
+- Razmak slova ovisi o veličini: naslovi stisnuti (−0.01em), sitan tekst blago
+  razmaknut (+0.01em), tijelo na nuli. Jedna vrijednost za sve je negdje kriva.
+- Tri neovisna signala umjesto jednog: `prefers-reduced-motion`,
+  `prefers-reduced-transparency` i `prefers-contrast`, svaki sa svojim ponašanjem.
+  Čuva ih `tests/e2e/a11y.spec.ts`, koji mjeri izračunati stil — `@media` pravilo
+  koje ništa ne radi inače prolazi neprimijećeno.
+
+**Cijena.** Lighthouse Performance je 87–90 umjesto 91; razlika je geometrija iz
+50m izvora, ne tema. Accessibility, Best Practices i SEO ostaju 100.

@@ -68,7 +68,7 @@ describe.skipIf(!built)('PWA manifest', () => {
     expect(manifest.lang).toBe('hr');
   });
 
-  it('boje se slazu s --void iz tokens.css', () => {
+  it('boje se slazu s --paper iz tokens.css', () => {
     /*
      * Razlicit theme_color i pozadina stranice daju bljesak pri pokretanju.
      * Vrijednost se cita iz tokena, ne upisuje ovdje — inace bi svaka promjena
@@ -78,8 +78,8 @@ describe.skipIf(!built)('PWA manifest', () => {
       join(import.meta.dirname, '..', '..', 'src', 'styles', 'tokens.css'),
       'utf8',
     );
-    const background = /--void:\s*(#[0-9a-fA-F]{6});/.exec(tokens)?.[1]?.toLowerCase();
-    expect(background, 'tokens.css nema --void').toBeTruthy();
+    const background = /--paper:\s*(#[0-9a-fA-F]{6});/.exec(tokens)?.[1]?.toLowerCase();
+    expect(background, 'tokens.css nema --paper').toBeTruthy();
 
     expect(manifest.theme_color.toLowerCase()).toBe(background);
     expect(manifest.background_color.toLowerCase()).toBe(background);

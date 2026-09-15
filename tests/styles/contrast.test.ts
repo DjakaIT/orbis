@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { oklchToRgb } from '../../src/engine/color';
+import { distanceColor, distanceRgb, oklchToRgb } from '../../src/engine/color';
 
 /**
  * Kontrast tokena iz SPEC §2.2, protiv praga 4.5:1 iz §11.3 t. 8.
@@ -22,7 +22,7 @@ const TOKENS = readFileSync(
 
 type Rgb = [number, number, number];
 
-/** Vrijednost tokena iz `:root`, npr. `--void`. */
+/** Vrijednost tokena iz `:root`, npr. `--paper`. */
 function token(name: string): string {
   const value = new RegExp(`${name}:\\s*([^;]+);`).exec(TOKENS)?.[1]?.trim();
   if (!value) throw new Error(`tokens.css nema ${name}`);
@@ -34,6 +34,10 @@ function parse(value: string): Rgb {
     const hex = value.slice(1);
     return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)) as Rgb;
   }
+
+  // `distanceRgb` vraca rgb() jer canvas ne prima oklch pouzdano.
+  const plain = /rgb\((\d+) (\d+) (\d+)\)/.exec(value);
+  if (plain) return [Number(plain[1]), Number(plain[2]), Number(plain[3])];
 
   const ok = /oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)/.exec(value);
   if (!ok) throw new Error(`Nepoznat zapis boje: ${value}`);
@@ -71,13 +75,13 @@ function contrastWith(color: string, background: string): number {
 
 describe('tekst', () => {
   const cases: [string, string][] = [
-    ['--ink', '--void'],
+    ['--ink', '--paper'],
     ['--ink', '--surface'],
-    ['--ink-muted', '--void'],
+    ['--ink-muted', '--paper'],
     ['--ink-muted', '--surface'],
     // Obje semanticke boje nose tekst: pogodak i poruku o gresci.
-    ['--hit', '--void'],
-    ['--error', '--void'],
+    ['--hit', '--paper'],
+    ['--error', '--paper'],
   ];
 
   for (const [fg, bg] of cases) {
@@ -92,12 +96,12 @@ describe('grafika', () => {
   it('--ink-faint ostaje ispod praga za tekst', () => {
     // Postoji zato sto je tih. Da prijedje 4.5:1, netko bi ga s pravom stavio na
     // tekst, a onda bi izgubio ulogu — razdjelnik koji se ne otima za paznju.
-    expect(contrast('--ink-faint', '--void')).toBeLessThan(4.5);
+    expect(contrast('--ink-faint', '--paper')).toBeLessThan(4.5);
   });
 
   it('--ink-faint svejedno zadovoljava prag za grafiku, 3:1', () => {
     // WCAG 1.4.11: rubovi i razdjelnici moraju se vidjeti.
-    expect(contrast('--ink-faint', '--void')).toBeGreaterThanOrEqual(3);
+    expect(contrast('--ink-faint', '--paper')).toBeGreaterThanOrEqual(3);
   });
 
   it('kopno se odvaja od oceana', () => {
@@ -114,18 +118,51 @@ describe('grafika', () => {
 describe('gradijent udaljenosti', () => {
   /*
    * Gradijent je jedina zasicena boja u sucelju (SPEC §2.1) i nosi podatak, pa
-   * mora ostati citljiv na pozadini. Krajevi su iz `ramp` u engine/color.ts.
+   * mora ostati citljiv na svojoj podlozi. Vrijednosti se ne prepisuju ovdje nego
+   * se traze od samih funkcija — prepisana kopija bi ostarila cim se skala makne.
+   *
+   * Dvije podloge, dvije skale: sucelje je na papiru, scena globusa je tamna.
+   * WCAG 1.4.11 trazi 3:1 za graficke elemente.
    */
-  it('blizu i sredina se jasno vide na pozadini', () => {
-    expect(contrastWith('oklch(0.78 0.20 28)', '--void')).toBeGreaterThanOrEqual(3);
-    expect(contrastWith('oklch(0.61 0.155 144)', '--void')).toBeGreaterThanOrEqual(3);
+  const steps = Array.from({ length: 21 }, (_, i) => i / 20);
+
+  it('traka u sucelju se vidi na papiru po cijeloj skali', () => {
+    for (const mode of ['world', 'capitals', 'hr'] as const) {
+      for (const t of steps) {
+        const km = t * (mode === 'hr' ? 400 : 20000);
+        const ratio = contrastWith(distanceColor(km, mode), '--paper');
+        expect(
+          ratio,
+          `${mode} na ${String(Math.round(km))} km: ${ratio.toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(3);
+      }
+    }
   });
 
-  it('pogodak je svjetliji od svakog promasaja', () => {
-    // Jedina zelena na ekranu mora se razaznati i po svjetlini, ne samo po tonu.
-    const hit = luminance(parse(token('--hit')));
-    for (const miss of ['oklch(0.78 0.20 28)', 'oklch(0.61 0.155 144)', 'oklch(0.44 0.11 260)']) {
-      expect(hit).toBeGreaterThan(luminance(parse(miss)));
+  it('boja na globusu se vidi na oceanu po cijeloj skali', () => {
+    for (const mode of ['world', 'capitals', 'hr'] as const) {
+      for (const t of steps) {
+        const km = t * (mode === 'hr' ? 400 : 20000);
+        const ratio = contrastWith(distanceRgb(km, mode), '--ocean');
+        expect(
+          ratio,
+          `${mode} na ${String(Math.round(km))} km: ${ratio.toFixed(2)}:1`,
+        ).toBeGreaterThanOrEqual(3);
+      }
     }
+  });
+
+  it('pogodak se na papiru razaznaje od svakog promasaja', () => {
+    /*
+     * Na tamnoj sceni pogodak se izdvajao svjetlinom. Na papiru je obrnuto —
+     * zelena mora biti tamna da nosi tekst — pa razliku nosi ton: gradijent je
+     * cijelom duljinom barem 60° od tona pogotka. To cuva tests/engine/color.
+     * Ovdje se provjerava ono sto je ovdje mjerljivo: da se vidi na papiru.
+     */
+    expect(contrast('--hit', '--paper')).toBeGreaterThanOrEqual(4.5);
+
+    const hit = luminance(parse(token('--hit')));
+    const nearest = luminance(parse(distanceColor(0, 'world')));
+    expect(Math.abs(hit - nearest)).toBeGreaterThan(0.02);
   });
 });

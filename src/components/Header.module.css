@@ -1,10 +1,48 @@
+/*
+ * Zaglavlje je prozirni sloj, ne neprozirna traka: sadržaj klizi ispod njega.
+ * Umjesto tvrde linije na dnu, rub se topi u gradijentu — linija dijeli, a ovo
+ * samo naznači da ondje nešto pluta.
+ */
 .header {
+  position: sticky;
+  z-index: 3;
+  top: 0;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--s-4);
-  padding: var(--s-4) 0 var(--s-3);
-  border-bottom: 1px solid var(--hairline);
+  margin: 0 calc(var(--s-4) * -1);
+  padding: var(--s-4) var(--s-4) var(--s-3);
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(180%);
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -12px;
+  left: 0;
+  height: 12px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--paper) 72%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Bez prozirnosti: puna ploha, bez zamućenja i bez prijelaza. */
+@media (prefers-reduced-transparency: reduce) {
+  .header {
+    background: var(--paper);
+    backdrop-filter: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .header::after {
+    display: none;
+  }
 }
 
 .wordmark {
@@ -12,5 +50,7 @@
   font-family: var(--font-display);
   font-size: var(--t-md);
   font-weight: 600;
-  letter-spacing: 0.01em;
+  /* Velik tekst treba stisnuti, ne razmaknuti. */
+  letter-spacing: var(--track-title);
+  line-height: var(--leading-title);
 }

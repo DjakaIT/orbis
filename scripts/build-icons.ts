@@ -30,11 +30,15 @@ function palette(): Record<string, RGB> {
     if (!hex) throw new Error(`tokens.css nema --${name} kao hex`);
     return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)) as RGB;
   };
+  /*
+   * Ikona je tamni globus i prati scenu, ne stranicu: stranica je od 2026-09-15
+   * svijetli papir, a globus je i dalje instrument u svojoj svjetlini.
+   */
   return {
-    void: read('void'),
+    void: read('stage'),
     ocean: read('ocean'),
     hairline: read('hairline'),
-    ink: read('ink'),
+    ink: read('stage-ink'),
   };
 }
 

@@ -7,8 +7,17 @@
   padding: 0 var(--s-4);
 }
 
+/*
+ * Scena je tamni instrument položen na papir: globus i karta ostaju čitljivi u
+ * svojoj vlastitoj svjetlini, a stranica oko njih je svijetla. Sjena ju odvaja
+ * od papira bolje nego bilo koja linija.
+ */
 .stage {
   min-height: 260px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--stage);
+  box-shadow: var(--shadow-stage);
 }
 
 .stagePlaceholder {
@@ -20,24 +29,27 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  gap: var(--s-4);
+  padding-top: var(--s-4);
 }
 
 /* Input je uvijek vidljiv bez scrolla. SPEC §2.4. */
 .panel {
-  padding-top: var(--s-4);
-  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
 }
 
 .error {
-  padding: var(--s-4) 0;
+  padding: var(--s-3) var(--s-4);
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--error) 10%, var(--surface));
   color: var(--error);
   font-size: var(--t-sm);
 }
 
 .league {
-  margin-top: var(--s-6);
-  padding-top: var(--s-4);
-  border-top: 1px solid var(--hairline);
+  margin-top: var(--s-2);
 }
 
 .footer {
@@ -45,22 +57,31 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--s-4);
-  padding: var(--s-3) 0 var(--s-4);
-  border-top: 1px solid var(--hairline);
-  /* --ink-faint je 2.77:1 na --void i ne smije nositi tekst. SPEC §11.3 t. 8. */
+  margin-top: var(--s-6);
+  padding: var(--s-4) 0 var(--s-6);
+  border-top: 1px solid var(--rule);
   color: var(--ink-muted);
-  /* --t-xs je 10.24px, ispod granice citljivosti. Sitno, ali ne sitnije od te
-     granice — footer nosi atribuciju izvora i jedini ulaz u ligu. */
+  /* --t-xs je 10.24px, ispod granice čitljivosti. */
   font-size: var(--t-sm);
+  letter-spacing: var(--track-small);
 }
 
 .leagueToggle {
+  padding: var(--s-1) var(--s-2);
+  margin: calc(var(--s-1) * -1) calc(var(--s-2) * -1);
+  border-radius: var(--radius-sm);
   color: var(--ink-muted);
   font-size: var(--t-sm);
   text-decoration: underline;
   text-underline-offset: 3px;
+  transition: color var(--press) var(--ease);
 }
 
 .leagueToggle:hover {
   color: var(--ink);
+}
+
+.leagueToggle:active {
+  color: var(--ink);
+  background: var(--rule);
 }

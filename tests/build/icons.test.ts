@@ -77,7 +77,7 @@ describe('ikona', () => {
   const c = 512 / 2;
   const r = c * (1 - 0.06);
 
-  it('pozadina je --void do samog ruba', () => {
+  it('pozadina je --paper do samog ruba', () => {
     for (const [x, y] of [
       [0, 0],
       [511, 0],
@@ -182,13 +182,14 @@ describe('paleta', () => {
   }
 
   it('boje ikone dolaze iz tokens.css, ne iz kopije', () => {
-    expect(asHex(VOID)).toBe(hex('void'));
+    // Ikona prati scenu, ne stranicu: globus je tamni instrument i na svijetloj temi.
+    expect(asHex(VOID)).toBe(hex('stage'));
     expect(asHex(OCEAN)).toBe(hex('ocean'));
-    expect(asHex(INK)).toBe(hex('ink'));
+    expect(asHex(INK)).toBe(hex('stage-ink'));
   });
 
-  it('pozadina nacrtane ikone je stvarno --void', () => {
+  it('pozadina nacrtane ikone je stvarno --stage', () => {
     const png = decodePng(icon(192, 0.06));
-    expect(asHex(png.at(0, 0))).toBe(hex('void'));
+    expect(asHex(png.at(0, 0))).toBe(hex('stage'));
   });
 });
