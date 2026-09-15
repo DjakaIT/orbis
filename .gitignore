@@ -25,12 +25,9 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Cloudflare
-.wrangler
+# Tajne za lokalni razvoj, ako ih ikad bude
 .dev.vars
 
-# Lokalni D1 i wrangler stanje
-worker/.wrangler
 
 # Podskupljeni font — generira ga `pnpm data`
 src/styles/fonts
@@ -42,3 +39,9 @@ public/og.png
 
 # Zastave — generira ih `pnpm data`
 public/flags
+
+# Netlifyjev lokalni radni direktorij: `pnpm dev:api` ondje pakira funkcije
+.netlify
+
+# Deno lockfile koji ostavi `netlify dev` (edge funkcije); ovaj projekt ih nema
+deno.lock

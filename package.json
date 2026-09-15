@@ -14,15 +14,15 @@
     "test": "vitest run",
     "e2e": "playwright test",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "worker:dev": "pnpm -C worker dev",
-    "worker:deploy": "pnpm -C worker deploy",
-    "db:init": "pnpm -C worker exec wrangler d1 migrations apply orbis-db --remote",
     "data": "tsx scripts/build-data.ts",
-    "analyze": "vite build --mode analyze"
+    "analyze": "vite build --mode analyze",
+    "dev:api": "netlify dev"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@netlify/blobs": "^11.1.0",
     "d3-geo": "^3.1.1",
+    "hono": "^4.13.7",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "three": "^0.186.0",
@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@netlify/functions": "^6.0.0",
     "@playwright/test": "^1.63.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

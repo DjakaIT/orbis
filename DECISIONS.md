@@ -48,6 +48,10 @@ SPEC §3 stavlja `src/` u korijen repozitorija, a `worker/` kao zaseban paket, p
 `pnpm-workspace.yaml` naveo samo `worker`. Zbog toga je u `.npmrc` uključen
 `ignore-workspace-root-check`, inače pnpm odbija svaku ovisnost aplikacije.
 
+_Dopuna 2026-09-15:_ `worker/` je ukinut (vidi odluku o Netlify Functions niže), pa je
+popis paketa prazan. `ignore-workspace-root-check` ostaje jer korijen i dalje jest
+workspace.
+
 ## 2026-09-14 — React sam probija budžet od 45 KB za JS
 
 Prazna ljuska bez ijedne linije logike igre gzipa se na 68.9 KB, protiv budžeta „JS bez
@@ -193,10 +197,9 @@ Praktično se ništa ne gubi: `public/_headers` ima isti format na oba, a `netli
 dodaje samo ono što Pages radi implicitno — SPA rewrite za `/l/*` i `/v/*`, bez kojeg
 bi deep linkovi lige vraćali 404 prije nego aplikacija uopće krene.
 
-**Otvoreno:** API lige ostaje Cloudflare Worker jer je D1 ondje. Netlify ga može
-proxyjati (`/api/*` → `workers.dev`), čime sve ostaje na istom originu i CORS-a nema.
-Dok Worker nije deployan, liga u produkciji ne radi — igra radi, panel lige javlja
-grešku. Alternativa je prepisati API na Netlify Functions, što znači i zamjenu D1.
+**Zatvoreno 2026-09-15:** izabrana je upravo ta alternativa — API je prepisan na
+Netlify Functions, a D1 zamijenjen Netlify Blobsima. Vidi odluku niže. Cloudflare je
+time potpuno izvan projekta.
 
 ## 2026-09-14 — CI ostaje u repou, ali se ne čeka
 
@@ -214,6 +217,10 @@ Frontend je na Netlifyju, Worker na `workers.dev`, a Netlify uz produkciju pravi
 deploy preview domene. Jedna vrijednost ne pokriva to, pa se `ALLOWED_ORIGIN` čita kao
 popis odvojen zarezom. Kad API ide kroz Netlify proxy, sve je na istom originu i CORS
 ionako ne dolazi do izražaja — ovo pokriva izravni poziv na Worker.
+
+_Povučeno 2026-09-15:_ Workera nema, API je funkcija na istom originu i u svakom
+deploy previewu, pa CORS-a nema nigdje. `ALLOWED_ORIGIN` je uklonjen — varijabla koja
+ne postoji ne može biti krivo postavljena.
 
 ## 2026-09-15 — Podskup fonta umjesto punog reza, i pinane osi umjesto varijabilnih
 
@@ -656,7 +663,68 @@ stari token i dalje vodi na istog igrača i njegovu ligu.
 jednom odmah nakon prijave. Test to izričito tvrdi, da se ne bi kasnije netko
 zabunio i pokušao spajati igrače po imenu.
 
-**Ostaje na vlasniku projekta:** Worker treba deployati (`wrangler d1 create`,
-migracije, `wrangler deploy`) i postaviti `ORBIS_API_URL` u Netlifyju. Bez toga
-nijedna izmjena u ovom repozitoriju ne može spojiti ligu — ali od trenutka kad se
-varijabla postavi, sve ostalo je već na mjestu.
+**Ostalo je na vlasniku projekta** da deploya Worker i postavi `ORBIS_API_URL`. To
+je i bio razlog za sljedeću odluku: korak koji traži tuđu prijavu i tuđi token je
+korak na kojem se staje. Uklonjen je.
+
+## 2026-09-15 — API lige je Netlifyjeva funkcija na Blobsima, ne Worker na D1
+
+SPEC §1 traži Cloudflare Workers + D1. Odstupam: API lige je sada Netlifyjeva
+funkcija (`netlify/functions/api.mts`), a spremište Netlify Blobs. Cloudflare je
+izvan projekta — nema `worker/`, `wrangler.toml`, migracija ni računa.
+
+**Zašto.** Prethodna postava je imala korak koji nitko nije mogao dovršiti umjesto
+vlasnika: stvoriti D1 bazu, pustiti migracije, deployati Worker, pa u Netlifyju
+postaviti `ORBIS_API_URL`. Dok se to ne napravi, liga u produkciji ne radi, i upravo
+se to dogodilo — prijava je vraćala 404 stranicu hostinga. Arhitektura u kojoj je
+backend na drugom servisu, pod drugom prijavom, spojen varijablom koja se upisuje
+rukom, ima tri mjesta na kojima može tiho zakazati. Funkcija na istom računu i istom
+originu nema nijedno: deploya se zajedno sa stranicom, iz istog commita.
+
+**Cijena.** Blobs je key-value, a D1 je SQL. Ljestvica se u SQL-u dobivala jednim
+JOIN-om; sada je model prepisan tako da se ljestvica dobiva jednim čitanjem po članu.
+Ključevi drže i obrnute indekse koje bi baza izvela sama:
+
+    player/:id · token/:hash · league/:id · code/:CODE
+    member/:leagueId/:playerId · playerLeague/:playerId/:leagueId
+    score/:playerId/:roundId · round/:leagueId/:roundId
+
+Rezultati jednog igrača u jednoj rundi su **jedan** blob, s danima kao ključevima
+(`"2026-09-15:world"`), pa tjedan ne košta sedam čitanja nego jedno. Liga je šestero
+prijatelja; za taj red veličine je ovo jeftinije od baze, a ne skuplje.
+
+Čita se i piše uz `consistency: 'strong'`. Eventualna konzistentnost bi značila da
+ljestvica odmah nakon vlastite partije možda ne sadrži tu partiju — a to je jedini
+trenutak u kojem je itko gleda.
+
+**Što je time dobiveno osim deploya.** `netlify/lib/app.ts` izvozi
+`createApp(store)`, a `netlify/lib/store.ts` uz Blobs nudi i spremište u memoriji.
+Cijeli API se zato vrti u `pnpm test`, bez mreže i bez emulatora: 39 testova u
+`tests/league/`, ondje gdje je prije stajala ručna skripta koja je tražila pokrenut
+Worker i pravu bazu. Vrijeme i bodovanje se uvoze iz `src/engine`, ne dupliciraju —
+granice runde moraju biti iste na obje strane, a sada su doslovno isti kod.
+
+**Zakazano zatvaranje** je `netlify/functions/close-rounds.mts`, `schedule: '0 * * * 5'`
+— svaki sat petkom, uz provjeru zagrebačkog sata u kodu. Fiksni UTC termin bi se ljeti
+i zimi razišao sa 17:00 po Zagrebu.
+
+**Poznato ograničenje okoline:** `netlify dev` na ovom Windows računu pada s
+`EPERM: operation not permitted, symlink` pri pakiranju funkcije — zip-it-and-ship-it
+radi symlinkove u `.netlify/functions-serve`, što Windows brani bez povlaštenog
+načina rada. To je lokalno, ne u kodu; Netlifyjev build je Linux. Provjera zato ne
+ovisi o tome: logika API-ja je pokrivena unit testovima protiv spremišta u memoriji,
+sučelje e2e testovima protiv presretnutih odgovora, a usklađenost klijenta, funkcije i
+`netlify.toml` u `tests/build/deploy.test.ts`.
+
+## 2026-09-15 — Testovi lige se više ne preskaču
+
+Testovi lige su tražili pokrenut backend i bez njega se tiho preskakali. Paket je
+zato bio zelen i u trenutku kad liga u produkciji uopće nije radila — preskočen test
+izgleda jednako kao i prošao.
+
+Sada ih ništa ne može preskočiti: API se vozi protiv spremišta u memoriji
+(`tests/league/`), sučelje protiv presretnutog `fetch`-a u pregledniku
+(`tests/e2e/league-ui.spec.ts`), a nedostupan API ima vlastiti test
+(`tests/e2e/league-offline.spec.ts`) jer je i to stanje koje igrač može vidjeti.
+Uvjetni `skipIf` ostaje samo tamo gdje ovisi o artefaktu koji se može izgraditi
+(`dist/`), ne o procesu koji netko mora upaliti.

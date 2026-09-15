@@ -3,19 +3,17 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { apiUrl } from '../../vite.config';
-
 /**
  * Isporuka lige.
  *
- * Ovo je rupa kroz koju je prosao bug: klijent u produkciji zove `/api`, a
- * `netlify.toml` je pravilo za `/api/*` imao **zakomentirano**. Nista nije puklo
- * u buildu ni u testovima — zahtjev je jednostavno isao na hosting, koji je
- * vratio svoju 404 stranicu.
+ * Ovo je rupa kroz koju je prošao bug: klijent je u produkciji zvao `/api`, a
+ * pravilo koje je to spajalo s Cloudflare Workerom stajalo je **zakomentirano**
+ * u `netlify.toml`, s placeholderom umjesto adrese. Ništa nije puklo u buildu ni
+ * u testovima — zahtjev je išao hostingu, koji je vratio svoju 404 stranicu.
  *
- * Testovi lige tada su preskakali kad Worker nije pokrenut, pa je zeleni paket
- * govorio da je sve u redu. Ovdje se ne trazi ni Worker ni mreza: provjerava se
- * da su klijent i isporuka **usuglaseni**.
+ * API je sada Netlifyjeva funkcija koja sama deklarira svoju putanju, pa spoja
+ * koji se može zaboraviti više nema. Ovi testovi čuvaju upravo to: da klijent,
+ * funkcija i `netlify.toml` govore istu stvar, bez mreže i bez deploya.
  */
 
 const ROOT = join(import.meta.dirname, '..', '..');
@@ -23,83 +21,75 @@ const DIST = join(ROOT, 'dist');
 
 const client = readFileSync(join(ROOT, 'src', 'league', 'client.ts'), 'utf8');
 const netlify = readFileSync(join(ROOT, 'netlify.toml'), 'utf8');
+const fn = readFileSync(join(ROOT, 'netlify', 'functions', 'api.mts'), 'utf8');
+const cron = readFileSync(join(ROOT, 'netlify', 'functions', 'close-rounds.mts'), 'utf8');
+
+/** Redci `netlify.toml` bez komentara — samo ono što stvarno vrijedi. */
+const active = netlify
+  .split('\n')
+  .filter((line) => !line.trimStart().startsWith('#'))
+  .join('\n');
 
 describe('adresa API-ja', () => {
-  it('klijent u produkciji zove isti origin', () => {
-    // Ako se ovo promijeni, promijenilo se i sve ispod — zato stoji ovdje.
+  it('klijent zove isti origin', () => {
     expect(client).toContain("'/api'");
   });
 
-  it('`ORBIS_API_URL` je jedina varijabla koja to spaja', () => {
-    expect(apiUrl({})).toBeNull();
-    expect(apiUrl({ ORBIS_API_URL: 'https://orbis-api.primjer.workers.dev' })).toBe(
-      'https://orbis-api.primjer.workers.dev',
-    );
+  it('funkcija poslužuje točno tu putanju', () => {
+    /*
+     * Ovo je par koji se prije razišao. Funkcija sama kaže gdje živi, pa ako se
+     * jedna strana promijeni bez druge, test pada odmah.
+     */
+    expect(fn).toMatch(/path:\s*'\/api\/\*'/);
   });
 
-  it('zavrsna kosa crta i visak `/api` se ne udvostrucuju', () => {
-    // `/api/*` pravilo dodaje vlastiti `/api`, pa bi oboje dalo `/api/api/...`.
-    for (const raw of [
-      'https://orbis-api.primjer.workers.dev/',
-      'https://orbis-api.primjer.workers.dev/api',
-      'https://orbis-api.primjer.workers.dev/api/',
-    ]) {
-      expect(apiUrl({ ORBIS_API_URL: raw }), raw).toBe('https://orbis-api.primjer.workers.dev');
-    }
+  it('nema proxyja koji bi se mogao zaboraviti', () => {
+    // Prethodna arhitektura je za ovo trebala redirect s upisanom adresom.
+    expect(active).not.toContain('/api/*');
+    expect(client).not.toContain('workers.dev');
+    expect(active).not.toContain('workers.dev');
   });
 
-  it('prazna ili sama bjelina se ne racunaju kao adresa', () => {
-    expect(apiUrl({ ORBIS_API_URL: '' })).toBeNull();
-    expect(apiUrl({ ORBIS_API_URL: '   ' })).toBeNull();
+  it('nijedna adresa API-ja se ne upisuje rukom', () => {
+    // Funkcija je na istom originu; nema varijable koja bi mogla ostati prazna.
+    expect(netlify).not.toContain('ORBIS_API_URL');
+    expect(client).not.toContain('http://');
   });
 });
 
 describe('netlify.toml', () => {
-  it('vraca deep linkove lige na ljusku', () => {
+  it('vraća deep linkove lige na ljusku', () => {
     // `/l/:code` i `/v/:token` su klijentske rute; bez ovoga su 404 prije starta.
-    expect(netlify).toMatch(/from\s*=\s*"\/l\/\*"/);
-    expect(netlify).toMatch(/from\s*=\s*"\/v\/\*"/);
+    expect(active).toMatch(/from\s*=\s*"\/l\/\*"/);
+    expect(active).toMatch(/from\s*=\s*"\/v\/\*"/);
   });
 
-  it('ne pokusava sam opisati `/api/*`', () => {
+  it('pokazuje na direktorij funkcija', () => {
+    expect(active).toMatch(/functions\s*=\s*"netlify\/functions"/);
+  });
+});
+
+describe('zakazano zatvaranje runde', () => {
+  it('vrti se petkom svaki sat, ne jednom u fiksni termin', () => {
     /*
-     * `netlify.toml` ne interpolira varijable okoline, pa bi pravilo ovdje
-     * znacilo adresu upisanu rukom — a upravo je takvo pravilo, zakomentirano,
-     * i proizvelo bug. Adresa dolazi iz builda, kroz `_redirects`.
+     * Satni raspored s provjerom zagrebačkog sata otporan je na ljetno i zimsko
+     * vrijeme; fiksni UTC termin ne bi bio. SPEC §7.3.
      */
-    const active = netlify
-      .split('\n')
-      .filter((line) => !line.trimStart().startsWith('#'))
-      .join('\n');
-    expect(active).not.toContain('/api/*');
-  });
-
-  it('uputa kako spojiti ligu stoji u datoteci', () => {
-    // Bez ovoga se ne zna gdje se adresa uopce postavlja.
-    expect(netlify).toContain('ORBIS_API_URL');
+    expect(cron).toMatch(/schedule:\s*'0 \* \* \* 5'/);
   });
 });
 
 describe('izlaz builda', () => {
   const built = existsSync(join(DIST, 'index.html'));
-  const redirects = join(DIST, '_redirects');
 
-  it.skipIf(!built)('bez varijable ne emitira prazno ili slomljeno pravilo', () => {
-    /*
-     * Build bez `ORBIS_API_URL` je ispravan build — samo bez lige. Ono sto ne
-     * smije postojati je pravilo koje pokazuje nikamo, jer bi ono vratilo 404 na
-     * isti nacin kao i prije, samo tise.
-     */
-    if (!existsSync(redirects)) return;
-
-    const rule = readFileSync(redirects, 'utf8');
-    expect(rule).toMatch(/^\/api\/\*\s+https?:\/\/\S+\/api\/:splat\s+200!$/m);
-    expect(rule).not.toContain('undefined');
-    expect(rule).not.toContain('<');
+  it.skipIf(!built)('_headers je ondje', () => {
+    expect(existsSync(join(DIST, '_headers'))).toBe(true);
   });
 
-  it.skipIf(!built)('_headers je i dalje ondje', () => {
-    // `_redirects` i `_headers` zive jedno uz drugo; lako je pregaziti jedno drugim.
-    expect(existsSync(join(DIST, '_headers'))).toBe(true);
+  it.skipIf(!built)('ne emitira se nikakav `_redirects` za API', () => {
+    // Ako se ovo pojavi, netko je vratio proxy koji više ne treba.
+    const redirects = join(DIST, '_redirects');
+    if (!existsSync(redirects)) return;
+    expect(readFileSync(redirects, 'utf8')).not.toContain('/api/');
   });
 });

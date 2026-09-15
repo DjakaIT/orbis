@@ -1,13 +1,14 @@
-# Netlify deploy. Frontend je statičan; API lige je zaseban Worker (vidi niže).
+# Netlify deploy. Frontend je statičan, API lige je Netlifyjeva funkcija.
 
 [build]
   command = "pnpm build"
   publish = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22"
-  # `pnpm data` skida Natural Earth i GeoNames pri svakom buildu. SPEC §4 tako
-  # i predviđa — podaci nisu u gitu jer su reproducibilni.
+  # `pnpm data` skida Natural Earth, GeoNames i zastave pri svakom buildu. SPEC §4
+  # tako i predviđa — podaci nisu u gitu jer su reproducibilni.
   NETLIFY_USE_PNPM = "true"
 
 # Deep linkovi lige su klijentske rute: `/l/:code` i `/v/:token` moraju vratiti
@@ -22,20 +23,13 @@
   to = "/index.html"
   status = 200
 
-# API lige živi na Cloudflare Workersu (D1 je ondje), a klijent u produkciji zove
-# `/api` na istom originu. Pravilo koje to spaja se NE PIŠE OVDJE: netlify.toml ne
-# interpolira varijable okoline, pa bi adresa morala biti upisana rukom — a upravo
-# je takvo pravilo, zakomentirano i bez adrese, značilo da prijava u ligu vraća
-# 404 stranicu hostinga.
+# Za `/api/*` ovdje NEMA pravila i ne treba ga biti. Funkcija sama deklarira svoju
+# putanju (`export const config = { path: '/api/*' }` u netlify/functions/api.mts),
+# pa je API na istom originu kao i stranica — bez proxyja, bez CORS-a i bez ijedne
+# adrese koja bi se morala upisati rukom.
 #
-# Umjesto toga build emitira `_redirects` iz varijable ORBIS_API_URL, koju Netlify
-# spaja s ovom datotekom. Da liga proradi:
-#
-#   1. cd worker && wrangler d1 create orbis-db     → upiši database_id u wrangler.toml
-#   2. wrangler d1 migrations apply orbis-db --remote
-#   3. wrangler deploy                              → ispiše adresu Workera
-#   4. u Netlifyju postavi ORBIS_API_URL na tu adresu i pokreni redeploy
-#
-# Bez te varijable igra radi normalno, a liga jasno kaže da nije dostupna.
+# Prije je API bio Cloudflare Worker, a pravilo koje ga je spajalo stajalo je
+# zakomentirano s placeholderom umjesto adrese. Posljedica je bila da je prijava u
+# ligu vraćala 404 stranicu hostinga. Vidi DECISIONS.md.
 
-# Zaglavlja su u public/_headers — Netlify i Cloudflare Pages dijele isti format.
+# Zaglavlja su u public/_headers.

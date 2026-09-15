@@ -5,13 +5,13 @@ import type { Mode } from '../types';
 import type { ClosedRound, LeagueView, Me, NewLeague, NewPlayer, ScoreResult } from './types';
 
 /*
- * U developmentu Worker sluša na 8787; u produkciji se očekuje da je API na
- * istom originu (Netlify redirect na Worker, vidi netlify.toml), pa nema CORS-a.
- * `VITE_API_URL` nadjačava oboje.
+ * Uvijek isti origin. API je Netlifyjeva funkcija na `/api/*`, pa nema ni proxyja
+ * ni CORS-a — `netlify dev` poslužuje i stranicu i funkciju na istom portu.
+ *
+ * Pod golim `vite dev` funkcije nema; liga tada javi da nije dostupna, a igra
+ * radi normalno. `VITE_API_URL` nadjačava za slučaj da API ipak živi drugdje.
  */
-const BASE =
-  (import.meta.env.VITE_API_URL as string | undefined) ??
-  (import.meta.env.DEV ? 'http://localhost:8787/api' : '/api');
+const BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '/api';
 
 /** Greška s HTTP statusom, da pozivatelj može razlikovati 409 od 404. */
 export class ApiError extends Error {

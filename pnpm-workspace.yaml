@@ -1,14 +1,14 @@
-# Aplikacija živi u korijenu repozitorija, worker je zaseban paket. SPEC §3.
-packages:
-  - 'worker'
+# Aplikacija živi u korijenu repozitorija. SPEC §3.
+#
+# Workspacea više nema: API lige je bio zaseban paket (Cloudflare Worker), a sada
+# je Netlifyjeva funkcija u `netlify/`, koja dijeli ovaj isti package.json — i time
+# i isti `src/engine`, bez ijedne duplicirane ovisnosti.
+packages: []
 
 # esbuild treba postinstall (tsx ga koristi); msgpackr-extract je opcionalni ubrzivač
-# mapshaperovog cachea; workerd je Cloudflareov runtime koji wrangler mora podići.
-# better-sqlite3 je mapshaperova neobavezna SQL grana, a sharp wranglerov obrađivač
-# slika — ni jedno ni drugo ne koristimo, a oboje traži native toolchain.
+# mapshaperovog cachea. better-sqlite3 je mapshaperova neobavezna SQL grana i traži
+# native toolchain koji ne koristimo.
 allowBuilds:
   better-sqlite3: false
   esbuild: true
   msgpackr-extract: true
-  sharp: false
-  workerd: true

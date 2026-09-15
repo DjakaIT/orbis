@@ -1,30 +1,8 @@
-/** Tipovi i pomoćnici oko D1. SPEC §7.4. */
-
-export interface Env {
-  DB: D1Database;
-  ALLOWED_ORIGIN: string;
-}
-
-export interface PlayerRow {
-  id: string;
-  nickname: string;
-}
-
-export interface LeagueRow {
-  id: string;
-  code: string;
-  name: string;
-  owner_id: string;
-}
-
-export interface ScoreRow {
-  player_id: string;
-  nickname: string;
-  puzzle_date: string;
-  mode: 'world' | 'hr';
-  guesses: number;
-  elapsed_ms: number;
-}
+/**
+ * Kodovi, tokeni i identifikatori. Preneseno iz Workera bez izmjene značenja.
+ *
+ * `crypto` je ovdje Web Crypto, koji Netlifyjeve funkcije imaju kao i Workeri.
+ */
 
 /**
  * Kod lige: šest znakova bez `0/O` i `1/I/L` — diktira se preko telefona.
@@ -39,7 +17,7 @@ export function leagueCode(): string {
   return out;
 }
 
-/** Token je 32 nasumična bajta; u bazi živi samo njegov SHA-256. SPEC §7.2. */
+/** Token je 32 nasumična bajta; spremljen je samo njegov SHA-256. SPEC §7.2. */
 export function newToken(): string {
   return hex(crypto.getRandomValues(new Uint8Array(32)));
 }

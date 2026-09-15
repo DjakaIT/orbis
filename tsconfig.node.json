@@ -9,6 +9,8 @@
     "vitest.config.ts",
     "playwright.config.ts",
     "eslint.config.ts",
-    "scripts/**/*.ts"
+    "scripts/**/*.ts",
+    "netlify/**/*.ts",
+    "netlify/**/*.mts"
   ]
 }

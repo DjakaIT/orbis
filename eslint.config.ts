@@ -7,7 +7,11 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'coverage/**', 'public/data/**', 'playwright-report/**', 'worker/**'],
+    /*
+     * `.netlify/` je ono sto `netlify dev` sam ispakira iz funkcija — bundle, ne
+     * izvor. Bez ovoga lint pada na datotekama koje nitko nije napisao.
+     */
+    ignores: ['dist/**', 'coverage/**', 'public/data/**', 'playwright-report/**', '.netlify/**'],
   },
 
   js.configs.recommended,
@@ -60,7 +64,21 @@ export default tseslint.config(
   },
 
   {
-    files: ['scripts/**/*.ts', 'tests/**/*.{ts,tsx}', '*.config.ts', 'eslint.config.ts'],
+    files: [
+      'scripts/**/*.ts',
+      'tests/**/*.{ts,tsx}',
+      '*.config.ts',
+      'eslint.config.ts',
+      /*
+       * Backend lige. Ovdje `Date` ne služi za kalendarski dan nego za trenutak:
+       * vrijeme upisa, prozor rate limita, i pretvorba već provjerenog datuma u
+       * instant za `roundIdFor`. Granice runde i dalje računa engine/time.ts.
+       *
+       * Prije je ovaj kod bio Cloudflare Worker i bio je posve izuzet iz linta;
+       * sada dobiva sva pravila osim ovog jednog.
+       */
+      'netlify/**/*.{ts,mts}',
+    ],
     languageOptions: { globals: globals.node },
     rules: { 'no-restricted-globals': 'off', 'no-restricted-properties': 'off' },
   },

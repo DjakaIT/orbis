@@ -19,16 +19,16 @@ pnpm dev
 
 ## Naredbe
 
-| Naredba           | Što radi                                                     |
-| ----------------- | ------------------------------------------------------------ |
-| `pnpm dev`        | Dev server (Vite)                                            |
-| `pnpm check`      | Lint + typecheck + testovi — mora proći prije svakog commita |
-| `pnpm build`      | Produkcijski build                                           |
-| `pnpm test`       | Vitest                                                       |
-| `pnpm e2e`        | Playwright testovi — traži build, vidi niže                  |
-| `pnpm analyze`    | Build uz treemap bundlea u `dist/stats.html`                 |
-| `pnpm format`     | Prettier                                                     |
-| `pnpm worker:dev` | Cloudflare Worker lokalno (od faze 3)                        |
+| Naredba        | Što radi                                                     |
+| -------------- | ------------------------------------------------------------ |
+| `pnpm dev`     | Dev server (Vite)                                            |
+| `pnpm check`   | Lint + typecheck + testovi — mora proći prije svakog commita |
+| `pnpm build`   | Produkcijski build                                           |
+| `pnpm test`    | Vitest                                                       |
+| `pnpm e2e`     | Playwright testovi — traži build, vidi niže                  |
+| `pnpm analyze` | Build uz treemap bundlea u `dist/stats.html`                 |
+| `pnpm format`  | Prettier                                                     |
+| `pnpm dev:api` | Netlify dev: stranica + funkcije lige na istom originu       |
 
 ## Testovi
 
@@ -44,8 +44,13 @@ pnpm build && pnpm check
 
 E2E vozi dva servera: dev na `:5173` i `vite preview` na `:4173`. Drugi postoji zbog
 `tests/e2e/pwa.spec.ts` — service worker, offline i manifest u razvoju ne postoje — pa
-`pnpm build` mora proći prije `pnpm e2e`. Testovi lige se preskaču ako worker nije
-pokrenut.
+`pnpm build` mora proći prije `pnpm e2e`.
+
+Nijedan test se ne preskače zbog nedostupnog poslužitelja. API lige se provjerava u
+`tests/league/` protiv spremišta u memoriji, a sučelje u `tests/e2e/league-ui.spec.ts`
+protiv presretnutih odgovora. Prije je bilo obrnuto: testovi lige tražili su pokrenut
+backend i tiho se preskakali bez njega, pa je paket ostao zelen dok liga u produkciji
+nije radila.
 
 ## Modovi
 
@@ -66,36 +71,39 @@ susjed se u listi ispisuje kao „susjedna". Pogodak se izvodi iz identiteta met
 
 ## Liga
 
-API lige je Cloudflare Worker s D1 bazom. Lokalno:
+API lige je Netlifyjeva funkcija (`netlify/functions/api.mts`, Hono router), a
+spremište su Netlify Blobs. Nema drugog servisa, druge prijave ni ijednog tokena:
+liga se deploya zajedno sa stranicom.
 
 ```bash
-pnpm -C worker exec wrangler d1 migrations apply orbis-db --local
-pnpm worker:dev                 # :8787
+pnpm dev:api                    # stranica + /api na istom portu
 ```
 
-Provjera backenda bez preglednika:
+Logika je odvojena od Netlifyja. `netlify/lib/app.ts` izvozi `createApp(store)`, a
+`netlify/lib/store.ts` uz Blobs nudi i spremište u memoriji — zato se cijeli API vrti
+u `pnpm test`, bez mreže i bez emulatora:
 
 ```bash
-node worker/test-league.mjs     # API: auth, validacija, ljestvica
-node worker/test-close.mjs …    # rano zatvaranje runde
-node worker/test-weeks.mjs      # dvije runde: prati li iste igrače kroz tjedne
+pnpm test tests/league          # API, runde, ljestvica, tjedni
 ```
 
 ### Spajanje lige u produkciji
 
-Klijent zove `/api` na istom originu. Pravilo koje to spaja s Workerom **nije** u
-`netlify.toml` — ondje se ne mogu čitati varijable okoline, pa bi adresa morala
-biti upisana rukom. Build umjesto toga emitira `_redirects` iz `ORBIS_API_URL`:
+Ništa se ne spaja. Funkcija sama deklarira svoju putanju:
 
-```bash
-cd worker
-npx wrangler d1 create orbis-db                    # upiši database_id u wrangler.toml
-npx wrangler d1 migrations apply orbis-db --remote
-npx wrangler deploy                                # ispiše adresu Workera
+```ts
+export const config: Config = { path: '/api/*' };
 ```
 
-Zatim u Netlifyju postavi `ORBIS_API_URL` na tu adresu i pokreni redeploy. Bez te
-varijable igra radi normalno, a liga jasno kaže da nije dostupna.
+Time je API na istom originu kao i stranica — bez proxyja, bez CORS-a, bez varijable
+s adresom koja može ostati prazna. Prije je API bio Cloudflare Worker, a pravilo koje
+ga je spajalo stajalo je zakomentirano u `netlify.toml`, pa je prijava u ligu vraćala
+404 stranicu hostinga. Da se to ne ponovi, `tests/build/deploy.test.ts` provjerava da
+klijent, funkcija i `netlify.toml` govore istu stvar.
+
+Runda se zatvara petkom u 17:00 po Zagrebu, ili ranije ako svi odigraju. Zakazanu
+stranu radi `netlify/functions/close-rounds.mts`, koja se vrti **svaki sat petkom** i
+sama provjerava zagrebački sat — fiksni UTC termin bi se ljeti i zimi razišao.
 
 Nadimak nije lozinka: isti nadimak s novog uređaja je **novi** igrač. Povratak na
 staro članstvo ide kroz link `/v/:token`, koji se pokazuje jednom nakon prijave.
@@ -127,9 +135,14 @@ VITE_SITE_URL=https://primjer.hr pnpm build
 
 ## Hosting
 
-Frontend je na Netlifyju (`netlify.toml`). Deep linkovi `/l/:code` i `/v/:token`
-traže SPA rewrite, koji je ondje podešen. API lige ostaje Worker; kad se deploya,
-odkomentiraj `/api/*` proxy u `netlify.toml` da sve bude na istom originu.
+Sve je na Netlifyju (`netlify.toml`): stranica, API lige i njezino spremište. Deep
+linkovi `/l/:code` i `/v/:token` su klijentske rute i traže SPA rewrite, koji je ondje
+podešen. Za `/api/*` pravila nema i ne treba ga biti — funkcija svoju putanju
+deklarira sama.
+
+Blobs ne treba stvarati ni migrirati; spremište `orbis-league` nastaje pri prvom
+upisu. Čita se i piše uz `consistency: 'strong'`, jer ljestvica koju vidiš odmah
+nakon svoje partije mora sadržavati tu partiju.
 
 ## Struktura
 
@@ -138,7 +151,8 @@ src/engine/      čista logika: vrijeme, sjeme, udaljenost, pretraga, boja, bodo
 src/render/      three.js globus i canvas karta Hrvatske
 src/components/  React sučelje
 src/state/       reducer, kontekst, localStorage
-worker/          Cloudflare Worker + D1 za ligu
+netlify/lib/     API lige: router, podaci, runde, spremište
+netlify/functions/  ulaz u funkciju i zakazano zatvaranje runde
 scripts/         data pipeline i generatori fonta i ikona (izlaz nije u gitu)
 tests/           Vitest (engine, stanje, build) i Playwright (e2e)
 ```
