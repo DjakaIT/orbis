@@ -31,7 +31,7 @@ import {
   type Player,
 } from './data';
 import { hashToken, leagueCode, newToken, uuid } from './ids';
-import { closeIfEveryoneDone, currentRound, everyoneDone, isClosed, standings } from './rounds';
+import { allStandings, closeIfEveryoneDone, currentRound, everyoneDone, isClosed } from './rounds';
 import type { Store } from './store';
 
 const MAX_NICKNAME = 24;
@@ -206,7 +206,7 @@ export function createApp(store: Store): Hono<AppEnv> {
       code: league.code,
       round_id: roundId,
       closes_at: roundClosesAt(roundId),
-      standings: await standings(store, league.id, roundId, playedToday, today),
+      standings: await allStandings(store, league.id, roundId, playedToday, today),
       everyone_done: await everyoneDone(store, league.id, roundId),
       revealed: playedToday,
     });

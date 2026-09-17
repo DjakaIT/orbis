@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { arrow, bearing, formatKm, haversine, worldDistance } from '../../src/engine/distance';
+import { bearing, formatKm, haversine, worldDistance } from '../../src/engine/distance';
 
 const ZAGREB = { lat: 45.815, lon: 15.982 };
 const SPLIT = { lat: 43.508, lon: 16.44 };
@@ -55,35 +55,6 @@ describe('bearing', () => {
     const b = bearing(ZAGREB.lat, ZAGREB.lon, LONDON.lat, LONDON.lon);
     expect(b).toBeGreaterThan(280);
     expect(b).toBeLessThan(320);
-    expect(arrow(b, false)).toBe('↖');
-  });
-});
-
-describe('arrow', () => {
-  it('zaokružuje na osam smjerova', () => {
-    expect(arrow(0, false)).toBe('↑');
-    expect(arrow(44, false)).toBe('↗');
-    expect(arrow(90, false)).toBe('→');
-    expect(arrow(135, false)).toBe('↘');
-    expect(arrow(180, false)).toBe('↓');
-    expect(arrow(225, false)).toBe('↙');
-    expect(arrow(270, false)).toBe('←');
-    expect(arrow(315, false)).toBe('↖');
-    expect(arrow(359, false)).toBe('↑');
-  });
-
-  it('pogodak nije strelica', () => {
-    expect(arrow(123, true)).toBe('✦');
-  });
-
-  it('nula kilometara sama po sebi nije pogodak', () => {
-    /*
-     * Matrica nosi minimalnu udaljenost izmedu granica (SPEC §4.3), pa je svaka
-     * susjedna drzava nula kilometara od mete — Kina, Rusija i Juzna Koreja sve
-     * su 0 km od Sjeverne Koreje. Susjed mora zadrzati strelicu; da nosi ✦,
-     * cetiri retka bi izgledala kao pogodak i igrac ne bi znao koji je tocan.
-     */
-    expect(arrow(90, false)).toBe('→');
   });
 });
 

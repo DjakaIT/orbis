@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 /**
  * Tri neovisna signala pristupačnosti, svaki sa svojim ponašanjem.

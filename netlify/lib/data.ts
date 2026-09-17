@@ -37,7 +37,8 @@ export type RoundScores = Record<string, Score>;
 
 export interface RoundState {
   closedAt: string | null;
-  results: unknown[] | null;
+  /** Konacne ljestvice po modu; modovi se boduju odvojeno. */
+  results: Record<string, unknown[]> | null;
 }
 
 /* ------------------------------------------------------------------ ključevi */
@@ -215,7 +216,7 @@ export async function closedRounds(
   store: Store,
   leagueId: string,
   limit = 20,
-): Promise<{ roundId: string; closedAt: string; results: unknown[] }[]> {
+): Promise<{ roundId: string; closedAt: string; results: Record<string, unknown[]> }[]> {
   const keys = await store.list(key.rounds(leagueId));
   const states = await Promise.all(
     keys.map(async (k) => ({ roundId: tail(k), state: await store.get<RoundState>(k) })),
@@ -230,7 +231,7 @@ export async function closedRounds(
     .map((r) => ({
       roundId: r.roundId,
       closedAt: r.state.closedAt,
-      results: r.state.results ?? [],
+      results: r.state.results ?? {},
     }));
 }
 

@@ -44,10 +44,15 @@ const FOV = 38;
 /**
  * Koliki dio **krace** poluosi zauzima kugla.
  *
- * Izvedeno iz dosadasnjih fov = 38° i z = 3,2, pa na sirokom ekranu globus ostaje
- * tocno velik koliko je i bio.
+ * Jedinica znaci da rub sfere pada tocno na rub kraće osi — najveci zum pri kojem
+ * se kugla jos vidi cijela. Prije je ovdje stajalo 0,9075, izvedeno iz fov = 38°
+ * i z = 3,2, pa je oko globusa ostajao pojas praznog papira na kojem se nista nije
+ * dogadalo, a drzave su bile manje nego sto su morale biti.
+ *
+ * Vise od ovoga znaci rezanje kugle: `cameraDistance` bi primakao kameru toliko
+ * da polumjer ne stane u uzu os.
  */
-const FILL = 1 / (Math.tan((FOV * Math.PI) / 360) * 3.2);
+const FILL = 1;
 
 /**
  * Koliko daleko kamera mora stajati da kugla stane cijela.

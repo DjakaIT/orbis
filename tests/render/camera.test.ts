@@ -8,6 +8,9 @@ import { cameraDistance } from '../../src/render/globe';
  * Kamera ima vertikalni kut, pa je na uspravnom ekranu širina ono što
  * ograničava. Dok je udaljenost bila stalnih 3,2, na mobitelu je poluširina pala
  * ispod polumjera kugle i ekran joj je odsijecao lijevu i desnu stranu.
+ *
+ *  je od 2026-09-17 jedinica: kugla ispuni kraću os do kraja. To je najveći
+ * zum pri kojem se još vidi cijela — preko toga bi je uža os odsjekla.
  */
 
 const FOV = 38;
@@ -47,11 +50,17 @@ describe('uklapanje globusa', () => {
     expect(fixed).toBeLessThan(1);
   });
 
-  it('na širokom ekranu ostaje točno dosadašnjih 3,2', () => {
-    // Stolni prikaz se ne smije promijeniti — mijenja se samo ono što je pucalo.
-    expect(cameraDistance(1)).toBeCloseTo(3.2, 6);
-    expect(cameraDistance(1.3)).toBeCloseTo(3.2, 6);
-    expect(cameraDistance(3)).toBeCloseTo(3.2, 6);
+  it('na širokom ekranu kugla ispuni kraću os do kraja', () => {
+    // FILL = 1: poluvisina je točno polumjer, pa kamera stoji na 1/tan(fov/2).
+    const touching = 1 / Math.tan((FOV * Math.PI) / 360);
+    expect(cameraDistance(1)).toBeCloseTo(touching, 6);
+    expect(cameraDistance(1.3)).toBeCloseTo(touching, 6);
+    expect(cameraDistance(3)).toBeCloseTo(touching, 6);
+  });
+
+  it('globus je veći nego dok je kamera stajala na 3,2', () => {
+    // Prije je rub sfere padao na 91 % kraće poluosi; sada pada na 100 %.
+    expect(cameraDistance(1)).toBeLessThan(3.2);
   });
 
   it('kugla zauzima jednak udio uže osi na svakom obliku', () => {
@@ -61,14 +70,15 @@ describe('uklapanje globusa', () => {
      */
     for (const [name, aspect] of SHAPES) {
       const { w, h } = halfExtent(aspect);
-      expect(1 / Math.min(w, h), name).toBeCloseTo(0.9075, 3);
+      expect(1 / Math.min(w, h), name).toBeCloseTo(1, 3);
     }
   });
 
   it('kamera se odmiče samo koliko uska os traži, ne više', () => {
     // Globus na mobitelu mora ostati skoro jednako velik, ne osjetno manji.
+    const wide = cameraDistance(3);
     const narrow = cameraDistance(412 / 500);
-    expect(narrow).toBeGreaterThan(3.2);
-    expect(narrow).toBeLessThan(3.2 * 1.25);
+    expect(narrow).toBeGreaterThan(wide);
+    expect(narrow).toBeLessThan(wide * 1.25);
   });
 });

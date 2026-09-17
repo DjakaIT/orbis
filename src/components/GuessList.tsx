@@ -1,13 +1,13 @@
-import { distanceColor, proximity } from '../engine/color';
+import { distanceColor } from '../engine/color';
 import { flagSrc } from '../engine/flag';
-import { arrow, formatKm } from '../engine/distance';
+import { formatKm } from '../engine/distance';
 import { useGame } from '../state/context';
 import { sortedGuesses } from '../state/reducer';
 import type { Guess } from '../types';
 import styles from './GuessList.module.css';
 
 /**
- * Ocitanja. Imena lijevo, brojevi desno (tabular), strelice u fiksnoj koloni.
+ * Ocitanja. Imena lijevo, brojevi desno (tabular).
  *
  * Default je poredak po udaljenosti, najdalje gore — tako je najblizi pogodak
  * uvijek neposredno iznad inputa. SPEC §2.4.
@@ -49,15 +49,6 @@ export default function GuessList() {
             ·
           </span>
           <span className={latest.hit ? styles.liveHit : undefined}>{verdict(latest)}</span>
-          {!latest.hit && (
-            <>
-              <span className={styles.liveSep} aria-hidden="true">
-                ·
-              </span>
-              {/* Kilometri su tocni, postotak je osjetljiv: koliko je to na ovoj skali. */}
-              <span>{proximity(latest.km, state.mode)}% blizu</span>
-            </>
-          )}
           {latest.trend !== 'first' && !latest.hit && (
             <>
               <span className={styles.liveSep} aria-hidden="true">
@@ -92,9 +83,6 @@ export default function GuessList() {
             <span className={styles.name}>{g.name}</span>
             <span className={g.neighbour ? styles.kmWord : styles.km}>
               {g.neighbour ? 'susjedna' : formatKm(g.km)}
-            </span>
-            <span className={styles.arrow} aria-hidden="true">
-              {arrow(g.bearing, g.hit)}
             </span>
           </li>
         ))}

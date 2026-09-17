@@ -1,5 +1,7 @@
 /** Oblici koje vraća API lige. SPEC §7.5. */
 
+import type { Mode } from '../types';
+
 export interface StandingRow {
   rank: number;
   playerId: string;
@@ -16,7 +18,8 @@ export interface LeagueView {
   round_id: string;
   /** Trenutak zatvaranja runde, ms od epohe. */
   closes_at: number;
-  standings: StandingRow[];
+  /** Ljestvica po modu — modovi se boduju odvojeno i ne zbrajaju. */
+  standings: Record<Mode, StandingRow[]>;
   everyone_done: boolean;
   /** Jesu li tuđi današnji rezultati otkriveni — istina tek kad igrač sam odigra. */
   revealed: boolean;
@@ -25,7 +28,7 @@ export interface LeagueView {
 export interface ClosedRound {
   round_id: string;
   closed_at: string;
-  results: StandingRow[];
+  results: Record<Mode, StandingRow[]>;
 }
 
 export interface Me {

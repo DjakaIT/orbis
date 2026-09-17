@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 import { dailyTarget } from '../../src/engine/seed';
 import { zagrebDate } from '../../src/engine/time';
@@ -77,7 +77,11 @@ test('zastave su slike, ne dva slova', async ({ page }) => {
   await expect(flag).toHaveAttribute('alt', '');
 });
 
-test('pokušaj pokazuje koliko je blizu, ne samo kilometre', async ({ page }) => {
+test('pokušaj pokazuje ime, udaljenost i je li bliži od prethodnog', async ({ page }) => {
+  /*
+   * Postotak je maknut 2026-09-17: ponavljao je kilometre drugom mjerom. Ono što
+   * brojka sama ne kaže jest je li igrač topliji nego prije, i to ostaje.
+   */
   await page.goto('/');
   const input = page.getByLabel('Upiši državu');
   await expect(input).toBeEnabled({ timeout: 15_000 });
@@ -86,5 +90,10 @@ test('pokušaj pokazuje koliko je blizu, ne samo kilometre', async ({ page }) =>
   await input.press('Enter');
 
   const status = page.getByRole('status').filter({ hasText: 'km' });
-  await expect(status).toContainText('% blizu');
+  await expect(status).toContainText('Brazil');
+  await expect(status).not.toContainText('%');
+
+  await input.fill('Japan');
+  await input.press('Enter');
+  await expect(status).toContainText(/bliže nego prije|dalje nego prije|jednako daleko/);
 });

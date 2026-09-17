@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, signOut, skipWelcome, test } from './fixtures';
 
 import { PREVIEW_URL } from '../../playwright.config';
 
@@ -15,7 +15,9 @@ import { PREVIEW_URL } from '../../playwright.config';
  */
 
 test('prijava u ligu bez API-ja ne pokazuje „HTTP 404"', async ({ page }) => {
+  await signOut(page);
   await page.goto(PREVIEW_URL);
+  await skipWelcome(page);
   await expect(page.getByLabel('Upiši državu')).toBeEnabled({ timeout: 20_000 });
 
   await page.getByRole('button', { name: 'Liga' }).click();
@@ -38,7 +40,9 @@ test('prijava u ligu bez API-ja ne pokazuje „HTTP 404"', async ({ page }) => {
 
 test('igra ostaje potpuno upotrebljiva dok liga ne radi', async ({ page }) => {
   // Liga je neobavezna. Pad lige ne smije povući igru sa sobom.
+  await signOut(page);
   await page.goto(PREVIEW_URL);
+  await skipWelcome(page);
 
   const input = page.getByLabel('Upiši državu');
   await expect(input).toBeEnabled({ timeout: 20_000 });
@@ -65,7 +69,9 @@ test('nadimak se šalje kao JSON, a ne kao navigacija obrasca', async ({ page })
     if (r.url().includes('/api/players')) sent.push({ method: r.method(), body: r.postData() });
   });
 
+  await signOut(page);
   await page.goto(PREVIEW_URL);
+  await skipWelcome(page);
   await expect(page.getByLabel('Upiši državu')).toBeEnabled({ timeout: 20_000 });
 
   await page.getByRole('button', { name: 'Liga' }).click();

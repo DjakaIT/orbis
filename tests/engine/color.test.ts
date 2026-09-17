@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  distanceColor,
-  distanceRgb,
-  distanceSquare,
-  oklchToRgb,
-  proximity,
-} from '../../src/engine/color';
+import { distanceColor, distanceRgb, distanceSquare, oklchToRgb } from '../../src/engine/color';
 
 /** Kanali iz "rgb(r, g, b)". */
 function channels(css: string): [number, number, number] {
@@ -177,35 +171,5 @@ describe('distanceSquare', () => {
   it('koristi skalu svog moda', () => {
     expect(distanceSquare(399, 'hr')).toBe('\u{1F7E6}');
     expect(distanceSquare(399, 'world')).toBe('\u{1F7E8}');
-  });
-});
-
-describe('proximity', () => {
-  it('pogodak je sto posto, najdalje je nula', () => {
-    expect(proximity(0, 'world')).toBe(100);
-    expect(proximity(20_000, 'world')).toBe(0);
-  });
-
-  it('raste kako udaljenost pada', () => {
-    const near = proximity(1000, 'world');
-    const far = proximity(15_000, 'world');
-    expect(near).toBeGreaterThan(far);
-  });
-
-  it('koristi skalu svog moda', () => {
-    // 300 km je u Hrvatskoj gotovo cijela zemlja, u svijetu susjedstvo.
-    expect(proximity(300, 'hr')).toBeLessThan(proximity(300, 'world'));
-  });
-
-  it('ne izlazi iz raspona ni na rubovima', () => {
-    expect(proximity(-100, 'world')).toBe(100);
-    expect(proximity(99_999, 'world')).toBe(0);
-    expect(proximity(99_999, 'hr')).toBe(0);
-  });
-
-  it('uvijek je cijeli broj', () => {
-    for (const km of [0, 1, 137, 4321, 19_999]) {
-      expect(Number.isInteger(proximity(km, 'world'))).toBe(true);
-    }
   });
 });

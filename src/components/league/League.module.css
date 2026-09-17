@@ -87,6 +87,18 @@
   font-size: var(--t-sm);
 }
 
+/* Jedna ljestvica po modu; naslov kaže koja je. */
+.table + .table {
+  margin-top: var(--s-4);
+}
+
+.tableName {
+  padding-bottom: var(--s-1);
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+  font-weight: 400;
+}
+
 .board {
   margin: 0;
   padding: 0;

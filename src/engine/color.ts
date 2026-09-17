@@ -10,18 +10,6 @@ import type { Mode } from './seed';
 /** Najveća smislena udaljenost po modu; iznad toga gradijent je zasićen. */
 const MAX_KM: Record<Mode, number> = { world: 20000, capitals: 20000, hr: 400 };
 
-/**
- * Koliko je pokusaj blizu mete, 0–100.
- *
- * Kilometri su tocni ali ih je tesko osjetiti: je li 4 300 km blizu ovisi o tome
- * koliko je velik svijet u kojem se igra. Postotak je ista brojka na istoj skali
- * kao i boja, pa se udaljenost moze procitati i bez raspoznavanja nijanse.
- */
-export function proximity(km: number, mode: Mode): number {
-  const t = Math.min(Math.max(km, 0) / MAX_KM[mode], 1);
-  return Math.round((1 - t) * 100);
-}
-
 interface Lch {
   l: number;
   c: number;
@@ -75,7 +63,7 @@ function ramp(km: number, mode: Mode, surface: Surface): Lch {
  * CSS boja za udaljenost. Pogodak vraća token `--hit`.
  *
  * `hit` dolazi iz identiteta mete, nikad iz `km === 0` — matrica nosi udaljenost
- * između granica, pa su sve susjedne države nula kilometara daleko. Vidi `arrow`.
+ * između granica, pa su sve susjedne države nula kilometara daleko.
  */
 export function distanceColor(km: number, mode: Mode, hit = false): string {
   if (hit) return 'var(--hit)';

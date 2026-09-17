@@ -6,6 +6,7 @@ import Header from './components/Header';
 import ModeToggle from './components/ModeToggle';
 import Result from './components/Result';
 import TierToggle from './components/TierToggle';
+import Welcome from './components/Welcome';
 import { readDeepLink } from './league/client';
 import { useGame } from './state/context';
 import { GameProvider } from './state/GameContext';
@@ -35,15 +36,38 @@ export default function App() {
   const [tier, setTier] = useState<Tier>(() => load().hr?.tier ?? 'gradovi');
 
   /*
+   * Ime se traži na ulazu, jednom. Prije se tražilo tek kad netko otvori ligu,
+   * pa je pitanje padalo usred partije; ovako je igrač spreman za ligu prije
+   * nego što sazna da postoji.
+   *
+   * Deep link je iznimka: `/l/:code` i `/v/:token` nose vlastiti tok kroz panel
+   * lige — ondje upis imena ujedno i pridružuje ligi, pa bi modal ispred njega
+   * otvorio račun bez članstva.
+   */
+  const [needsName, setNeedsName] = useState(
+    () => load().player === null && readDeepLink() === null,
+  );
+
+  /*
    * `key` remounta providera pri svakoj promjeni moda ili razine. Bez toga bi
    * efekt koji sprema partiju stigao prije nego što se novi bazen učita i
    * žigosao staru partiju novom razinom — pa bi se pokušaji iz „gradova"
    * pojavili u „mjestima", gdje ti indeksi znače druga naselja.
    */
   return (
-    <GameProvider key={`${mode}-${tier}`} mode={mode} tier={tier}>
-      <Board mode={mode} onMode={setMode} tier={tier} onTier={setTier} />
-    </GameProvider>
+    <>
+      <GameProvider key={`${mode}-${tier}`} mode={mode} tier={tier}>
+        <Board mode={mode} onMode={setMode} tier={tier} onTier={setTier} />
+      </GameProvider>
+
+      {needsName && (
+        <Welcome
+          onDone={() => {
+            setNeedsName(false);
+          }}
+        />
+      )}
+    </>
   );
 }
 

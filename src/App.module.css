@@ -24,8 +24,8 @@
  * ništa i Zemlja je imala oštar rez prema papiru.
  *
  * `closest-side` veže 100 % uz polovicu kraće stranice, a upravo ta stranica
- * određuje i koliko je kugla velika: pri fov-u od 38° i kameri na z = 3,2 rub
- * sfere pada na 91 % te polovice. Zato je vrhunac na 93 %, tik izvan ruba, i
+ * određuje i koliko je kugla velika: rub sfere pada točno na 100 % te polovice
+ * (vidi `FILL` u render/globe.ts). Zato je vrhunac na 102 %, tik izvan ruba, i
  * omjer se ne mijenja s oblikom prozora.
  */
 .stage::before {
@@ -35,10 +35,10 @@
   inset: 0;
   background: radial-gradient(
     circle closest-side at 50% 48%,
-    color-mix(in srgb, var(--halo) 16%, transparent) 80%,
-    color-mix(in srgb, var(--halo) 34%, transparent) 93%,
-    color-mix(in srgb, var(--halo) 12%, transparent) 108%,
-    transparent 130%
+    color-mix(in srgb, var(--halo) 16%, transparent) 88%,
+    color-mix(in srgb, var(--halo) 34%, transparent) 102%,
+    color-mix(in srgb, var(--halo) 12%, transparent) 118%,
+    transparent 140%
   );
   pointer-events: none;
 }

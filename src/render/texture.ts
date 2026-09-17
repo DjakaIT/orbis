@@ -186,15 +186,15 @@ function drawGeometry(
 const ICE_SHEETS = ['GRL', 'ATA'];
 
 /**
- * Najmanji promjer, u pikselima teksture, ispod kojeg drzava dobiva i biljeg.
+ * Najmanji promjer, u pikselima teksture, ispod kojeg drzava dobiva i mrlju.
  *
  * Mauricijus zauzima 3 × 4 piksela od 2048 × 1024. Obojan je tocno, ali kugla se
  * na ekranu prikazuje na oko 500 px, pa na njega dode manje od jednog piksela —
  * igrac pogodi drzavu i na globusu se ne dogodi nista. Svaki pokusaj mora nesto
- * pokazati, pa se sitnima uz ispunu crta i kolut.
+ * pokazati, pa se sitnima ispuna prosiri do ove mjere.
  */
 export const MIN_VISIBLE_PX = 22;
-const MARKER_RADIUS = 11;
+const SPOT_RADIUS = MIN_VISIBLE_PX / 2;
 
 /** Omeda geometrije u pikselima teksture. */
 export function bounds(geometry: GeoJSON.Geometry): {
@@ -376,17 +376,18 @@ export class GlobeTexture {
     ctx.globalAlpha = 1;
     drawGeometry(ctx, geometry, null, this.tokens.hairline);
 
-    if (tiny) this.marker(box, color, alpha);
+    if (tiny) this.spot(box, color, alpha);
     return true;
   }
 
   /**
-   * Kolut oko drzave premale da bi se vidjela.
+   * Prosiruje ispunu drzave premale da bi se vidjela.
    *
-   * Prsten, ne puna tocka: puna bi na malom zumu izgledala kao otok kojeg nema,
-   * a prsten se cita kao oznaka. Unutra ostaje prava, tocno obojana drzava.
+   * Puna mrlja u boji udaljenosti, ne kolut oko nje: kolut je oznaka koja stoji
+   * *pored* podatka, a boja je sam podatak — sitna drzava se tako cita istom
+   * mjerom kao i svaka druga, samo krupnije nacrtana. SPEC §2.1.
    */
-  private marker(
+  private spot(
     box: { x0: number; y0: number; x1: number; y1: number },
     color: string,
     alpha: number,
@@ -396,10 +397,14 @@ export class GlobeTexture {
     const cy = (box.y0 + box.y1) / 2;
 
     ctx.globalAlpha = alpha;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3.5;
+    ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(cx, cy, MARKER_RADIUS, 0, Math.PI * 2);
+    ctx.arc(cx, cy, SPOT_RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Tanak rub drzi mrlju u istom rjecniku kao i granice drzava.
+    ctx.strokeStyle = this.tokens.hairline;
+    ctx.lineWidth = 1;
     ctx.stroke();
     ctx.globalAlpha = 1;
   }

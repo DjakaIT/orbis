@@ -209,11 +209,13 @@ describe.skipIf(!built)('budzeti iz SPEC §9.5', () => {
    */
   const items: { name: string; files: () => string[]; budget: number; ceiling?: number }[] = [
     // React + react-dom su ~60 KB prije ijedne linije igre. DECISIONS.md, 2026-09-14.
+    // Strop podignut 2026-09-17 s 92 na 94: modal za ime na ulazu i tri odvojene
+    // ljestvice lige. DECISIONS.md.
     {
       name: 'JS bez three.js',
       files: () => assets('.js').filter((f) => !f.includes('three-')),
       budget: 45,
-      ceiling: 92,
+      ceiling: 94,
     },
     // WebGLRenderer se ne da tree-shakeati dok se crta na WebGL-u.
     {

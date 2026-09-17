@@ -30,22 +30,6 @@ export function worldDistance(a: number, b: number, m: Uint16Array, n: number): 
   return v;
 }
 
-const ARROWS = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'] as const;
-
-/**
- * Osam smjerova, azimut zaokružen na 45°. Meta nosi ✦ umjesto strelice.
- *
- * Pogodak se **ne** smije izvoditi iz nule kilometara. Matrica nosi minimalnu
- * udaljenost između granica (SPEC §4.3), pa je svaka susjedna država 0 km od
- * mete: Kina, Rusija i Južna Koreja su sve 0 km od Sjeverne Koreje. Jedini
- * pogodak je onaj čiji indeks odgovara meti.
- */
-export function arrow(bearingDeg: number, hit: boolean): string {
-  if (hit) return '✦';
-  const i = Math.round((((bearingDeg % 360) + 360) % 360) / 45) % 8;
-  return ARROWS[i] ?? '↑';
-}
-
 /**
  * Hrvatski zapis tisućica: tanki razmak U+2009. SPEC §2.3.
  * Brojevi se čitaju kao instrument, pa nema decimala.

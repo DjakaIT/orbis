@@ -1,4 +1,6 @@
-import { expect, test, type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+
+import { expect, signOut, skipWelcome, test } from './fixtures';
 
 /**
  * Sučelje lige, protiv presretnutog API-ja.
@@ -81,7 +83,12 @@ async function stubApi(page: Page): Promise<{ posted: { url: string; body: unkno
         code: 'ABCDEF',
         round_id: '2026-09-18',
         closes_at: Date.now() + 86_400_000,
-        standings: [standing('Daniel', 1, 5), standing('Marta', 2, 3, false)],
+        // Ljestvica je po modu: bodovi se ne zbrajaju kroz modove. DECISIONS.md.
+        standings: {
+          world: [standing('Daniel', 1, 5), standing('Marta', 2, 3, false)],
+          capitals: [],
+          hr: [],
+        },
         everyone_done: false,
         revealed: true,
       });
@@ -93,7 +100,10 @@ async function stubApi(page: Page): Promise<{ posted: { url: string; body: unkno
 }
 
 async function signUp(page: Page): Promise<void> {
+  // Prijava kroz panel lige postoji za onoga tko je modal na ulazu preskocio.
+  await signOut(page);
   await page.goto('/');
+  await skipWelcome(page);
 
   /*
    * Ne ceka se da igra bude spremna. Liga je svoj panel i ne ovisi o podacima

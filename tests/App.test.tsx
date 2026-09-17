@@ -48,9 +48,29 @@ const PINNED = new Date('2026-03-03T12:00:00Z');
 
 beforeEach(() => {
   localStorage.clear();
+  // Modal na ulazu trazi ime dok igraca nema. Ovi testovi gledaju plocu, pa
+  // igrac vec postoji; sam modal ima svoj describe nize.
+  signedIn();
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(PINNED);
 });
+
+/** Upisuje igraca u pohranu, da modal na ulazu ne stoji ispred ploce. */
+function signedIn(): void {
+  localStorage.setItem(
+    'orbis:v1',
+    JSON.stringify({
+      v: 1,
+      world: null,
+      hr: null,
+      capitals: null,
+      stats: {},
+      player: { id: 'p1', token: 'x'.repeat(64), nickname: 'Daniel' },
+      lastLeagueCode: null,
+      prefs: { sortBy: 'distance' },
+    }),
+  );
+}
 
 afterEach(() => {
   vi.useRealTimers();
@@ -62,6 +82,11 @@ afterEach(() => {
  */
 function row(name: string): HTMLElement[] {
   return screen.queryAllByRole('listitem').filter((li) => li.textContent?.includes(name));
+}
+
+/** Inline boja trake retka — ondje se vidi je li pogodak ili udaljenost. */
+function bar(li: HTMLElement | undefined): string {
+  return li?.querySelector('span')?.getAttribute('style') ?? '';
 }
 
 describe('App', () => {
@@ -88,8 +113,12 @@ describe('App', () => {
     expect(row('Alfa')[0]?.textContent).toContain(`100${String.fromCodePoint(0x2009)}km`);
   });
 
-  it('oznaku pogotka nosi samo meta', async () => {
-    // Meta je Beta. Alfa je promasaj i mora zadrzati strelicu, ne ✦.
+  it('pogodak se razlikuje od promašaja, iako strelica više ne postoji', async () => {
+    /*
+     * Meta je Beta. Otkad su strelice maknute, pogodak se čita iz dvije stvari:
+     * statusni redak kaže „pogodak", a traka retka nosi `--hit` umjesto boje
+     * udaljenosti. Susjed na nula kilometara ne smije dobiti ni jedno ni drugo.
+     */
     const user = userEvent.setup();
     render(<App />);
 
@@ -98,14 +127,15 @@ describe('App', () => {
     await waitFor(() => {
       expect(row('Alfa')).toHaveLength(1);
     });
-    expect(row('Alfa')[0]?.textContent).not.toContain('✦');
+    expect(screen.getByRole('status').textContent).not.toContain('pogodak');
+    expect(bar(row('Alfa')[0])).not.toContain('--hit');
 
     await user.type(input, 'Beta{Enter}');
     await waitFor(() => {
       expect(row('Beta')).toHaveLength(1);
     });
-    expect(row('Beta')[0]?.textContent).toContain('✦');
     expect(screen.getByRole('status').textContent).toContain('pogodak');
+    expect(bar(row('Beta')[0])).toContain('--hit');
   });
 
   it('poruka kaze je li pokusaj blizi od prethodnog', async () => {
@@ -186,5 +216,71 @@ describe('App', () => {
 
     await user.click(screen.getByText('po udaljenosti'));
     expect(screen.getByText('kronološki')).toBeInTheDocument();
+  });
+});
+
+describe('ime na ulazu', () => {
+  beforeEach(() => {
+    // Ovaj describe gleda upravo slučaj kad igrača još nema.
+    localStorage.clear();
+  });
+
+  it('modal traži ime prije nego se dođe do ploče', async () => {
+    render(<App />);
+    expect(await screen.findByLabelText('Nadimak')).toBeInTheDocument();
+    expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
+  });
+
+  it('upisano ime se sprema i modal nestaje', async () => {
+    const user = userEvent.setup();
+    const created = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({ player_id: 'p9', token: 'a'.repeat(64), nickname: 'Marta' }),
+          { status: 201, headers: { 'Content-Type': 'application/json' } },
+        ),
+      );
+
+    render(<App />);
+    await user.type(await screen.findByLabelText('Nadimak'), 'Marta');
+    await user.click(screen.getByRole('button', { name: 'Kreni' }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    const stored = JSON.parse(localStorage.getItem('orbis:v1') ?? '{}') as {
+      player?: { nickname?: string };
+    };
+    expect(stored.player?.nickname).toBe('Marta');
+
+    created.mockRestore();
+  });
+
+  it('pad mreže ne zaključava igru', async () => {
+    const user = userEvent.setup();
+    const failed = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('mreža'));
+
+    render(<App />);
+    await user.type(await screen.findByLabelText('Nadimak'), 'Marta');
+    await user.click(screen.getByRole('button', { name: 'Kreni' }));
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    // Izlaz postoji: igra ligu ne treba.
+    await user.click(screen.getByRole('button', { name: /Preskoči/ }));
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    failed.mockRestore();
+  });
+
+  it('igrač koji već ima ime ne vidi modal', async () => {
+    signedIn();
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByLabelText('Upiši državu')).toBeInTheDocument();
+    });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

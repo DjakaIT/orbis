@@ -140,7 +140,7 @@ describe('liga', () => {
     await post(`/api/leagues/${code}/join`, undefined, owner.token);
     const view = await get(`/api/leagues/${code}`, owner.token);
 
-    expect((view.json.standings as unknown[]).length).toBe(1);
+    expect((view.json.standings as Record<string, unknown[]>).world?.length).toBe(1);
   });
 
   it('nepostojeći kod je 404, tuđa liga je 403', async () => {
@@ -230,12 +230,17 @@ describe('rezultati', () => {
     expect(again.status).toBe(200);
 
     const view = await get(`/api/leagues/${code}`, owner.token);
-    const row = (view.json.standings as { guesses: number }[])[0];
+    const row = (view.json.standings as Record<string, { guesses: number }[]>).world?.[0];
     // Drugi pokušaj nije prepisao prvi — ostaju tri, ne jedan.
     expect(row?.guesses).toBe(3);
   });
 
-  it('različiti modovi istog dana su različiti rezultati', async () => {
+  it('modovi se boduju odvojeno, svaki u svojoj ljestvici', async () => {
+    /*
+     * Prije su se zbrajali, pa je jedan redak nosio šest pokušaja kroz tri moda
+     * i iz njega se nije vidjelo tko je u čemu bolji. Sada svaki mod ima svoju
+     * ljestvicu s vlastita dva pokušaja.
+     */
     const { owner, code } = await league();
     const base = { puzzle_date: TODAY, guesses: 2, elapsed_ms: 20_000 };
 
@@ -244,7 +249,12 @@ describe('rezultati', () => {
     await post('/api/scores', { ...base, mode: 'hr' }, owner.token);
 
     const view = await get(`/api/leagues/${code}`, owner.token);
-    expect((view.json.standings as { guesses: number }[])[0]?.guesses).toBe(6);
+    const tables = view.json.standings as Record<string, { guesses: number; points: number }[]>;
+
+    for (const mode of ['world', 'capitals', 'hr']) {
+      expect(tables[mode]?.[0]?.guesses, mode).toBe(2);
+      expect(tables[mode]?.[0]?.points, mode).toBe(8);
+    }
   });
 });
 
@@ -265,8 +275,11 @@ describe('otkrivanje tuđih rezultata', () => {
     const hidden = await get(`/api/leagues/${code}`, owner.token);
     expect(hidden.json.revealed).toBe(false);
     const marta = (
-      hidden.json.standings as { nickname: string; points: number; playedToday: boolean }[]
-    ).find((r) => r.nickname === 'Marta');
+      hidden.json.standings as Record<
+        string,
+        { nickname: string; points: number; playedToday: boolean }[]
+      >
+    ).world?.find((r) => r.nickname === 'Marta');
     expect(marta?.points).toBe(0);
     expect(marta?.playedToday).toBe(true);
 
@@ -278,9 +291,9 @@ describe('otkrivanje tuđih rezultata', () => {
     );
     const shown = await get(`/api/leagues/${code}`, owner.token);
     expect(shown.json.revealed).toBe(true);
-    const martaNow = (shown.json.standings as { nickname: string; points: number }[]).find(
-      (r) => r.nickname === 'Marta',
-    );
+    const martaNow = (
+      shown.json.standings as Record<string, { nickname: string; points: number }[]>
+    ).world?.find((r) => r.nickname === 'Marta');
     expect(martaNow?.points).toBeGreaterThan(0);
   });
 });

@@ -880,3 +880,61 @@ Kod je jedino što osnivač mora nekome proslijediti, pa ima svoju karticu ispod
 ljestvice, s gumbom za kopiranje — prije je stajao sitno, u rečenici u podnožju.
 Uvijek na istom mjestu: uvjetovati ga brojem članova znači da ga nema baš kad ga
 netko traži, a dvije kopije na ekranu znače da nijedna nije očita.
+
+## 2026-09-17 — Strelice, postotak i kolut oko malih država su maknuti
+
+Sve tri su bile pomoćne oznake **pored** podatka, a podatak je udaljenost i njezina
+boja. Strelica je nosila smjer koji igra ne traži, postotak je ponavljao kilometre
+drugom mjerom, a kolut oko sitne države bio je oznaka da ondje nešto jest — umjesto
+da se ta država jednostavno vidi.
+
+Male države sada dobivaju **punu mrlju u boji udaljenosti**, promjera
+`MIN_VISIBLE_PX`. Mauricijus zauzima 3 × 4 piksela teksture i na ekranu je manji od
+piksela; mrlja ga crta krupnije, ali istom bojom kao i svaku drugu državu, pa se čita
+istom mjerom. SPEC §2.1: boja je podatak, oznaka nije.
+
+Uklonjeni su i `arrow()` i `proximity()` jer su ostali bez korisnika, zajedno sa
+svojim testovima. `Guess.bearing` ostaje — računa se u reduceru i ide u pohranu; ako
+zatreba, smjer je ondje.
+
+## 2026-09-17 — Liga se boduje po modu, ne zbrojno
+
+Ljestvica je zbrajala bodove iz sva tri moda u jedan redak, pa se iz njega nije dalo
+pročitati ni tko je u čemu bolji ni zašto netko vodi — pogodak iz glavnih gradova
+dizao je isti broj kao pogodak iz država.
+
+Sada su tri odvojene ljestvice, jedna po modu, s vlastitim poretkom i vlastitom
+kvačicom „odigrao danas". `standings()` prima mod; `allStandings()` vraća sve tri.
+Snapshot zatvorene runde je mapa po modu, pa i povijest ima tri pobjednika.
+
+Otvaranje i zatvaranje runde ostaje nepromijenjeno: runda se zatvara kad su svi
+odigrali petak u **bilo kojem** modu. To je pravilo o rundi, ne o bodovanju, i nije
+bilo dio problema.
+
+## 2026-09-17 — Ime se traži na ulazu, s izlazom
+
+Modal pri prvom otvaranju traži nadimak i sprema igrača. Prije se ime tražilo tek kad
+netko otvori panel lige, pa je pitanje padalo usred partije.
+
+Modal ima tihi izlaz („Preskoči, igrat ću bez lige"). Upis ide preko mreže i može
+pasti; bez izlaza bi pala mreža značila da se igra uopće ne može igrati, a igra ligu
+ne treba. Deep linkovi `/l/:code` i `/v/:token` modal preskaču — ondje upis imena
+ujedno i pridružuje ligi, pa bi modal ispred njega otvorio račun bez članstva.
+
+## 2026-09-17 — Globus ispunjava kraću os do kraja
+
+`FILL` je s 0,9075 podignut na 1: rub sfere sada pada točno na rub kraće osi. Prije je
+oko globusa ostajao pojas praznog papira, a države su bile manje nego što su morale
+biti. Ovo je najveći zum pri kojem se kugla još vidi cijela — preko toga bi je uža os
+odsjekla, što je popravak od 2026-09-16 upravo uklonio. Oreol je pomaknut s 93 % na
+102 %, da ostane tik izvan ruba.
+
+## 2026-09-17 — Strop za JS podignut s 92 na 94 KB
+
+Modal za ime i tri odvojene ljestvice donose oko 1,3 KB gzipano. Budžet iz SPEC §9.5
+je i dalje 45 KB i i dalje je nedostižan uz React; strop je, kako test i kaže, samo
+čuvar od daljnjeg rasta. Mjereno 92,9 KB.
+
+Statički uvoz modala je ovdje **manji** od lijenog: zaseban chunk nosi vlastiti
+režijski trošak i mjerio je 93,3 KB, jer test zbraja sve JS datoteke osim three.js-a,
+pa lijenost ne skida bajtove nego ih samo premješta.

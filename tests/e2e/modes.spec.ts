@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('HR podaci se ne preuzimaju dok se mod ne odabere', async ({ page }) => {
   const requests: string[] = [];

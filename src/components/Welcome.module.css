@@ -1,0 +1,108 @@
+/* Modal na ulazu. Isti rječnik kao ostatak stranice: papir, hairline, oštar rub. */
+
+.backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-4);
+  /* Papir ispod ostaje čitljiv, samo utihne — nije crna zavjesa. */
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  backdrop-filter: blur(3px);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  width: 100%;
+  max-width: 24rem;
+  padding: var(--s-6);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+}
+
+/* Naslovni rez je podskupljen na točno pet glifova riječi „Orbis" (build-font.ts),
+   pa velika slova ondje ne postoje: `text-transform: uppercase` srušio bi svako
+   osim O na system-ui i wordmark bi se čitao kao „0RBIS". */
+.wordmark {
+  color: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.lead {
+  margin: 0;
+  font-size: var(--t-md);
+  font-weight: 400;
+}
+
+.note {
+  color: var(--ink-muted);
+  font-size: var(--t-sm);
+}
+
+.row {
+  display: flex;
+  gap: var(--s-2);
+  margin-top: var(--s-1);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.input::placeholder {
+  color: var(--ink-muted);
+}
+
+.button {
+  flex-shrink: 0;
+  padding: var(--s-2) var(--s-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--raised);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--t-sm);
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--ink-muted);
+}
+
+.button:disabled {
+  color: var(--ink-faint);
+  cursor: default;
+  box-shadow: none;
+}
+
+.error {
+  color: var(--error);
+  font-size: var(--t-sm);
+}
+
+/* Izlaz je tih, ali postoji: mreža može pasti, a igra ligu ne treba. */
+.skip {
+  align-self: flex-start;
+  padding: 0;
+  color: var(--ink-muted);
+  font-size: var(--t-xs);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.skip:hover {
+  color: var(--ink);
+}

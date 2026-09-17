@@ -8,6 +8,7 @@ import {
   roundState,
 } from '../../netlify/lib/data';
 import {
+  allStandings,
   closeDueRounds,
   closeIfEveryoneDone,
   closeRound,
@@ -63,7 +64,7 @@ describe('ljestvica', () => {
       elapsedMs: 20_000,
     });
 
-    const table = await standings(store, LEAGUE, FRIDAY, true, '2026-09-16');
+    const table = await standings(store, LEAGUE, FRIDAY, true, 'world', '2026-09-16');
     expect(table.map((r) => r.nickname)).toEqual(['Ana', 'Bruno']);
     expect(table[0]?.rank).toBe(1);
     expect(table[0]?.points).toBeGreaterThan(table[1]?.points ?? 0);
@@ -75,7 +76,7 @@ describe('ljestvica', () => {
       elapsedMs: 20_000,
     });
 
-    const hidden = await standings(store, LEAGUE, FRIDAY, false, '2026-09-15');
+    const hidden = await standings(store, LEAGUE, FRIDAY, false, 'world', '2026-09-15');
     const bruno = hidden.find((r) => r.nickname === 'Bruno');
     expect(bruno?.points).toBe(0);
     // Kvačica se ipak vidi — ona je jedino što ekipu tjera da zaigra. SPEC §7.6.
@@ -83,7 +84,7 @@ describe('ljestvica', () => {
   });
 
   it('član bez ijednog rezultata je na ljestvici s nulom', async () => {
-    const table = await standings(store, LEAGUE, FRIDAY, true, '2026-09-16');
+    const table = await standings(store, LEAGUE, FRIDAY, true, 'world', '2026-09-16');
     expect(table).toHaveLength(2);
     expect(table.every((r) => r.points === 0)).toBe(true);
   });
@@ -115,7 +116,9 @@ describe('zatvaranje runde', () => {
     await everyonePlaysFriday();
     await closeRound(store, LEAGUE, FRIDAY);
 
-    const results = (await roundState(store, LEAGUE, FRIDAY))?.results as { nickname: string }[];
+    const results = ((await roundState(store, LEAGUE, FRIDAY))?.results?.world ?? []) as {
+      nickname: string;
+    }[];
     expect(results.map((r) => r.nickname).sort()).toEqual(['Ana', 'Bruno']);
   });
 
@@ -146,12 +149,14 @@ describe('iz tjedna u tjedan', () => {
     }
     await closeRound(store, LEAGUE, FRIDAY);
 
-    const week2 = await standings(store, LEAGUE, NEXT_FRIDAY, true, '2026-09-22');
+    const week2 = await standings(store, LEAGUE, NEXT_FRIDAY, true, 'world', '2026-09-22');
     expect(week2.map((r) => r.nickname).sort()).toEqual(['Ana', 'Bruno']);
     expect(week2.every((r) => r.points === 0)).toBe(true);
 
     // A prošli tjedan je i dalje ondje, sa svojim bodovima.
-    const week1 = (await roundState(store, LEAGUE, FRIDAY))?.results as { points: number }[];
+    const week1 = ((await roundState(store, LEAGUE, FRIDAY))?.results?.world ?? []) as {
+      points: number;
+    }[];
     expect(week1.some((r) => r.points > 0)).toBe(true);
   });
 
@@ -163,10 +168,12 @@ describe('iz tjedna u tjedan', () => {
 
     await member('cvita', 'Cvita');
 
-    const closed = (await roundState(store, LEAGUE, FRIDAY))?.results as { nickname: string }[];
+    const closed = ((await roundState(store, LEAGUE, FRIDAY))?.results?.world ?? []) as {
+      nickname: string;
+    }[];
     expect(closed.map((r) => r.nickname)).not.toContain('Cvita');
 
-    const open = await standings(store, LEAGUE, NEXT_FRIDAY, true, '2026-09-22');
+    const open = await standings(store, LEAGUE, NEXT_FRIDAY, true, 'world', '2026-09-22');
     expect(open.map((r) => r.nickname)).toContain('Cvita');
   });
 
@@ -203,5 +210,59 @@ describe('zakazano zatvaranje', () => {
 
     // Sljedeći petak još nije došao.
     expect((await roundState(store, LEAGUE, NEXT_FRIDAY))?.closedAt).toBeNull();
+  });
+});
+
+describe('modovi se boduju odvojeno', () => {
+  it('bodovi iz jednog moda ne ulaze u ljestvicu drugog', async () => {
+    /*
+     * Prije su se zbrajali svi modovi, pa je pogodak iz glavnih gradova dizao
+     * isti redak kao i pogodak iz država — iz ljestvice se nije vidjelo tko je
+     * u čemu bolji. Sada je svaki mod vlastiti stupac.
+     */
+    await putScore(store, 'ana', FRIDAY, '2026-09-15', 'world', { guesses: 1, elapsedMs: 10_000 });
+    await putScore(store, 'bruno', FRIDAY, '2026-09-15', 'capitals', {
+      guesses: 1,
+      elapsedMs: 10_000,
+    });
+
+    const world = await standings(store, LEAGUE, FRIDAY, true, 'world', '2026-09-16');
+    const capitals = await standings(store, LEAGUE, FRIDAY, true, 'capitals', '2026-09-16');
+
+    expect(world.find((r) => r.nickname === 'Ana')?.points).toBe(10);
+    expect(world.find((r) => r.nickname === 'Bruno')?.points).toBe(0);
+
+    expect(capitals.find((r) => r.nickname === 'Bruno')?.points).toBe(10);
+    expect(capitals.find((r) => r.nickname === 'Ana')?.points).toBe(0);
+  });
+
+  it('kvačica prati mod, ne bilo koju odigranu partiju', async () => {
+    await putScore(store, 'ana', FRIDAY, '2026-09-15', 'world', { guesses: 3, elapsedMs: 30_000 });
+
+    const world = await standings(store, LEAGUE, FRIDAY, true, 'world', '2026-09-15');
+    const hr = await standings(store, LEAGUE, FRIDAY, true, 'hr', '2026-09-15');
+
+    expect(world.find((r) => r.nickname === 'Ana')?.playedToday).toBe(true);
+    expect(hr.find((r) => r.nickname === 'Ana')?.playedToday).toBe(false);
+  });
+
+  it('allStandings vraća sva tri moda, i prazne', async () => {
+    await putScore(store, 'ana', FRIDAY, '2026-09-15', 'hr', { guesses: 4, elapsedMs: 40_000 });
+
+    const all = await allStandings(store, LEAGUE, FRIDAY, true, '2026-09-16');
+    expect(Object.keys(all).sort()).toEqual(['capitals', 'hr', 'world']);
+    expect(all.hr.find((r) => r.nickname === 'Ana')?.points).toBe(5);
+    expect(all.world.every((r) => r.points === 0)).toBe(true);
+    expect(all.capitals.every((r) => r.points === 0)).toBe(true);
+  });
+
+  it('snapshot zatvorene runde nosi sva tri moda', async () => {
+    for (const id of ['ana', 'bruno']) {
+      await putScore(store, id, FRIDAY, FRIDAY, 'world', { guesses: 2, elapsedMs: 20_000 });
+    }
+    await closeRound(store, LEAGUE, FRIDAY);
+
+    const results = (await roundState(store, LEAGUE, FRIDAY))?.results;
+    expect(Object.keys(results ?? {}).sort()).toEqual(['capitals', 'hr', 'world']);
   });
 });

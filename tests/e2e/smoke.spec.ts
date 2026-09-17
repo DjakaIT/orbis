@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('stranica se učita i prikaže wordmark', async ({ page }) => {
   await page.goto('/');

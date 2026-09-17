@@ -24,8 +24,20 @@ export interface Standing extends StandingRow {
   rank: number;
 }
 
+/** Modovi se boduju odvojeno, pa svaki ima vlastitu ljestvicu. */
+export const LEAGUE_MODES = ['world', 'capitals', 'hr'] as const;
+
+export type LeagueMode = (typeof LEAGUE_MODES)[number];
+
+export type StandingsByMode = Record<LeagueMode, Standing[]>;
+
 /**
- * Ljestvica lige za rundu.
+ * Ljestvica lige za rundu i **jedan mod**.
+ *
+ * Bodovi iz različitih modova se ne zbrajaju. Prije su se zbrajali, pa je jedan
+ * redak nosio zbroj država, glavnih gradova i hrvatskih naselja — iz njega se
+ * nije dalo pročitati tko je u čemu bolji, ni zašto netko vodi. Tri odvojene
+ * ljestvice su tri usporediva stupca.
  *
  * `revealToday` je `false` dok igrač sam nije odigrao: iz tuđeg broja pokušaja
  * vidi se je li zagonetka teška. SPEC §7.6.
@@ -35,6 +47,7 @@ export async function standings(
   leagueId: string,
   roundId: string,
   revealToday: boolean,
+  mode: LeagueMode,
   today = zagrebDate(),
 ): Promise<Standing[]> {
   const ids = await memberIds(store, leagueId);
@@ -45,9 +58,8 @@ export async function standings(
       if (!player) return null;
 
       const all = await scoresOf(store, id, roundId);
-      const counted = Object.entries(all).filter(
-        ([field]) => revealToday || !field.startsWith(`${today}:`),
-      );
+      const own = Object.entries(all).filter(([field]) => field.endsWith(`:${mode}`));
+      const counted = own.filter(([field]) => revealToday || !field.startsWith(`${today}:`));
 
       return {
         playerId: id,
@@ -55,8 +67,9 @@ export async function standings(
         points: counted.reduce((sum, [, s]) => sum + points(s.guesses), 0),
         guesses: counted.reduce((sum, [, s]) => sum + s.guesses, 0),
         elapsedMs: counted.reduce((sum, [, s]) => sum + s.elapsedMs, 0),
-        // Kvačica je jedini podatak koji ekipu tjera da zaigra, pa se pokazuje uvijek.
-        playedToday: playedOn(all, today),
+        // Kvačica je jedini podatak koji ekipu tjera da zaigra, pa se pokazuje
+        // uvijek — ali samo za ovaj mod, jer je i ljestvica samo za njega.
+        playedToday: own.some(([field]) => field === `${today}:${mode}`),
       };
     }),
   );
@@ -65,6 +78,22 @@ export async function standings(
     .filter((r): r is StandingRow => r !== null)
     .sort(compareStandings)
     .map((r, i) => ({ ...r, rank: i + 1 }));
+}
+
+/** Sve tri ljestvice odjednom. */
+export async function allStandings(
+  store: Store,
+  leagueId: string,
+  roundId: string,
+  revealToday: boolean,
+  today = zagrebDate(),
+): Promise<StandingsByMode> {
+  const tables = await Promise.all(
+    LEAGUE_MODES.map((mode) => standings(store, leagueId, roundId, revealToday, mode, today)),
+  );
+  return Object.fromEntries(
+    LEAGUE_MODES.map((mode, i) => [mode, tables[i] ?? []]),
+  ) as StandingsByMode;
 }
 
 /** Runda u tijeku za ligu; otvara je ako ne postoji. */
@@ -112,7 +141,7 @@ export async function closeRound(
 ): Promise<boolean> {
   if (await isClosed(store, leagueId, roundId)) return false;
 
-  const results = await standings(store, leagueId, roundId, true);
+  const results = await allStandings(store, leagueId, roundId, true);
   await setRound(store, leagueId, roundId, { closedAt: new Date().toISOString(), results });
 
   // Sljedeća runda kreće odmah, da ljestvica nikad ne ostane bez otvorene runde.

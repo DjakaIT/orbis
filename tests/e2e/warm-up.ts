@@ -1,5 +1,7 @@
 import { chromium } from '@playwright/test';
 
+import { signIn } from './fixtures';
+
 import { DEV_URL, PREVIEW_URL } from '../../playwright.config';
 
 /**
@@ -19,6 +21,8 @@ export default async function warmUp(): Promise<void> {
     for (const url of [DEV_URL, PREVIEW_URL]) {
       const page = await browser.newPage();
       try {
+        // Modal na ulazu inace stoji preko polja koje se ceka.
+        await signIn(page);
         await page.goto(url, { timeout: 60_000 });
         // Polje je omogućeno tek kad su podaci učitani — tada je server topao.
         await page.getByLabel('Upiši državu').waitFor({ state: 'visible', timeout: 60_000 });
