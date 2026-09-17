@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bounds, MIN_VISIBLE_PX, plan, unwrap, type Ring } from '../../src/render/texture';
+import { bounds, plan, unwrap, type Ring } from '../../src/render/texture';
 
 /**
  * Crtanje prstenova preko ruba karte.
@@ -134,15 +134,16 @@ describe('običan prsten', () => {
 
 describe('sitne države', () => {
   /**
-   * Mauricijus se bojao točno, i to se nije vidjelo.
+   * Mauricijus se boja točno, i to se na punom kadru gotovo ne vidi.
    *
-   * Prijavljeno kao „stisnuo sam Mauricijus, a karta je označila nešto drugo".
-   * Izmjereno: država je promijenila 3 × 4 piksela od 2048 × 1024, na svom pravom
-   * mjestu (57,3–57,7° E). Kugla se na ekranu prikazuje na oko 500 px, pa na to
-   * dođe manje od jednog piksela — pokušaj se dogodio, a globus je ostao isti.
+   * Država zauzima 3 × 4 piksela od 2048 × 1024, na svom pravom mjestu
+   * (57,3–57,7° E). Kugla se na ekranu prikazuje na oko 400 px, pa na to dođe
+   * manje od jednog piksela.
    *
-   * Zato ispod praga ide i kolut. Ovdje se čuva prag: da stvarne veličine padnu
-   * s prave strane, jer sam prag bez toga nije ništa.
+   * Pomagala su probana i maknuta: puna mrlja je Esvatini crtala kao kolut, a
+   * zadebljan obris je prelazio granicu države. Odgovor je zum. Ovi testovi
+   * čuvaju mjeru — da se zna koliko je sitno ono što se bez zuma ne vidi, i da
+   * pomagalo ne uđe natrag nezapaženo.
    */
 
   /** Pravokutnik u stupnjevima, kao gruba zamjena za obris države. */
@@ -166,29 +167,32 @@ describe('sitne države', () => {
     return Math.max(b.x1 - b.x0, b.y1 - b.y0);
   };
 
-  it('Mauricijus je ispod praga vidljivosti', () => {
+  it('Mauricijus je nekoliko piksela teksture', () => {
     // Oko 0,35° × 0,45° — stvarne dimenzije iz Natural Eartha.
-    expect(widthPx(box(57.3, -20.5, 0.35, 0.45))).toBeLessThan(MIN_VISIBLE_PX);
+    const px = widthPx(box(57.3, -20.5, 0.35, 0.45));
+    expect(px).toBeGreaterThan(0);
+    expect(px).toBeLessThan(5);
   });
 
   it('Malta, Singapur i Maldivi također', () => {
-    expect(widthPx(box(14.2, 35.8, 0.3, 0.2))).toBeLessThan(MIN_VISIBLE_PX);
-    expect(widthPx(box(103.6, 1.2, 0.4, 0.2))).toBeLessThan(MIN_VISIBLE_PX);
-    expect(widthPx(box(72.9, 3.2, 0.6, 1.2))).toBeLessThan(MIN_VISIBLE_PX);
+    expect(widthPx(box(14.2, 35.8, 0.3, 0.2))).toBeLessThan(5);
+    expect(widthPx(box(103.6, 1.2, 0.4, 0.2))).toBeLessThan(5);
+    expect(widthPx(box(72.9, 3.2, 0.6, 1.2))).toBeLessThan(10);
   });
 
-  it('Hrvatska je iznad njega, i ne dobiva kolut', () => {
-    // Kolut preko države koja se ionako vidi bio bi šum, ne oznaka.
-    expect(widthPx(box(13.5, 42.4, 5.4, 4.1))).toBeGreaterThan(MIN_VISIBLE_PX);
-  });
-
-  it('prag je iznad piksela, ali daleko ispod države', () => {
+  it('Esvatini je malen, ali daleko od točke', () => {
     /*
-     * Prag mora ostati između dva reda veličine: veći od šuma jednog piksela,
-     * manji od najmanje države koja se sama vidi. Bez toga bi ili sitne ostale
-     * nevidljive ili bi kolutovi pali po pola karte.
+     * Prijavljeno: „Esvatini je ocrtan kao nekakav krug, a nijedna država nije
+     * krug." Država je oko 1,4° × 1,9°, dakle desetak piksela teksture — dosta
+     * da joj se obris vidi čim se zumira, i previše da bi je smjelo zamijeniti
+     * bilo kakvo pomagalo.
      */
-    expect(MIN_VISIBLE_PX).toBeGreaterThan(4);
-    expect(MIN_VISIBLE_PX).toBeLessThan(widthPx(box(13.5, 42.4, 5.4, 4.1)));
+    const px = widthPx(box(30.8, -27.3, 1.4, 1.9));
+    expect(px).toBeGreaterThan(5);
+    expect(px).toBeLessThan(20);
+  });
+
+  it('Hrvatska se vidi i bez zuma', () => {
+    expect(widthPx(box(13.5, 42.4, 5.4, 4.1))).toBeGreaterThan(25);
   });
 });

@@ -938,3 +938,35 @@ je i dalje 45 KB i i dalje je nedostižan uz React; strop je, kako test i kaže,
 Statički uvoz modala je ovdje **manji** od lijenog: zaseban chunk nosi vlastiti
 režijski trošak i mjerio je 93,3 KB, jer test zbraja sve JS datoteke osim three.js-a,
 pa lijenost ne skida bajtove nego ih samo premješta.
+
+## 2026-09-17 (drugi krug) — Zum globusa, i zašto pomagala za sitne države odlaze
+
+Prijavljeno troje odjednom: globus je opet odsječen sa strana, zum ne radi, a
+Esvatini je nacrtan kao krug. Sve troje je jedan uzrok — veličina je bila
+kompromis jer se u globus nije moglo ući.
+
+**Zum se radi sužavanjem kuta objektiva, ne primicanjem kamere.** Prva izvedba je
+primicala kameru: `position.z = cameraDistance / zoom`. Pri zumu 8 to daje
+z = 0,41, a polumjer kugle je 1 — kamera je bila **unutar** globusa i na ekranu je
+ostao prazan papir. Sada kamera stoji gdje jest, a mijenja se `fov`, kao
+teleobjektiv. `zoomedFov(n)` daje točno n-terostruko povećanje.
+
+Gornja granica je 4, i veže se uz teksturu a ne uz geometriju: kugla se crta na
+oko 400 px, vidljiva polutka nosi 1024 od 2048 stupaca teksture, pa je na
+četverostrukom zumu omjer već ispod jedan teksel po pikselu. Na osam je slika bila
+vidljivo mutna.
+
+**`FILL` se vraća s 1 na 0,88.** Jedinica je kugli oduzela svaki piksel zraka i na
+stvarnim ekranima se rezala sa strana — `clientWidth` je zaokružen na cijeli
+piksel, a oreol i sjena trebaju mjesta izvan ruba. Veličina više nije kompromis
+jer postoji zum.
+
+**Sitne države se boje točno unutar svojih granica, bez pomagala.** Prvo je bila
+puna mrlja: Esvatini je zauzimao desetak piksela teksture, pao ispod praga i dobio
+krug — a nijedna država nije krug. Zatim zadebljan obris, koji je zadržavao oblik
+ali je prelazio granicu. Oboje je bio ustupak tome što se sitna država na punom
+kadru ne vidi, a to sada rješava zum. `MIN_VISIBLE_PX` i prateći kod su uklonjeni.
+
+Cijena je poštena i zapisana: pogodak na Mauricijusu na punom kadru ne mijenja
+gotovo ništa na kugli. Ime, zastava i udaljenost stoje u listi, kartica pogotka se
+otvara, a tko želi vidjeti državu — zumira.

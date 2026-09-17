@@ -42,17 +42,30 @@ const MAX_PITCH = Math.PI / 2 - 0.05;
 /** Vertikalni kut kamere. */
 const FOV = 38;
 /**
- * Koliki dio **krace** poluosi zauzima kugla.
+ * Koliki dio **krace** poluosi zauzima kugla pri punom kadru.
  *
- * Jedinica znaci da rub sfere pada tocno na rub kraće osi — najveci zum pri kojem
- * se kugla jos vidi cijela. Prije je ovdje stajalo 0,9075, izvedeno iz fov = 38°
- * i z = 3,2, pa je oko globusa ostajao pojas praznog papira na kojem se nista nije
- * dogadalo, a drzave su bile manje nego sto su morale biti.
+ * Jedinica bi znacila da rub sfere pada tocno na rub, bez ijednog piksela zraka —
+ * i tako je bilo 2026-09-17. Na stvarnim ekranima se kugla ondje ipak rezala sa
+ * strana: `clientWidth` je zaokruzen na cijeli piksel, a oreol i sjena trebaju
+ * mjesta izvan ruba. Pojas od 12 % je ta rezerva.
  *
- * Vise od ovoga znaci rezanje kugle: `cameraDistance` bi primakao kameru toliko
- * da polumjer ne stane u uzu os.
+ * Velicina vise nije kompromis jer postoji zum: tko zeli blize, primakne se.
  */
-const FILL = 1;
+const FILL = 0.88;
+
+/**
+ * Raspon zuma. 1 je cijela kugla u kadru.
+ *
+ * Gornja granica je vezana uz teksturu, ne uz geometriju: kugla se na ekranu
+ * crta na oko 400 px, a vidljiva polutka nosi 1024 od 2048 stupaca teksture, pa
+ * je na cetverostrukom zumu omjer vec ispod jedan teksel po pikselu. Na osam je
+ * slika bila vidljivo mutna.
+ */
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 4;
+
+/** Koliko jedan zarez kotacica mijenja zum. Eksponencijalno, vidi `onWheel`. */
+const WHEEL_SENSITIVITY = 0.0015;
 
 /**
  * Koliko daleko kamera mora stajati da kugla stane cijela.
@@ -68,6 +81,17 @@ const FILL = 1;
  */
 export function cameraDistance(aspect: number, fov = FOV): number {
   return Math.max(1, 1 / aspect) / (FILL * Math.tan((fov * Math.PI) / 360));
+}
+
+/**
+ * Kut objektiva za zadani zum, u stupnjevima.
+ *
+ * Teleobjektiv: kamera stoji na mjestu, a uzi kut povecava ono sto vidi. Time
+ * kamera nikad ne ude u kuglu, sto se s primicanjem dogadalo — pri zumu 8 je
+ * padala na z = 0,41 uz polumjer 1 i globus bi nestao.
+ */
+export function zoomedFov(zoom: number, fov = FOV): number {
+  return (Math.atan(Math.tan((fov * Math.PI) / 360) / zoom) * 360) / Math.PI;
 }
 
 /** Trajanje okretanja prema meti pri pogotku. SPEC §6.1. */
@@ -107,6 +131,14 @@ export class Globe {
   private dragging = false;
   private lastX = 0;
   private lastY = 0;
+
+  /** Zum: 1 je cijela kugla u kadru, vise znaci blize. */
+  private zoom = MIN_ZOOM;
+
+  /** Aktivni dodiri, za stiskanje s dva prsta. */
+  private readonly pointers = new Map<number, { x: number; y: number }>();
+  private pinchStart = 0;
+  private pinchZoom = MIN_ZOOM;
 
   private readonly host: HTMLElement;
 
@@ -238,8 +270,8 @@ export class Globe {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     // Kugla mora stati i po sirini, ne samo po visini. Vidi `cameraDistance`.
-    this.camera.position.z = cameraDistance(this.camera.aspect);
-    this.camera.updateProjectionMatrix();
+    // `setZoom` postavlja udaljenost i zadrzava trenutni zum kroz promjenu okvira.
+    this.setZoom(this.zoom);
   }
 
   dispose(): void {
@@ -256,34 +288,92 @@ export class Globe {
 
   /* ------------------------------------------------------------- kontrole */
 
+  /**
+   * Postavlja zum. 1 je cijela kugla u kadru, vise znaci blize.
+   *
+   * Zumira se **suzavanjem kuta objektiva**, ne primicanjem kamere. Primicanje
+   * je na velikom zumu kameru uvuklo unutar kugle — polumjer je 1, a kamera je
+   * pri osmerostrukom zumu pala na z = 0,41 i globus je s ekrana nestao. Kamera
+   * zato ostaje gdje jest, a mijenja se `fov`, kao teleobjektiv.
+   *
+   * Rotacija se usporava razmjerno zumu: pri peterostrukom priblizavanju isti
+   * pomak prsta prelazi peterostruko manje stupnjeva, inace drzava odleti van
+   * kadra prije nego je igrac stigne pogledati.
+   */
+  setZoom(next: number): void {
+    this.zoom = clamp(next, MIN_ZOOM, MAX_ZOOM);
+    this.camera.position.z = cameraDistance(this.camera.aspect);
+    this.camera.fov = zoomedFov(this.zoom);
+    this.camera.updateProjectionMatrix();
+  }
+
+  get zoomLevel(): number {
+    return this.zoom;
+  }
+
   private readonly onDown = (e: PointerEvent): void => {
-    this.dragging = true;
+    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     // Blago auto-rotiranje staje na prvi dodir i ne vraca se. SPEC §6.1.
     this.auto = false;
     this.spin = null;
+
+    if (this.pointers.size === 2) {
+      this.pinchStart = this.pointerSpread();
+      this.pinchZoom = this.zoom;
+    }
+
+    this.dragging = this.pointers.size === 1;
     this.lastX = e.clientX;
     this.lastY = e.clientY;
     this.renderer.domElement.setPointerCapture(e.pointerId);
   };
 
   private readonly onMove = (e: PointerEvent): void => {
+    if (!this.pointers.has(e.pointerId)) return;
+    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // Dva prsta znace stiskanje, ne vrtnju.
+    if (this.pointers.size >= 2) {
+      const spread = this.pointerSpread();
+      if (this.pinchStart > 0) this.setZoom((this.pinchZoom * spread) / this.pinchStart);
+      return;
+    }
+
     if (!this.dragging) return;
-    this.yaw += (e.clientX - this.lastX) * DRAG_SENSITIVITY;
-    this.pitch = clamp(
-      this.pitch + (e.clientY - this.lastY) * DRAG_SENSITIVITY,
-      -MAX_PITCH,
-      MAX_PITCH,
-    );
+    const speed = DRAG_SENSITIVITY / this.zoom;
+    this.yaw += (e.clientX - this.lastX) * speed;
+    this.pitch = clamp(this.pitch + (e.clientY - this.lastY) * speed, -MAX_PITCH, MAX_PITCH);
     this.lastX = e.clientX;
     this.lastY = e.clientY;
   };
 
   private readonly onUp = (e: PointerEvent): void => {
+    this.pointers.delete(e.pointerId);
     this.dragging = false;
+    this.pinchStart = 0;
     if (this.renderer.domElement.hasPointerCapture(e.pointerId)) {
       this.renderer.domElement.releasePointerCapture(e.pointerId);
     }
   };
+
+  /**
+   * Kotacic mijenja zum. `preventDefault` je nuzan da se stranica ne pomakne
+   * ispod pokazivaca, pa slusac mora biti `passive: false`.
+   */
+  private readonly onWheel = (e: WheelEvent): void => {
+    e.preventDefault();
+    this.auto = false;
+    this.spin = null;
+    // Eksponencijalno: svaki korak mnozi, pa je osjecaj jednak na svakom zumu.
+    this.setZoom(this.zoom * Math.exp(-e.deltaY * WHEEL_SENSITIVITY));
+  };
+
+  /** Razmak izmedu prva dva prsta, u pikselima. */
+  private pointerSpread(): number {
+    const [a, b] = [...this.pointers.values()];
+    if (!a || !b) return 0;
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  }
 
   private attach(): void {
     const el = this.renderer.domElement;
@@ -292,6 +382,7 @@ export class Globe {
     el.addEventListener('pointermove', this.onMove);
     el.addEventListener('pointerup', this.onUp);
     el.addEventListener('pointercancel', this.onUp);
+    el.addEventListener('wheel', this.onWheel, { passive: false });
   }
 
   private detach(): void {
@@ -300,6 +391,7 @@ export class Globe {
     el.removeEventListener('pointermove', this.onMove);
     el.removeEventListener('pointerup', this.onUp);
     el.removeEventListener('pointercancel', this.onUp);
+    el.removeEventListener('wheel', this.onWheel);
   }
 
   private readonly loop = (): void => {

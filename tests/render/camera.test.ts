@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { cameraDistance } from '../../src/render/globe';
+import { cameraDistance, zoomedFov } from '../../src/render/globe';
 
 /**
  * Kugla mora stati cijela, na svakom obliku ekrana.
@@ -50,17 +50,22 @@ describe('uklapanje globusa', () => {
     expect(fixed).toBeLessThan(1);
   });
 
-  it('na širokom ekranu kugla ispuni kraću os do kraja', () => {
-    // FILL = 1: poluvisina je točno polumjer, pa kamera stoji na 1/tan(fov/2).
-    const touching = 1 / Math.tan((FOV * Math.PI) / 360);
-    expect(cameraDistance(1)).toBeCloseTo(touching, 6);
-    expect(cameraDistance(1.3)).toBeCloseTo(touching, 6);
-    expect(cameraDistance(3)).toBeCloseTo(touching, 6);
+  it('na širokom ekranu udaljenost ne ovisi o omjeru', () => {
+    // Sirina tad nije ogranicenje, pa sva tri daju istu udaljenost.
+    expect(cameraDistance(1.3)).toBeCloseTo(cameraDistance(1), 6);
+    expect(cameraDistance(3)).toBeCloseTo(cameraDistance(1), 6);
   });
 
-  it('globus je veći nego dok je kamera stajala na 3,2', () => {
-    // Prije je rub sfere padao na 91 % kraće poluosi; sada pada na 100 %.
-    expect(cameraDistance(1)).toBeLessThan(3.2);
+  it('oko kugle ostaje zraka, da je rub ne odsiječe', () => {
+    /*
+     * FILL = 1 je 2026-09-17 kugli oduzeo svaki piksel zraka i na stvarnim
+     * ekranima se rezala sa strana: `clientWidth` je zaokruzen na cijeli piksel,
+     * a oreol i sjena trebaju mjesta izvan ruba.
+     */
+    for (const [name, aspect] of SHAPES) {
+      const { w, h } = halfExtent(aspect);
+      expect(Math.min(w, h), name).toBeGreaterThan(1.05);
+    }
   });
 
   it('kugla zauzima jednak udio uže osi na svakom obliku', () => {
@@ -70,7 +75,7 @@ describe('uklapanje globusa', () => {
      */
     for (const [name, aspect] of SHAPES) {
       const { w, h } = halfExtent(aspect);
-      expect(1 / Math.min(w, h), name).toBeCloseTo(1, 3);
+      expect(1 / Math.min(w, h), name).toBeCloseTo(0.88, 3);
     }
   });
 
@@ -80,5 +85,45 @@ describe('uklapanje globusa', () => {
     const narrow = cameraDistance(412 / 500);
     expect(narrow).toBeGreaterThan(wide);
     expect(narrow).toBeLessThan(wide * 1.25);
+  });
+});
+
+describe('zum', () => {
+  it('jedinica je polazni kut, bez promjene', () => {
+    expect(zoomedFov(1)).toBeCloseTo(FOV, 6);
+  });
+
+  it('veći zum znači uži kut', () => {
+    expect(zoomedFov(2)).toBeLessThan(zoomedFov(1));
+    expect(zoomedFov(4)).toBeLessThan(zoomedFov(2));
+    expect(zoomedFov(4)).toBeGreaterThan(0);
+  });
+
+  it('zum je stvarno povećanje toliko puta', () => {
+    /*
+     * Ono što se vidi na ekranu skalira se s 1/tan(fov/2). Zum od N mora dati
+     * točno N puta veći prikaz, inače brojka na kotačiću ne znači ništa.
+     */
+    const half = (deg: number): number => Math.tan((deg * Math.PI) / 360);
+    for (const zoom of [1, 1.5, 3, 4]) {
+      expect(half(FOV) / half(zoomedFov(zoom)), `zum ${String(zoom)}`).toBeCloseTo(zoom, 6);
+    }
+  });
+
+  it('kamera ostaje izvan kugle na svakom zumu', () => {
+    /*
+     * Ovo je bug zbog kojeg zum i postoji u ovom obliku. Primicanje kamere je
+     * pri zumu 8 davalo z = 0,41, a polumjer kugle je 1 — kamera je bila unutra
+     * i na ekranu je ostao prazan papir.
+     */
+    for (const [name, aspect] of SHAPES) {
+      for (const zoom of [1, 2, 3, 4]) {
+        const inside = cameraDistance(aspect) / zoom;
+        if (zoom > 3) expect(inside, `primicanje, ${name}`).toBeLessThan(1.2);
+
+        // Suzavanje kuta ne dira udaljenost.
+        expect(cameraDistance(aspect), `${name} @ ${String(zoom)}`).toBeGreaterThan(1);
+      }
+    }
   });
 });

@@ -32,8 +32,24 @@ export default function Globe() {
     });
     observer.observe(el);
 
+    /*
+     * Zum živi u sceni, koja je imperativna i ne ostavlja traga u DOM-u, pa ga
+     * e2e test inače ne može pročitati. Kuka postoji samo u dev buildu —
+     * `import.meta.env.DEV` je u produkciji `false` i rolldown cijeli blok
+     * izbaci, tako da u isporučenom kodu ovoga nema.
+     */
+    let tick = 0;
+    if (import.meta.env.DEV) {
+      const publish = (): void => {
+        (window as { __orbisZoom?: number }).__orbisZoom = g.zoomLevel;
+        tick = window.setTimeout(publish, 100);
+      };
+      publish();
+    }
+
     return () => {
       observer.disconnect();
+      if (tick) clearTimeout(tick);
       g.dispose();
       scene.current = null;
     };
