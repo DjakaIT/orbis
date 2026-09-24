@@ -1,4 +1,4 @@
-import { test as base, type Page } from '@playwright/test';
+import { test as base, type Page, type Route } from '@playwright/test';
 
 /**
  * Od 2026-09-17 igra na ulazu traži nadimak i dok ga nema stoji modal preko
@@ -64,8 +64,22 @@ export async function signOut(page: Page): Promise<void> {
   }, KEY);
 }
 
+/**
+ * Nijedan test ne zove Google.
+ *
+ * Od kad postoji prijava, panel lige pokusa povuci Googleovu knjizniku svaki put
+ * kad igrac jos nije vezan. Pustiti to van znaci da cijeli paket ovisi o tudoj
+ * mrezi i da svaki pokretanje salje zahtjev trecoj strani. Blokada je ovdje, za
+ * sve testove; `google.spec.ts` svoju knjiznicu podmetne prije ucitavanja, pa mu
+ * mreza ionako ne treba.
+ */
+async function blockGoogle(page: Page): Promise<void> {
+  await page.route('https://accounts.google.com/**', (route: Route) => route.abort());
+}
+
 export const test = base.extend({
   page: async ({ page }, use) => {
+    await blockGoogle(page);
     await signIn(page);
     await use(page);
   },

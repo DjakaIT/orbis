@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 
-import { ApiError, createPlayer } from '../league/client';
+import { ApiError, createPlayer, signInWithGoogle } from '../league/client';
 import { patch } from '../state/persist';
 import type { Player } from '../types';
+import GoogleSignIn from './league/GoogleSignIn';
 import styles from './Welcome.module.css';
 
 /**
@@ -14,6 +15,10 @@ import styles from './Welcome.module.css';
  *
  * Preskakanje postoji namjerno. Upis ide preko mreže i može pasti; bez izlaza bi
  * pala mreža značila da se igra uopće ne može igrati, a igra ligu ne treba.
+ *
+ * Prijava Googleom stoji ispod nadimka i rješava ono što nadimak ne može:
+ * nadimak nije lozinka, pa isti nadimak s novog uređaja bude novi igrač. Tko se
+ * prijavi, isti je igrač svugdje. Nije obavezna i ne pojavi se ako nije podešena.
  */
 export default function Welcome({ onDone }: { onDone: () => void }) {
   const [nickname, setNickname] = useState('');
@@ -40,6 +45,24 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
       onDone();
     } catch (err) {
       setError(err instanceof ApiError || err instanceof Error ? err.message : 'Upis nije uspio');
+      setBusy(false);
+    }
+  }
+
+  async function google(credential: string): Promise<void> {
+    setBusy(true);
+    setError(null);
+    try {
+      // Ovdje igrača još nema, pa se nema što vezati — prijava ga stvara.
+      const signed = await signInWithGoogle(credential);
+      patch({
+        player: { id: signed.player_id, token: signed.token, nickname: signed.nickname },
+      });
+      onDone();
+    } catch (err) {
+      setError(
+        err instanceof ApiError || err instanceof Error ? err.message : 'Prijava nije uspjela',
+      );
       setBusy(false);
     }
   }
@@ -85,6 +108,11 @@ export default function Welcome({ onDone }: { onDone: () => void }) {
             {error}
           </p>
         )}
+
+        <GoogleSignIn
+          label="ili se prijavi, pa te liga pamti na svakom uređaju:"
+          onCredential={(c) => void google(c)}
+        />
 
         <button type="button" className={styles.skip} onClick={onDone}>
           Preskoči, igrat ću bez lige

@@ -10,13 +10,22 @@
 import type { Config, Context } from '@netlify/functions';
 
 import { createApp } from '../lib/app';
+import { googleVerifier } from '../lib/google';
 import { blobStore } from '../lib/store';
 
 /** Aplikacija i spremište se grade jednom po instanci, ne po zahtjevu. */
 let app: ReturnType<typeof createApp> | null = null;
 
 export default async function handler(request: Request, _context: Context): Promise<Response> {
-  app ??= createApp(await blobStore());
+  /*
+   * Bez `GOOGLE_CLIENT_ID` prijava Googleom javi da nije podešena, a sve ostalo
+   * radi. Varijabla nije tajna — isti client ID stoji i u stranici — ali ovdje
+   * mora biti jer se `aud` provjerava na poslužitelju.
+   */
+  const clientId = process.env.GOOGLE_CLIENT_ID ?? '';
+  app ??= createApp(await blobStore(), {
+    ...(clientId ? { verifyGoogle: googleVerifier(clientId) } : {}),
+  });
   return app.fetch(request);
 }
 

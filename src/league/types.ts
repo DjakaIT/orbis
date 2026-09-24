@@ -34,6 +34,8 @@ export interface ClosedRound {
 export interface Me {
   player_id: string;
   nickname: string;
+  /** Vezani vanjski računi, npr. `['google']`. */
+  linked?: string[];
   leagues: { code: string; name: string }[];
 }
 
@@ -41,6 +43,17 @@ export interface NewPlayer {
   player_id: string;
   token: string;
   nickname: string;
+}
+
+export interface SignedIn extends NewPlayer {
+  /**
+   * Je li uređaj prešao na drugog igrača.
+   *
+   * Istina kad je Google račun već vezan uz nekog drugog igrača od onog koji je
+   * bio na ovom uređaju. Sučelje to mora reći naglas — tiha zamjena identiteta
+   * znači da čovjek gleda tuđu ljestvicu i ne zna zašto.
+   */
+  switched: boolean;
 }
 
 export interface NewLeague {

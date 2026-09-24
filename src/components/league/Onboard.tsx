@@ -1,22 +1,29 @@
 import { useState } from 'react';
 
 import styles from './League.module.css';
+import GoogleSignIn from './GoogleSignIn';
 
 /**
- * Cijela registracija je: upiši nadimak. Bez emaila, lozinke, potvrde, OAutha,
- * captche. Osam sekundi, nijedan korak na kojem se može odustati. SPEC §7.2.
+ * Cijela registracija je: upiši nadimak. Osam sekundi, nijedan korak na kojem se
+ * može odustati. SPEC §7.2.
+ *
+ * Google prijava stoji **ispod** nadimka, ne iznad njega, i može je se preskočiti.
+ * Ona rješava drugu stvar: nadimak nije lozinka, pa isti nadimak s novog uređaja
+ * bude novi igrač. Tko se prijavi, isti je igrač svugdje.
  */
 export default function Onboard({
   joining = false,
   busy,
   error,
   onSubmit,
+  onGoogle,
 }: {
   /** Dolazi li igrač preko `/l/:code` — tad je ovo zadnji korak pridruživanja. */
   joining?: boolean;
   busy: boolean;
   error: string | null;
   onSubmit: (nickname: string) => void;
+  onGoogle: (credential: string) => void;
 }) {
   const [nickname, setNickname] = useState('');
 
@@ -54,6 +61,8 @@ export default function Onboard({
           {error}
         </p>
       )}
+
+      <GoogleSignIn label="ili, da te liga pamti na svakom uređaju:" onCredential={onGoogle} />
     </form>
   );
 }

@@ -16,6 +16,7 @@ import type { MiddlewareHandler } from 'hono';
 import { isTodayOrYesterday, roundClosesAt, roundIdFor, zagrebDate } from '../../src/engine/time';
 import {
   addMember,
+  addToken,
   codeTaken,
   createLeague,
   createPlayer,
@@ -25,11 +26,14 @@ import {
   leagueIdsOf,
   leaguesOf,
   playedOn,
+  playerByIdentity,
   playerByToken,
   putScore,
+  linkIdentity,
   scoresOf,
   type Player,
 } from './data';
+import type { VerifyGoogle } from './google';
 import { hashToken, leagueCode, newToken, uuid } from './ids';
 import { allStandings, closeIfEveryoneDone, currentRound, everyoneDone, isClosed } from './rounds';
 import type { Store } from './store';
@@ -66,7 +70,15 @@ interface AppEnv {
   Variables: Vars;
 }
 
-export function createApp(store: Store): Hono<AppEnv> {
+export interface AppOptions {
+  /**
+   * Provjera Google tokena. Izostane li, ruta postoji ali javlja da prijava nije
+   * podešena — igra i liga preko nadimka rade i bez nje.
+   */
+  verifyGoogle?: VerifyGoogle;
+}
+
+export function createApp(store: Store, options: AppOptions = {}): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
   const hits = new Map<string, { count: number; resetAt: number }>();
 
@@ -138,8 +150,81 @@ export function createApp(store: Store): Hono<AppEnv> {
     return c.json({
       player_id: me.id,
       nickname: me.nickname,
+      linked: me.linked ?? [],
       leagues: mine.map((l) => ({ code: l.code, name: l.name })),
     });
+  });
+
+  /**
+   * Prijava Googleom. Nadimak i dalje radi bez nje — ovo je trajnost, ne zid.
+   *
+   * Nadimak nije lozinka: isti nadimak s novog uređaja je novi igrač, a jedina
+   * veza natrag bio je link `/v/:token`, koji se lako izgubi. Vezan Google račun
+   * je isti igrač na svakom uređaju, zauvijek.
+   *
+   * Četiri slučaja, i svaki je odluka:
+   *
+   * 1. Račun već vezan → prijavi se u **njega**. Trajni identitet pobjeđuje.
+   * 2. Račun nije vezan, a igrač je već ovdje s nadimkom → veže se **postojeći**
+   *    igrač. Tako mu lige, povijest i streak prežive prijavu; stvoriti novog
+   *    značilo bi tiho ga odvojiti od vlastite ekipe.
+   * 3. Račun nije vezan, igrača nema → novi igrač, nadimak s Google računa.
+   * 4. Račun vezan uz jednog, a uređaj drži drugog → prijava u vezanog, bez
+   *    spajanja. Spajanje dvaju igrača nije nedvosmisleno (čiji rezultat te
+   *    runde vrijedi?), pa se ne radi nagađanjem; odgovor kaže što se dogodilo.
+   */
+  app.post('/api/auth/google', async (c) => {
+    const verify = options.verifyGoogle;
+    if (!verify) return c.json({ error: 'Google prijava nije podešena' }, 501);
+
+    const body = await c.req
+      .json<{ credential?: unknown }>()
+      .catch(() => ({ credential: undefined }));
+    const credential = typeof body.credential === 'string' ? body.credential : '';
+    if (!credential) return c.json({ error: 'Nedostaje Google token' }, 400);
+
+    let account;
+    try {
+      account = await verify(credential);
+    } catch {
+      return c.json({ error: 'Google prijava nije prošla' }, 401);
+    }
+
+    const header = c.req.header('Authorization');
+    const bearer = header?.startsWith('Bearer ') ? header.slice(7) : null;
+    const current = bearer ? await playerByToken(store, await hashToken(bearer)) : null;
+
+    const linked = await playerByIdentity(store, 'google', account.sub);
+
+    let player = linked;
+    let created = false;
+
+    if (!player) {
+      if (current) {
+        player = current;
+      } else {
+        const id = uuid();
+        const nickname = (account.name ?? 'Igrač').slice(0, MAX_NICKNAME);
+        player = await createPlayer(store, id, await hashToken(newToken()), nickname);
+        created = true;
+      }
+      await linkIdentity(store, 'google', account.sub, player.id);
+    }
+
+    // Svaki uređaj dobiva svoj token; postojeći se time ne poništavaju.
+    const token = newToken();
+    await addToken(store, player.id, await hashToken(token));
+
+    return c.json(
+      {
+        player_id: player.id,
+        token,
+        nickname: player.nickname,
+        /** Je li uređaj promijenio igrača — sučelje to mora reći naglas. */
+        switched: current !== null && current.id !== player.id,
+      },
+      created ? 201 : 200,
+    );
   });
 
   /* -------------------------------------------------------------------- lige */

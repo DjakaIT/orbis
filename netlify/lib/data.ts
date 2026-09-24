@@ -17,6 +17,13 @@ export interface Player {
   id: string;
   nickname: string;
   createdAt: string;
+  /**
+   * Vanjski računi vezani uz ovog igrača, npr. `google`.
+   *
+   * Postoji da sučelje može reći „prijavljen si" i da se veza ne pokušava dvaput.
+   * Sam ključ veze je zaseban zapis, jer se pita i u drugom smjeru.
+   */
+  linked?: string[];
 }
 
 export interface League {
@@ -46,6 +53,7 @@ export interface RoundState {
 const key = {
   player: (id: string) => `player/${id}`,
   token: (hash: string) => `token/${hash}`,
+  identity: (provider: string, subject: string) => `identity/${provider}/${subject}`,
   league: (id: string) => `league/${id}`,
   code: (code: string) => `code/${code.toUpperCase()}`,
   member: (leagueId: string, playerId: string) => `member/${leagueId}/${playerId}`,
@@ -83,6 +91,52 @@ export async function playerByToken(store: Store, tokenHash: string): Promise<Pl
 
 export function playerById(store: Store, id: string): Promise<Player | null> {
   return store.get<Player>(key.player(id));
+}
+
+/**
+ * Još jedan token za istog igrača.
+ *
+ * Tokeni se ne zamjenjuju nego zbrajaju: svaki uređaj dobije svoj. Tako prijava
+ * na prijenosniku ne izbaci mobitel, a jedan izgubljeni token ne nosi ostale.
+ * Sprema se samo SHA-256, kao i prvi. SPEC §7.2.
+ */
+export async function addToken(store: Store, playerId: string, tokenHash: string): Promise<void> {
+  await store.set(key.token(tokenHash), { playerId });
+}
+
+/**
+ * Veže vanjski račun uz igrača.
+ *
+ * Zapis ide u oba smjera: `identity/…` da se iz Googleova `sub` nađe igrač, i
+ * popis na samom igraču da sučelje zna da je vezan.
+ */
+export async function linkIdentity(
+  store: Store,
+  provider: string,
+  subject: string,
+  playerId: string,
+): Promise<void> {
+  await store.set(key.identity(provider, subject), {
+    playerId,
+    linkedAt: new Date().toISOString(),
+  });
+
+  const player = await playerById(store, playerId);
+  if (!player) return;
+  const linked = player.linked ?? [];
+  if (!linked.includes(provider)) {
+    await store.set(key.player(playerId), { ...player, linked: [...linked, provider] });
+  }
+}
+
+/** Igrač vezan uz vanjski račun, ako takav postoji. */
+export async function playerByIdentity(
+  store: Store,
+  provider: string,
+  subject: string,
+): Promise<Player | null> {
+  const found = await store.get<{ playerId: string }>(key.identity(provider, subject));
+  return found ? playerById(store, found.playerId) : null;
 }
 
 /* --------------------------------------------------------------------- lige */

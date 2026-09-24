@@ -2,7 +2,15 @@
 
 import type { Mode } from '../types';
 
-import type { ClosedRound, LeagueView, Me, NewLeague, NewPlayer, ScoreResult } from './types';
+import type {
+  ClosedRound,
+  LeagueView,
+  Me,
+  NewLeague,
+  NewPlayer,
+  ScoreResult,
+  SignedIn,
+} from './types';
 
 /*
  * Uvijek isti origin. API je Netlifyjeva funkcija na `/api/*`, pa nema ni proxyja
@@ -78,6 +86,20 @@ export function createPlayer(nickname: string): Promise<NewPlayer> {
 
 export function me(token: string): Promise<Me> {
   return call<Me>('/me', { token });
+}
+
+/**
+ * Prijava Googleom.
+ *
+ * Postojeći token se šalje ako ga ima: poslužitelj tada veže **tog** igrača
+ * umjesto da napravi novog, pa lige i povijest prežive prijavu.
+ */
+export function signInWithGoogle(credential: string, token?: string | null): Promise<SignedIn> {
+  return call<SignedIn>('/auth/google', {
+    method: 'POST',
+    ...(token ? { token } : {}),
+    body: { credential },
+  });
 }
 
 /** Ime je neobavezno — bez njega ga poslužitelj izvede iz nadimka. */

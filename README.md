@@ -87,6 +87,46 @@ u `pnpm test`, bez mreže i bez emulatora:
 pnpm test tests/league          # API, runde, ljestvica, tjedni
 ```
 
+### Prijava Googleom
+
+Nadimak nije lozinka: isti nadimak s novog uređaja je **novi** igrač. Prijava
+Googleom to rješava — vezan račun je isti igrač na svakom uređaju. Nije obavezna;
+bez nje liga radi kao i prije, preko nadimka i linka `/v/:token`.
+
+Nova baza ne treba: veza se drži u istom Netlify Blobs spremištu, pod ključem
+`identity/google/<sub>`. Ne treba ni nova ovisnost — potpis provjerava
+`verifyWithJwks` iz Hona, koji je već tu kao router.
+
+**Što treba postaviti** (jednom, i to u Googleovoj konzoli — nitko drugi ne može
+umjesto vlasnika računa):
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → novi projekt.
+2. _APIs & Services → OAuth consent screen_: tip **External**, ime aplikacije
+   „Orbis". Za šestero prijatelja test-način je dovoljan; objava nije potrebna.
+3. _APIs & Services → Credentials → Create credentials → OAuth client ID_, tip
+   **Web application**. Pod _Authorized JavaScript origins_ upiši adresu stranice
+   (npr. `https://orbis-urbis.netlify.app`) i `http://localhost:5173` za razvoj.
+   _Authorized redirect URIs_ ostaje prazno — Identity Services ne preusmjerava.
+4. Kopiraj **Client ID** (završava s `.apps.googleusercontent.com`).
+
+Zatim ga postavi na dva mjesta u Netlifyju (_Site configuration → Environment
+variables_), s istom vrijednošću:
+
+| Varijabla               | Gdje se koristi                              |
+| ----------------------- | -------------------------------------------- |
+| `VITE_GOOGLE_CLIENT_ID` | ugrađuje se u stranicu pri buildu, crta gumb |
+| `GOOGLE_CLIENT_ID`      | funkcija, provjerava `aud` u tokenu          |
+
+Nije tajna — isti client ID stoji u stranici kod svih koji ovo koriste. Prijavu
+štiti provjera potpisa i publike na poslužitelju, ne skrivanje te vrijednosti.
+Bez tih varijabli gumb se ne pojavi, a ruta jasno javi da prijava nije podešena.
+
+Lokalno:
+
+```bash
+VITE_GOOGLE_CLIENT_ID=… GOOGLE_CLIENT_ID=… pnpm dev:api
+```
+
 ### Spajanje lige u produkciji
 
 Ništa se ne spaja. Funkcija sama deklarira svoju putanju:

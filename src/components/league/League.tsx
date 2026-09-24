@@ -10,6 +10,7 @@ import {
   leagueView,
   me as fetchMe,
   readDeepLink,
+  signInWithGoogle,
   submitScore,
 } from '../../league/client';
 import type { ClosedRound, LeagueView } from '../../league/types';
@@ -17,6 +18,7 @@ import { now } from '../../engine/time';
 import { useGame } from '../../state/context';
 import { load, patch } from '../../state/persist';
 import type { Player } from '../../types';
+import GoogleSignIn from './GoogleSignIn';
 import Invite from './Invite';
 import Onboard from './Onboard';
 import RoundSummary from './RoundSummary';
@@ -54,6 +56,10 @@ export default function League() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<string | null>(null);
+  /** Vezani vanjski računi; `null` dok se ne dozna. */
+  const [linked, setLinked] = useState<string[] | null>(null);
+  /** Poruka koja se mora vidjeti, a nije greška — npr. zamjena igrača. */
+  const [notice, setNotice] = useState<string | null>(null);
 
   const submitted = useRef(new Set<string>());
 
@@ -94,6 +100,24 @@ export default function League() {
       alive.current = false;
     };
   }, [link, fail]);
+
+  useEffect(() => {
+    if (!player) return;
+    const alive = { current: true };
+
+    void (async () => {
+      try {
+        const who = await fetchMe(player.token);
+        if (alive.current) setLinked(who.linked ?? []);
+      } catch {
+        // Nedostupna liga nije razlog za poruku; panel to već kaže drugdje.
+      }
+    })();
+
+    return () => {
+      alive.current = false;
+    };
+  }, [player]);
 
   /* ------------------------------------------------------------ ljestvica */
 
@@ -184,6 +208,51 @@ export default function League() {
     }
   }
 
+  /**
+   * Prijava Googleom, i za novog igrača i za vezanje postojećeg.
+   *
+   * Postojeći token ide uz zahtjev: poslužitelj tada veže tog igrača umjesto da
+   * napravi novog. Ako je račun već vezan uz nekog drugog, prijava vodi u njega —
+   * i to se mora reći naglas, jer bi inače čovjek gledao tuđu ljestvicu.
+   */
+  async function onGoogle(credential: string): Promise<void> {
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const signed = await signInWithGoogle(credential, player?.token ?? null);
+      const next: Player = {
+        id: signed.player_id,
+        token: signed.token,
+        nickname: signed.nickname,
+      };
+      setPlayer(next);
+      patch({ player: next });
+
+      const who = await fetchMe(next.token);
+      setLinked(who.linked ?? ['google']);
+
+      // Liga s prethodnog igrača ne vrijedi za ovog; uzmi njegovu prvu.
+      const mine = who.leagues.map((l) => l.code);
+      if (code === null || !mine.includes(code)) {
+        const first = mine[0] ?? null;
+        setCode(first);
+        setView(null);
+        patch({ lastLeagueCode: first });
+      }
+
+      if (signed.switched) {
+        setNotice(
+          `Sad si prijavljen kao ${signed.nickname}. Igrač koji je prije bio na ovom uređaju nije vezan uz ovaj Google račun.`,
+        );
+      }
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onCreate(): Promise<void> {
     if (!player) return;
     setBusy(true);
@@ -224,12 +293,31 @@ export default function League() {
         busy={busy}
         error={error}
         onSubmit={(n) => void onNickname(n)}
+        onGoogle={(c) => void onGoogle(c)}
       />
     );
   }
 
   return (
     <div className={styles.wrap}>
+      {notice !== null && (
+        <p className={styles.recovery} role="status">
+          {notice}
+        </p>
+      )}
+
+      {/*
+       * Veza se nudi dok je nema. Igrač koji je već prijavljen ne treba gumb, a
+       * onaj koji nije ga treba vidjeti i nakon što je ušao pod nadimkom — jer
+       * tek tad shvati da mu liga treba i na drugom uređaju.
+       */}
+      {linked !== null && !linked.includes('google') && (
+        <GoogleSignIn
+          label="Poveži Google račun da te liga pamti i na drugom uređaju:"
+          onCredential={(c) => void onGoogle(c)}
+        />
+      )}
+
       {recovery !== null && (
         <p className={styles.recovery}>
           Spremi ovaj link ako promijeniš uređaj:{' '}

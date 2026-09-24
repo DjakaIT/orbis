@@ -23,6 +23,7 @@ const client = readFileSync(join(ROOT, 'src', 'league', 'client.ts'), 'utf8');
 const netlify = readFileSync(join(ROOT, 'netlify.toml'), 'utf8');
 const fn = readFileSync(join(ROOT, 'netlify', 'functions', 'api.mts'), 'utf8');
 const cron = readFileSync(join(ROOT, 'netlify', 'functions', 'close-rounds.mts'), 'utf8');
+const app = readFileSync(join(ROOT, 'netlify', 'lib', 'app.ts'), 'utf8');
 
 /** Redci `netlify.toml` bez komentara — samo ono što stvarno vrijedi. */
 const active = netlify
@@ -91,5 +92,38 @@ describe('izlaz builda', () => {
     const redirects = join(DIST, '_redirects');
     if (!existsSync(redirects)) return;
     expect(readFileSync(redirects, 'utf8')).not.toContain('/api/');
+  });
+});
+
+describe('prijava Googleom', () => {
+  const google = readFileSync(join(ROOT, 'netlify', 'lib', 'google.ts'), 'utf8');
+  const clientSide = readFileSync(join(ROOT, 'src', 'league', 'google.ts'), 'utf8');
+
+  it('client ID se ne upisuje u kod nego cita iz okoline', () => {
+    /*
+     * Nije tajna, ali upisan rukom znaci da preview deploy i produkcija dijele
+     * istu vrijednost i da se promjena trazi po datotekama. Isto je pravilo
+     * srusilo ligu kad je adresa Workera stajala upisana u konfiguraciji.
+     */
+    expect(clientSide).toContain('VITE_GOOGLE_CLIENT_ID');
+    expect(clientSide).not.toMatch(/['"][\w-]+\.apps\.googleusercontent\.com['"]/);
+    expect(google).not.toMatch(/['"][\w-]+\.apps\.googleusercontent\.com['"]/);
+  });
+
+  it('adresa Googleovih kljuceva se ne upisuje nego otkriva', () => {
+    // OpenID Discovery: `{issuer}/.well-known/openid-configuration`. SPEC §4.1.
+    expect(google).toContain('.well-known/openid-configuration');
+    expect(google).not.toContain('/oauth2/v3/certs');
+  });
+
+  it('publika tokena se provjerava', () => {
+    // Bez `aud` prolazi token izdan bilo kojoj drugoj Google aplikaciji.
+    expect(google).toMatch(/aud:\s*clientId/);
+  });
+
+  it('prijava je dodatak, pa se odsutnost podesenja ne rusi', () => {
+    // Bez varijable ruta javlja 501, a gumb se ne crta. Vidi app.ts i google.ts.
+    expect(app).toContain('Google prijava nije podešena');
+    expect(clientSide).toContain('export const configured');
   });
 });

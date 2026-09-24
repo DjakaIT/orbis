@@ -970,3 +970,66 @@ kadru ne vidi, a to sada rješava zum. `MIN_VISIBLE_PX` i prateći kod su uklonj
 Cijena je poštena i zapisana: pogodak na Mauricijusu na punom kadru ne mijenja
 gotovo ništa na kugli. Ime, zastava i udaljenost stoje u listi, kartica pogotka se
 otvara, a tko želi vidjeti državu — zumira.
+
+## 2026-09-22 — Prijava Googleom, uz nadimak a ne umjesto njega
+
+Traženo: „napravi logiranje tako da liga lijepo pamti sve igrače". SPEC §7.2
+kaže da registracije nema — „bez emaila, lozinke, potvrde, **OAutha**, captche" —
+pa je ovo odstupanje.
+
+**Zašto je bilo potrebno.** Nadimak nije lozinka. Identitet je bio token u
+`localStorage`, a jedini put natrag link `/v/:token`, koji se pokaže jednom i
+lako se izgubi. Tko obriše podatke stranice ili uzme drugi uređaj postaje novi
+igrač — s praznom ljestvicom i bez svoje lige. Za igru koja se igra tjednima to
+nije rubni slučaj nego stanje koje prije ili kasnije pogodi svakoga.
+
+**Nadimak ostaje prvi.** Gumb za prijavu stoji **ispod** polja za nadimak, na sva
+tri mjesta gdje se identitet dodiruje: modal na ulazu, panel lige za one koji su
+ga preskočili, i ponuda vezanja onome tko već igra pod nadimkom. Preskočiti ga se
+može uvijek. Osam sekundi do igre iz §7.2 time nije potrošeno.
+
+**Bez nove baze i bez nove ovisnosti.** Veza se drži u istom Netlify Blobs
+spremištu, ključ `identity/google/<sub>`; `sub` je Googleov trajni
+identifikator računa i ne mijenja se ni s promjenom e-pošte. Potpis provjerava
+`verifyWithJwks` iz `hono/utils/jwt` — Hono je već ondje kao router. Adresa
+ključeva se ne upisuje rukom nego čita iz Googleove OpenID konfiguracije na
+`{issuer}/.well-known/openid-configuration`, kako Discovery i propisuje; to je
+izvedeno iz standarda, ne izmišljeno (SPEC §4.1).
+
+**`aud` se mora provjeriti.** Token izdan nekoj sasvim drugoj aplikaciji je
+valjano potpisan Googleovim ključem. Bez provjere publike bi njime mogao ući bilo
+tko tko ima bilo koju Google aplikaciju — to je klasičan propust u ovakvim
+integracijama, ne egzotičan napad. `tests/league/google-token.test.ts` to tvrdi
+izričito, generiranim RSA parom i ručno potpisanim tokenom.
+
+**Četiri slučaja, i svaki je odluka.** Kod prijave:
+
+1. Račun već vezan → prijava u **njega**; trajni identitet pobjeđuje.
+2. Račun nije vezan, a igrač je već ovdje pod nadimkom → veže se **postojeći**
+   igrač, pa mu lige, povijest i streak prežive. Napraviti novog značilo bi tiho
+   ga odvojiti od vlastite ekipe, a to izgleda potpuno isto kao da sve radi.
+3. Račun nije vezan, igrača nema → novi igrač, nadimak s Google računa.
+4. Račun vezan uz jednog, a uređaj drži drugog → prijava u vezanog, **bez**
+   spajanja. Spojiti dva igrača nije nedvosmisleno (čiji rezultat te runde
+   vrijedi?), pa se ne radi nagađanjem. Odgovor nosi `switched`, a sučelje to
+   kaže naglas — tiha zamjena identiteta znači da čovjek gleda tuđu ljestvicu i
+   ne zna zašto.
+
+**Tokeni se zbrajaju, ne zamjenjuju.** Svaki uređaj dobiva svoj, pa prijava na
+prijenosniku ne izbaci mobitel. Sprema se i dalje samo SHA-256.
+
+**Izostanak podešenja nije kvar.** Bez `GOOGLE_CLIENT_ID` ruta vraća 501 s
+jasnom porukom, a bez `VITE_GOOGLE_CLIENT_ID` gumba nema. Isto vrijedi kad
+Googleovu skriptu blokira proširenje ili mreža: komponenta ne nacrta ništa, bez
+poruke o grešci. Liga preko nadimka radi u svim tim slučajevima, i to je
+provjereno testom, a ne pretpostavljeno.
+
+**Testovi ne zovu Google.** Potpis se provjerava protiv generiranog RSA para i
+lažnog JWKS-a, odluka o igraču protiv spremišta u memoriji, a sučelje protiv
+podmetnute knjižnice u pregledniku. `tests/e2e/fixtures.ts` blokira
+`accounts.google.com` za **sve** testove: paket koji ovisi o tuđoj mreži prije
+ili kasnije padne iz razloga koji nema veze s kodom.
+
+**Ostaje na vlasniku projekta** jedan korak koji se ne da automatizirati: OAuth
+client ID u Google Cloud konzoli traži prijavu na njegov Google račun. Upute su u
+README-u. Do tada je sve ostalo na mjestu i ništa nije pokvareno.

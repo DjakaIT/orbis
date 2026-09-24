@@ -32,7 +32,11 @@ vlastitoj kartici ispod ljestvice. Ime lige izvodi poslužitelj iz nadimka.
 API je Netlifyjeva funkcija, spremište Netlify Blobs — nema Cloudflarea, nema D1,
 nema drugog servisa ni tokena. Odstupanje od SPEC §1, obrazloženo u DECISIONS.md.
 
-- `netlify/lib/app.ts` — `createApp(store)`, sve rute
+- `netlify/lib/app.ts` — `createApp(store, { verifyGoogle })`, sve rute
+- `netlify/lib/google.ts` — provjera Google ID tokena; `aud` se **mora**
+  provjeriti, inače prolazi token izdan bilo kojoj drugoj aplikaciji
+- Prijava Googleom je **dodatak**, nikad uvjet: bez `GOOGLE_CLIENT_ID` /
+  `VITE_GOOGLE_CLIENT_ID` gumba nema, a nadimak radi kao i prije
 - `netlify/lib/store.ts` — Blobs ili mapa u memoriji, ista sučelja
 - `netlify/functions/api.mts` — ulaz; **sam deklarira `path: '/api/*'`**, u
   `netlify.toml` za API nema pravila i ne smije ga biti

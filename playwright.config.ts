@@ -41,6 +41,13 @@ export default defineConfig({
       command: 'pnpm dev --port 5173',
       url: DEV_URL,
       reuseExistingServer: !process.env.CI,
+      /*
+       * Client ID za Google prijavu. Nije tajna — isti takav stoji u svakoj
+       * stranici koja ovo koristi — a ovdje je izmišljen, jer se sama Googleova
+       * knjižnica u testu zamjenjuje. Bez njega se gumb ne bi ni iscrtao, pa
+       * `google.spec.ts` ne bi imao što provjeriti.
+       */
+      env: { VITE_GOOGLE_CLIENT_ID: 'e2e-test.apps.googleusercontent.com' },
     },
     {
       command: 'pnpm preview --port 4173 --strictPort',
