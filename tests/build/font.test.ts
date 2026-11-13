@@ -105,15 +105,12 @@ describe('skup znakova', () => {
     expect(missing(meta.countries.map((c) => c.name).join(''))).toEqual([]);
   });
 
-  it('pokriva sva imena naselja, u obje razine', async () => {
+  it('pokriva sva imena naselja, ne samo mete', async () => {
     const path = join(DATA, 'hr-places.json');
     expect(exists(path), 'pokreni `pnpm data` prije testa').toBe(true);
 
-    const places = JSON.parse(await readFile(path, 'utf8')) as {
-      gradovi: { name: string }[];
-      mjesta: { name: string }[];
-    };
-    const names = [...places.gradovi, ...places.mjesta].map((p) => p.name).join('');
+    const places = JSON.parse(await readFile(path, 'utf8')) as { names: string[] };
+    const names = places.names.join('');
     expect(names).toMatch(/[čćđšž]/);
     expect(missing(names)).toEqual([]);
   });

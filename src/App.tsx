@@ -128,7 +128,7 @@ function Board({ mode, onMode, tier, onTier }: BoardProps) {
         >
           {leagueOpen ? 'Sakrij ligu' : 'Liga'}
         </button>
-        <span>Podaci: Natural Earth, DGU, GeoNames</span>
+        <span>Podaci: Natural Earth, Wikidata, Unicode CLDR</span>
       </footer>
     </div>
   );

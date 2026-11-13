@@ -56,13 +56,16 @@ const FILL = 0.88;
 /**
  * Raspon zuma. 1 je cijela kugla u kadru.
  *
- * Gornja granica je vezana uz teksturu, ne uz geometriju: kugla se na ekranu
- * crta na oko 400 px, a vidljiva polutka nosi 1024 od 2048 stupaca teksture, pa
- * je na cetverostrukom zumu omjer vec ispod jedan teksel po pikselu. Na osam je
- * slika bila vidljivo mutna.
+ * Gornja granica je vezana uz teksturu, ne uz geometriju. S teksturom od 2048
+ * stupaca granica je bila 4, jer je na 8 slika bila mutna; tekstura je sada
+ * 4096 (vidi texture.ts), pa je na 8 jednako oštra kao prije na 4 — dovoljno
+ * da se Luksemburg ili Andora vide kao država, a ne kao točka.
  */
 const MIN_ZOOM = 1;
-const MAX_ZOOM = 4;
+const MAX_ZOOM = 8;
+
+/** Koliki dio preostale razlike zum prijeđe u jednom frameu. Mekano, bez skoka. */
+const ZOOM_EASE = 0.22;
 
 /** Koliko jedan zarez kotacica mijenja zum. Eksponencijalno, vidi `onWheel`. */
 const WHEEL_SENSITIVITY = 0.0015;
@@ -134,6 +137,10 @@ export class Globe {
 
   /** Zum: 1 je cijela kugla u kadru, vise znaci blize. */
   private zoom = MIN_ZOOM;
+  /** Kamo zum ide. Kotačić mijenja ovo, a petlja do toga klizi. */
+  private zoomTarget = MIN_ZOOM;
+  /** Točka ekrana koja pri zumu ostaje na mjestu, kao pomak od središta u px. */
+  private anchor = { x: 0, y: 0 };
 
   /** Aktivni dodiri, za stiskanje s dva prsta. */
   private readonly pointers = new Map<number, { x: number; y: number }>();
@@ -271,6 +278,7 @@ export class Globe {
     this.camera.aspect = w / h;
     // Kugla mora stati i po sirini, ne samo po visini. Vidi `cameraDistance`.
     // `setZoom` postavlja udaljenost i zadrzava trenutni zum kroz promjenu okvira.
+    this.anchor = { x: 0, y: 0 };
     this.setZoom(this.zoom);
   }
 
@@ -301,10 +309,38 @@ export class Globe {
    * kadra prije nego je igrac stigne pogledati.
    */
   setZoom(next: number): void {
+    const before = this.zoom;
     this.zoom = clamp(next, MIN_ZOOM, MAX_ZOOM);
+    this.keepAnchor(before, this.zoom);
     this.camera.position.z = cameraDistance(this.camera.aspect);
     this.camera.fov = zoomedFov(this.zoom);
     this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Zum prema pokazivaču, ne prema sredini. Točka ispod kursora ili između dva
+   * prsta ostaje ispod njih, pa se do Luksemburga dolazi jednim pokretom umjesto
+   * da se prvo okreće, pa zumira, pa opet okreće.
+   *
+   * Pomak od središta `d` px na zumu `z` je kut `d / (R z)` radijana, gdje je R
+   * polumjer kugle u pikselima na zumu 1. Da točka ostane na mjestu, kugla se
+   * okrene za razliku tih kutova. Aproksimacija malih kutova; daleko od središta
+   * malo zaostaje, što se pod prstom ne osjeti.
+   */
+  private keepAnchor(from: number, to: number): void {
+    if (from === to || (this.anchor.x === 0 && this.anchor.y === 0)) return;
+    const el = this.renderer.domElement;
+    const radius = (FILL * Math.min(el.clientWidth, el.clientHeight)) / 2;
+    if (radius <= 0) return;
+    const k = 1 / from - 1 / to;
+    this.yaw -= (this.anchor.x / radius) * k;
+    this.pitch = clamp(this.pitch - (this.anchor.y / radius) * k, -MAX_PITCH, MAX_PITCH);
+  }
+
+  /** Pomak točke ekrana od središta platna, u CSS pikselima. */
+  private offset(x: number, y: number): { x: number; y: number } {
+    const r = this.renderer.domElement.getBoundingClientRect();
+    return { x: x - (r.left + r.width / 2), y: y - (r.top + r.height / 2) };
   }
 
   get zoomLevel(): number {
@@ -335,7 +371,12 @@ export class Globe {
     // Dva prsta znace stiskanje, ne vrtnju.
     if (this.pointers.size >= 2) {
       const spread = this.pointerSpread();
-      if (this.pinchStart > 0) this.setZoom((this.pinchZoom * spread) / this.pinchStart);
+      const [a, b] = [...this.pointers.values()];
+      if (a && b) this.anchor = this.offset((a.x + b.x) / 2, (a.y + b.y) / 2);
+      if (this.pinchStart > 0) {
+        this.setZoom((this.pinchZoom * spread) / this.pinchStart);
+        this.zoomTarget = this.zoom;
+      }
       return;
     }
 
@@ -365,7 +406,14 @@ export class Globe {
     this.auto = false;
     this.spin = null;
     // Eksponencijalno: svaki korak mnozi, pa je osjecaj jednak na svakom zumu.
-    this.setZoom(this.zoom * Math.exp(-e.deltaY * WHEEL_SENSITIVITY));
+    this.anchor = this.offset(e.clientX, e.clientY);
+    this.zoomTarget = clamp(
+      this.zoomTarget * Math.exp(-e.deltaY * WHEEL_SENSITIVITY),
+      MIN_ZOOM,
+      MAX_ZOOM,
+    );
+    // Bez animacije uz `prefers-reduced-motion`: zum upada odmah.
+    if (reducedMotion()) this.setZoom(this.zoomTarget);
   };
 
   /** Razmak izmedu prva dva prsta, u pikselima. */
@@ -383,7 +431,17 @@ export class Globe {
     el.addEventListener('pointerup', this.onUp);
     el.addEventListener('pointercancel', this.onUp);
     el.addEventListener('wheel', this.onWheel, { passive: false });
+    el.addEventListener('dblclick', this.onDouble);
   }
+
+  /** Dvostruki klik ili dodir: dvaput bliže, prema toj točki. Na najbližem natrag na cijelu kuglu. */
+  private readonly onDouble = (e: MouseEvent): void => {
+    this.auto = false;
+    this.spin = null;
+    this.anchor = this.offset(e.clientX, e.clientY);
+    this.zoomTarget = this.zoomTarget >= MAX_ZOOM ? MIN_ZOOM : Math.min(MAX_ZOOM, this.zoomTarget * 2);
+    if (reducedMotion()) this.setZoom(this.zoomTarget);
+  };
 
   private detach(): void {
     const el = this.renderer.domElement;
@@ -392,6 +450,7 @@ export class Globe {
     el.removeEventListener('pointerup', this.onUp);
     el.removeEventListener('pointercancel', this.onUp);
     el.removeEventListener('wheel', this.onWheel);
+    el.removeEventListener('dblclick', this.onDouble);
   }
 
   private readonly loop = (): void => {
@@ -406,6 +465,11 @@ export class Globe {
       if (t >= 1) this.spin = null;
     } else if (this.auto && !reducedMotion()) {
       this.yaw += AUTO_ROTATE;
+    }
+
+    if (Math.abs(this.zoomTarget - this.zoom) > 1e-3) {
+      const next = this.zoom + (this.zoomTarget - this.zoom) * ZOOM_EASE;
+      this.setZoom(Math.abs(this.zoomTarget - next) < 1e-3 ? this.zoomTarget : next);
     }
 
     this.sphere.rotation.y = this.yaw;

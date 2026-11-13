@@ -8,12 +8,18 @@
 import { feature } from 'topojson-client';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 
+import type { Pool } from '../engine/seed';
 import { buildIndex, type SearchIndex } from '../engine/search';
 import type { Place } from '../types';
+import { dataUrl, getJson } from './files';
 
 interface WorldMeta {
   n: number;
   countries: { id: number; iso: string; a2?: string; name: string; lat: number; lon: number }[];
+  /** Bazeni meta s datumom početka. Vidi `Pool` u engine/seed.ts. */
+  pools: Pool[];
+  /** Id iz popisa prije 2026-11-14 → današnji id, za partije spremljene prije. */
+  legacy: number[];
 }
 
 export interface Aliases {
@@ -29,12 +35,8 @@ export interface WorldData {
   /** Granice po ISO3 kodu, za crtanje teksture. */
   shapes: Map<string, GeoJSON.Geometry>;
   index: SearchIndex;
-}
-
-async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(path);
-  if (!res.ok) throw new Error(`Ne mogu ucitati ${path}: HTTP ${String(res.status)}`);
-  return (await res.json()) as T;
+  pools: Pool[];
+  legacy: number[];
 }
 
 /**
@@ -73,10 +75,10 @@ export function loadWorld(): Promise<WorldData> {
 
 async function fetchWorld(): Promise<WorldData> {
   const [meta, topo, aliases, matrixBuf] = await Promise.all([
-    getJson<WorldMeta>('/data/world-meta.json'),
-    getJson<Topology>('/data/world-topo.json'),
-    getJson<Aliases>('/data/aliases.json'),
-    fetch('/data/world-matrix.bin').then(async (r) => {
+    getJson<WorldMeta>('world-meta.json'),
+    getJson<Topology>('world-topo.json'),
+    getJson<Aliases>('aliases.json'),
+    fetch(dataUrl('world-matrix.bin')).then(async (r) => {
       if (!r.ok) throw new Error(`Ne mogu ucitati matricu: HTTP ${String(r.status)}`);
       return r.arrayBuffer();
     }),
@@ -97,6 +99,8 @@ async function fetchWorld(): Promise<WorldData> {
     matrix: expandTriangle(new Uint16Array(matrixBuf), meta.n),
     shapes: shapesByIso(topo),
     index: buildIndex(places, aliases.world),
+    pools: meta.pools,
+    legacy: meta.legacy,
   };
 }
 
@@ -121,9 +125,10 @@ export function shapesByIso(topo: Topology): Map<string, GeoJSON.Geometry> {
   const parts = new Map<string, GeoJSON.Position[][][]>();
 
   for (const f of fc.features) {
-    const p = f.properties as { ISO_A3_EH?: string; ADM0_A3?: string } | null;
+    const p = f.properties as { CODE?: string; ISO_A3_EH?: string; ADM0_A3?: string } | null;
     if (!p) continue;
-    const iso = p.ISO_A3_EH && p.ISO_A3_EH !== '-99' ? p.ISO_A3_EH : p.ADM0_A3;
+    // `CODE` piše pipeline od 2026-11: kod pod kojim se oblik crta i boji.
+    const iso = p.CODE ?? (p.ISO_A3_EH && p.ISO_A3_EH !== '-99' ? p.ISO_A3_EH : p.ADM0_A3);
     if (!iso) continue;
 
     const g = f.geometry;

@@ -20,5 +20,6 @@
  */
 export function flagSrc(alpha2: string | undefined): string | null {
   const code = (alpha2 ?? '').trim().toLowerCase();
-  return /^[a-z]{2}$/.test(code) ? `/flags/${code}.svg` : null;
+  // Dva slova za države; `gb-eng`, `gb-sct`, `gb-wls`, `gb-nir` za dijelove UK-a.
+  return /^[a-z]{2}(-[a-z]{3})?$/.test(code) ? `/flags/${code}.svg` : null;
 }

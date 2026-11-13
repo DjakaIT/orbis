@@ -215,6 +215,13 @@ export function paintNatural(
   land: Uint8Array,
   ice: Uint8Array,
   c: BaseColors,
+  /**
+   * `both` slika kopno i more kako maska kaže. `land` i `sea` slikaju svaki
+   * piksel kao kopno, odnosno more: dva glatka sloja bez miješanja na obali, koja
+   * texture.ts slaže preko oštrog vektorskog obrisa. Bez toga se obala, razvučena
+   * iz 1024 px, na zumu 8× razlije u pojas od pedesetak kilometara.
+   */
+  layer: 'both' | 'land' | 'sea' = 'both',
 ): void {
   const w = BASE_W;
   const h = BASE_H;
@@ -235,7 +242,7 @@ export function paintNatural(
       const n = grain(x, y);
 
       let rgb: Rgb;
-      if (land[i] === 1) {
+      if (layer === 'land' || (layer === 'both' && land[i] === 1)) {
         rgb = landColor(lat, clamp01(inland[i]! / INLAND), n, c);
         /*
          * Led ne ovisi o širini nego o podacima: Grenland i Antarktika dolaze

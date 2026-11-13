@@ -51,6 +51,12 @@ export interface Round {
   solved: boolean;
   /** Kad je partija zapoceta, ms od epohe — za `elapsed_ms` u ligi. */
   startedAt: number;
+  /**
+   * Na koji popis pokazuju indeksi u `guesses`. Nema ga u partiji spremljenoj
+   * prije 2026-11-14: tada su to indeksi starog popisa i prevode se kroz
+   * `legacy` iz podataka. Vidi `DATA_VERSION` u state/GameContext.tsx.
+   */
+  data?: number;
 }
 
 export interface ModeStats {

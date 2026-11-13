@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 import { expect, test } from './fixtures';
 
-import { dailyTarget } from '../../src/engine/seed';
+import { targetFor, type Pool } from '../../src/engine/seed';
 import { zagrebDate } from '../../src/engine/time';
 
 /**
@@ -13,10 +13,10 @@ import { zagrebDate } from '../../src/engine/time';
  */
 async function targetName(): Promise<string> {
   const meta = JSON.parse(await readFile('public/data/world-meta.json', 'utf8')) as {
-    n: number;
     countries: { name: string }[];
+    pools: Pool[];
   };
-  const name = meta.countries[dailyTarget(zagrebDate(), 'world', meta.n)]?.name;
+  const name = meta.countries[targetFor(zagrebDate(), 'world', meta.pools)]?.name;
   if (!name) throw new Error('meta dana nije nadena');
   return name;
 }
@@ -89,8 +89,11 @@ test('pokušaj pokazuje ime, udaljenost i je li bliži od prethodnog', async ({ 
   await input.fill('Brazil');
   await input.press('Enter');
 
-  const status = page.getByRole('status').filter({ hasText: 'km' });
+  // Ne filtrira se po „km": kad je meta dana susjed Brazila (2026-11-13 Paragvaj),
+  // očitanje kaže „susjedna država" umjesto kilometara.
+  const status = page.getByRole('status').filter({ hasText: /Brazil|Japan/ });
   await expect(status).toContainText('Brazil');
+  await expect(status).toContainText(/km|susjedna|pogodak/);
   await expect(status).not.toContainText('%');
 
   await input.fill('Japan');

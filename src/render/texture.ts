@@ -7,12 +7,20 @@
 
 import { BASE_H, BASE_W, paintNatural } from './basemap';
 
-const W = 2048;
-const H = 1024;
+/**
+ * 4096 × 2048, ne 2048 × 1024 iz SPEC §6.1. Zum ide do 8×, a na 2048 stupaca
+ * jedan teksel pokriva ~19 km na ekvatoru: Luksemburg, Andora i gradovi u modu
+ * glavnih gradova bili su mrlja čim im se igrač primakne. Dvostruka širina
+ * drži sliku jednako oštrom na 8× kao što je prije bila na 4×.
+ */
+const W = 4096;
+const H = 2048;
+/** Debljine linija su zadane za 2048 stupaca; ovoliko puta je tekstura šira. */
+const K = W / 2048;
 
 /** Granice se crtaju tanko; graticule jos tanje. SPEC §6.1. */
-const BORDER_WIDTH = 0.8;
-const GRATICULE_WIDTH = 1;
+const BORDER_WIDTH = 0.8 * K;
+const GRATICULE_WIDTH = 1 * K;
 const GRATICULE_STEP = 30;
 
 export interface Tokens {
@@ -264,18 +272,36 @@ export class GlobeTexture {
       }),
     );
 
-    paintNatural(sctx, land, ice, {
+    const colors = {
       shelf: toRgb(this.tokens.ocean),
       abyss: toRgb(this.tokens.seaDeep),
       verdant: toRgb(this.tokens.landmass),
       arid: toRgb(this.tokens.landArid),
       boreal: toRgb(this.tokens.landBoreal),
       ice: toRgb(this.tokens.ice),
-    });
+    };
 
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
+
+    // More preko cijele karte, pa kopno izrezano po vektorskom obrisu u punoj
+    // rezoluciji: obala ostaje oštra i na zumu 8×. Vidi `layer` u basemap.ts.
+    paintNatural(sctx, land, ice, colors, 'sea');
     ctx.drawImage(small, 0, 0, W, H);
+
+    paintNatural(sctx, land, ice, colors, 'land');
+    const cut = document.createElement('canvas');
+    cut.width = W;
+    cut.height = H;
+    const cctx = cut.getContext('2d');
+    if (!cctx) throw new Error('Canvas 2D nije dostupan');
+    for (const g of shapes.values()) drawGeometry(cctx, g, '#000', null);
+    cctx.globalCompositeOperation = 'source-in';
+    cctx.imageSmoothingEnabled = true;
+    cctx.imageSmoothingQuality = 'high';
+    cctx.drawImage(small, 0, 0, W, H);
+    ctx.drawImage(cut, 0, 0);
+    cut.width = 0;
 
     ctx.strokeStyle = this.tokens.hairline;
     ctx.lineWidth = GRATICULE_WIDTH;

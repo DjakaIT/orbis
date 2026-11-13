@@ -42,7 +42,7 @@ test('zum ne izlazi iz raspona', async ({ page }) => {
   // Koraci su obični, kakve kotačić i šalje — Chromium sintetičku deltu od
   // dvadeset tisuća ne prosljeđuje cijelu, pa bi jedan golemi zamah lagao.
   for (let i = 0; i < 20; i++) await page.mouse.wheel(0, -500);
-  await expect.poll(() => zoom(page)).toBeCloseTo(4, 5);
+  await expect.poll(() => zoom(page)).toBeCloseTo(8, 5);
 
   for (let i = 0; i < 40; i++) await page.mouse.wheel(0, 500);
   // Ispod jedinice kugla bi otplutala u daljinu i ostavila prazan papir.
@@ -67,6 +67,14 @@ test('promjena veličine prozora zadržava zum', async ({ page }) => {
   await canvas.hover();
   await page.mouse.wheel(0, -900);
   await expect.poll(() => zoom(page)).toBeGreaterThan(1.5);
+  // Zum klizi do cilja kroz nekoliko frameova; čeka se da stane.
+  await expect
+    .poll(async () => {
+      const before = await zoom(page);
+      await page.waitForTimeout(150);
+      return Math.abs((await zoom(page)) - before);
+    })
+    .toBeLessThan(1e-4);
 
   const zoomed = await zoom(page);
   await page.setViewportSize({ width: 800, height: 700 });

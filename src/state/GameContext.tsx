@@ -12,11 +12,12 @@ import {
 
 import { loadWorld } from '../data/load';
 import { match, type SearchIndex } from '../engine/search';
+import type { Pool } from '../engine/seed';
 import { now, zagrebDate } from '../engine/time';
 import type { HrGeometry } from '../render/mapHR';
-import type { Mode, Persisted, Place, Tier } from '../types';
+import type { Mode, Persisted, Place, Round, Tier } from '../types';
 import { GameCtx, type GameValue } from './context';
-import { load, patch } from './persist';
+import { DATA_VERSION, load, patch, translateRound } from './persist';
 import { initialState, reducer, toRound, type GameState } from './reducer';
 
 /** Sve što jedan mod treba da bi se odigrao. */
@@ -28,6 +29,9 @@ interface Loaded {
   matrix: Uint16Array | null;
   shapes: Map<string, GeoJSON.Geometry> | null;
   geometry: HrGeometry | null;
+  pools: Pool[];
+  /** Id iz popisa prije 2026-11-14 → današnji id. */
+  legacy: number[];
 }
 
 async function loadMode(mode: Mode, tier: Tier): Promise<Loaded> {
@@ -40,6 +44,8 @@ async function loadMode(mode: Mode, tier: Tier): Promise<Loaded> {
       matrix: d.matrix,
       shapes: d.shapes,
       geometry: null,
+      pools: d.pools,
+      legacy: d.legacy,
     };
   }
 
@@ -55,6 +61,8 @@ async function loadMode(mode: Mode, tier: Tier): Promise<Loaded> {
       matrix: null,
       shapes: d.shapes,
       geometry: null,
+      pools: d.pools,
+      legacy: d.legacy,
     };
   }
 
@@ -71,19 +79,27 @@ async function loadMode(mode: Mode, tier: Tier): Promise<Loaded> {
     matrix: null,
     shapes: null,
     geometry: d.geometry,
+    pools: d.pools,
+    legacy: d.legacy,
   };
 }
 
 /** Spremljena partija vrijedi samo za svoj mod i, u Hrvatskoj, svoju razinu. */
-function roundFor(p: Persisted, mode: Mode, tier: Tier) {
-  if (mode === 'world') return p.world;
-  if (mode === 'capitals') return p.capitals;
-  return p.hr?.tier === tier ? p.hr : null;
+function roundFor(p: Persisted, mode: Mode, tier: Tier, legacy: number[]): Round | null {
+  const round =
+    mode === 'world'
+      ? p.world
+      : mode === 'capitals'
+        ? p.capitals
+        : p.hr?.tier === tier
+          ? p.hr
+          : null;
+  return round ? translateRound(round, legacy) : null;
 }
 
 /** Partija se sprema u polje svog moda; Hrvatska uz to nosi i razinu. */
 function roundPatch(mode: Mode, tier: Tier, state: GameState): Partial<Persisted> {
-  const round = toRound(state);
+  const round = toRound(state, DATA_VERSION);
   if (mode === 'world') return { world: round };
   if (mode === 'capitals') return { capitals: round };
   return { hr: { ...round, tier } };
@@ -115,9 +131,14 @@ export function GameProvider({ mode, tier, children }: ProviderProps) {
         setLoaded(data);
         dispatch({
           type: 'loaded',
-          data: { places: data.places, matrix: data.matrix, n: data.places.length },
+          data: {
+            places: data.places,
+            matrix: data.matrix,
+            n: data.places.length,
+            pools: data.pools,
+          },
           // Druga razina je drugi bazen: indeksi iz nje ne znace nista ovdje.
-          round: roundFor(persisted.current, mode, tier),
+          round: roundFor(persisted.current, mode, tier, data.legacy),
           now: now(),
         });
       },

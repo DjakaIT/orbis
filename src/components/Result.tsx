@@ -21,6 +21,18 @@ export default function Result() {
 
   const target = places?.[state.target];
   const hit = state.guesses.find((g) => g.hit);
+  /*
+   * Ime mete. Država s više glavnih gradova ima ih sve kao pogodak, pa kartica
+   * pokazuje sve, pogođeni prvi: „Cape Town · Bloemfontein · Pretoria".
+   */
+  const hitPlace = hit ? places?.[hit.id] : undefined;
+  const name = [
+    hitPlace?.name ?? target?.name ?? '',
+    ...(places ?? [])
+      .filter((p) => p.code === target?.code && p.id !== hitPlace?.id && p.id !== target?.id)
+      .map((p) => p.name),
+    ...(target && hitPlace && target.id !== hitPlace.id ? [target.name] : []),
+  ].join(' · ');
   const attempts = state.guesses.length;
   const stats = state.stats[state.mode];
   const text = shareText(state.date, state.guesses, state.mode);
@@ -46,7 +58,7 @@ export default function Result() {
         a dva živa područja na isti događaj znače da se sve pročita dvaput.
       */}
       <p className={styles.sr}>
-        Pogodak: {target?.name ?? ''}, iz {attempts} {guessNoun(attempts)}.
+        Pogodak: {name}, iz {attempts} {guessNoun(attempts)}.
       </p>
 
       <div className={styles.crest} aria-hidden="true">
@@ -58,7 +70,7 @@ export default function Result() {
       </div>
 
       <h2 className={styles.name} aria-hidden="true">
-        {target?.name}
+        {name}
       </h2>
 
       <p className={styles.line} aria-hidden="true">

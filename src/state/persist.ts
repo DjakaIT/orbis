@@ -155,6 +155,30 @@ function rollOver(state: Persisted, today: DateString): Persisted {
   return next;
 }
 
+/**
+ * Verzija popisa na koji pokazuju spremljeni indeksi. 2 je popis od 2026-11-12
+ * (sva naselja, UK u četiri dijela, glavni gradovi iz Wikidate). Partija bez
+ * ove oznake spremljena je starom aplikacijom.
+ */
+export const DATA_VERSION = 2;
+
+/**
+ * Partija spremljena prije novog popisa nosi stare indekse. Prevode se jednom,
+ * pri učitavanju, kroz `legacy` iz podataka: Somaliland postaje Somalija, UK
+ * Engleska, a naselje iz starog popisa isto naselje u novom. Bez ovoga bi igrač
+ * koji je danas već igrao nakon deploya vidio tuđa imena u svojoj listi.
+ *
+ * Shema ostaje `v: 1` — ovo je prijevod indeksa, ne nova shema, i podizanje
+ * verzije obrisalo bi streakove, što SPEC §8 zabranjuje.
+ */
+export function translateRound<R extends Round>(round: R, legacy: readonly number[]): R {
+  if (round.data === DATA_VERSION) return round;
+  const guesses = [
+    ...new Set(round.guesses.flatMap((id) => (legacy[id] === undefined ? [] : [legacy[id]]))),
+  ];
+  return { ...round, guesses, data: DATA_VERSION };
+}
+
 /** Biljezi rijesenu partiju: jedan poziv, na pogodak. */
 export function recordSolved(stats: ModeStats, guesses: number): ModeStats {
   const dist = [...stats.dist];

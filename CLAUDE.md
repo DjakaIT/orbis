@@ -4,7 +4,7 @@ Dnevna geografska igra. Puna specifikacija: SPEC.md — pročitaj prije rada.
 
 ## Naredbe
 
-pnpm dev · pnpm data · pnpm check · pnpm build · pnpm dev:api
+pnpm dev · pnpm data · pnpm sources · pnpm check · pnpm build · pnpm dev:api
 
 ## Nepromjenjivo
 
@@ -18,6 +18,9 @@ pnpm dev · pnpm data · pnpm check · pnpm build · pnpm dev:api
 - Pogodak je identitet mete, NIKAD `km === 0` — matrica je udaljenost među
   granicama, pa je svaki susjed nula kilometara
 - Niz meta je permutacija po krugu: u N dana svaka meta dolazi na red jednom
+- Bazen meta se nikad ne mijenja na mjestu — promjena je novi `Pool` s datumom
+  početka (engine/seed.ts), a pipeline provjerava da do tog dana mete ostanu iste
+- Wikidata se čita iz snimke `scripts/sources/` (`pnpm sources`), nikad pri buildu
 - Podloga globusa se **računa** iz granica (render/basemap.ts), ne preuzima —
   rastersku adresu se ne izmišlja, SPEC §4.1
 - Paleta podloge je prigušena namjerno: kopno mora stati u luminanciju

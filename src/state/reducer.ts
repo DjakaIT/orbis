@@ -1,7 +1,7 @@
 /** Stanje igre. Nema Reduxa ni Zustanda — premalo stanja. SPEC §1. */
 
 import { bearing } from '../engine/distance';
-import { dailyTarget } from '../engine/seed';
+import { targetFor, type Pool } from '../engine/seed';
 import type { DateString } from '../engine/time';
 import type { Guess, Mode, ModeStats, Persisted, Place, Round, Trend } from '../types';
 import { recordSolved } from './persist';
@@ -11,6 +11,8 @@ export interface ModeData {
   /** Puni N*N niz udaljenosti u km, ili `null` kad se udaljenost racuna haversineom. */
   matrix: Uint16Array | null;
   n: number;
+  /** Bazeni meta s datumom početka. Vidi `Pool` u engine/seed.ts. */
+  pools: Pool[];
 }
 
 export interface GameState {
@@ -64,7 +66,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, status: 'error', error: action.message };
 
     case 'loaded': {
-      const target = dailyTarget(state.date, state.mode, action.data.places.length);
+      const target = targetFor(state.date, state.mode, action.data.pools);
       const restored = action.round?.date === state.date ? action.round : null;
 
       return {
@@ -92,7 +94,7 @@ export function reducer(state: GameState, action: Action): GameState {
         previous?.km ?? null,
       );
       const guesses = [...state.guesses, guess];
-      const solved = action.id === state.target;
+      const solved = guess.hit;
 
       return {
         ...state,
@@ -131,11 +133,23 @@ function describe(
   previousKm: number | null,
 ): Guess {
   const from = data.places[id];
-  const to = data.places[target];
-  if (!from || !to) throw new Error(`Meta ${String(id)} nije u bazenu`);
+  const goal = data.places[target];
+  if (!from || !goal) throw new Error(`Meta ${String(id)} nije u bazenu`);
 
-  const km = data.matrix ? (data.matrix[id * data.n + target] ?? 0) : haversineKm(from, to);
-  const hit = id === target;
+  /*
+   * Pogodak je identitet mete, a meta je kod: država, ili grad svoje države. Za
+   * Južnoafričku Republiku su Pretoria, Bloemfontein i Cape Town tri mjesta s
+   * istim kodom, i svako je pogodak. Nikad `km === 0` — vidi `neighbour`.
+   */
+  const hit = from.code === goal.code;
+
+  // Udaljenost do najbližeg mjesta mete: kod triju glavnih gradova, do onog bližeg.
+  const to = nearestOf(from, data.places, goal);
+  const km = hit
+    ? 0
+    : data.matrix
+      ? (data.matrix[id * data.n + target] ?? 0)
+      : haversineKm(from, to);
 
   return {
     id,
@@ -154,6 +168,21 @@ function describe(
     trend: trendOf(km, previousKm),
     a2: from.a2 ?? '',
   };
+}
+
+/** Od mjesta s kodom mete, ono najbliže pokušaju. Uglavnom je to sama meta. */
+function nearestOf(from: Place, places: Place[], goal: Place): Place {
+  let best = goal;
+  let bestKm = haversineKm(from, goal);
+  for (const p of places) {
+    if (p.code !== goal.code || p === goal) continue;
+    const d = haversineKm(from, p);
+    if (d < bestKm) {
+      best = p;
+      bestKm = d;
+    }
+  }
+  return best;
 }
 
 function trendOf(km: number, previousKm: number | null): Trend {
@@ -182,11 +211,12 @@ export function sortedGuesses(state: GameState): Guess[] {
 }
 
 /** Stanje partije za zapis u localStorage. */
-export function toRound(state: GameState): Round {
+export function toRound(state: GameState, data: number): Round {
   return {
     date: state.date,
     guesses: state.guesses.map((g) => g.id),
     solved: state.solved,
     startedAt: state.startedAt,
+    data,
   };
 }

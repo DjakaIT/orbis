@@ -1,3 +1,7 @@
+import { createHash } from 'node:crypto';
+import { existsSync, readFileSync, readdirSync, renameSync } from 'node:fs';
+import { join } from 'node:path';
+
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, type Plugin } from 'vite';
@@ -84,9 +88,54 @@ function preloadFonts(): Plugin {
   };
 }
 
+/**
+ * Podaci dobivaju sadržajni hash u imenu, ali tek u `dist/`.
+ *
+ * `public/_headers` daje `/data/*` zaglavlje `immutable` na godinu dana, a
+ * service worker ih drži `CacheFirst`. Pod stalnim imenom promjena podataka
+ * zato ne bi stigla do igrača koji je mod već otvorio — dobio bi novi kod sa
+ * starim popisom, a novi popis znači druge indekse i drugu metu. S hashom je
+ * nova datoteka nova adresa.
+ *
+ * U `public/data` imena ostaju stalna, jer ih po njima čitaju font i testovi.
+ * Vite kopira `public/` prije `writeBundle`, a PWA plugin piše service worker
+ * u `closeBundle`, pa preimenovanje ovdje ulazi u precache pod novim imenom.
+ */
+export function dataFiles(dir = 'public/data'): Record<string, string> {
+  if (!existsSync(dir)) return {};
+  const out: Record<string, string> = {};
+  for (const name of readdirSync(dir).sort()) {
+    const hash = createHash('sha256')
+      .update(readFileSync(join(dir, name)))
+      .digest('hex')
+      .slice(0, 10);
+    const dot = name.lastIndexOf('.');
+    out[name] = `${name.slice(0, dot)}.${hash}${name.slice(dot)}`;
+  }
+  return out;
+}
+
+function hashedData(): Plugin {
+  let files: Record<string, string> = {};
+  return {
+    name: 'orbis-hashed-data',
+    config(_, env) {
+      files = env.command === 'build' ? dataFiles() : {};
+      return { define: { __DATA_FILES__: JSON.stringify(files) } };
+    },
+    writeBundle(options) {
+      const out = join(options.dir ?? 'dist', 'data');
+      for (const [name, hashed] of Object.entries(files)) {
+        if (existsSync(join(out, name))) renameSync(join(out, name), join(out, hashed));
+      }
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
+    hashedData(),
     shareTags(),
     preloadFonts(),
     /*
@@ -125,7 +174,7 @@ export default defineConfig(({ mode }) => ({
          */
         globIgnores: [
           '**/data/hr-*.json',
-          '**/data/capitals.json',
+          '**/data/capitals.*json',
           // 197 zastava je 1,3 MB; u partiji ih se pokaze tek nekoliko.
           'flags/**',
           'og.png',
@@ -136,7 +185,11 @@ export default defineConfig(({ mode }) => ({
           {
             urlPattern: /\/data\/.*\.(json|bin)$/,
             handler: 'CacheFirst',
-            options: { cacheName: 'orbis-data', expiration: { maxAgeSeconds: 2_592_000 } },
+            options: {
+              cacheName: 'orbis-data',
+              // Svaka verzija podataka je nova adresa; stare ne trebaju čekati 30 dana.
+              expiration: { maxAgeSeconds: 2_592_000, maxEntries: 12 },
+            },
           },
         ],
         // Deep linkovi lige su klijentske rute; offline ih vraća na ljusku.

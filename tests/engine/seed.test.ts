@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { dailyTarget } from '../../src/engine/seed';
-import { addDays, lastNDates } from '../../src/engine/time';
+import { dailyTarget, EPOCH, targetFor, type Pool } from '../../src/engine/seed';
+import { addDays, daysBetween, lastNDates } from '../../src/engine/time';
 
 const POOL = 177;
 
@@ -232,5 +232,66 @@ describe('jamstva pod pritiskom', () => {
     const near = dailyTarget('2026-02-02', 'world', POOL);
     expect(dailyTarget('2031-07-04', 'world', POOL)).toBe(far);
     expect(dailyTarget('2026-02-02', 'world', POOL)).toBe(near);
+  });
+});
+
+describe('targetFor — bazeni s datumom', () => {
+  const ids = (n: number, offset = 0): number[] => Array.from({ length: n }, (_, i) => i + offset);
+
+  it('jedan bazen od epohe daje točno stari niz', () => {
+    // Stari popis u pogonu: niz se ne smije pomaknuti ni za jedan dan.
+    const pools: Pool[] = [{ from: EPOCH, ids: ids(199) }];
+    for (const date of ['2026-03-03', '2026-11-12', '2027-05-01'] as const) {
+      expect(targetFor(date, 'world', pools)).toBe(dailyTarget(date, 'world', 199));
+    }
+  });
+
+  it('prvi bazen preslikava poziciju na novi indeks', () => {
+    const map = ids(50).map((i) => i * 2);
+    const pools: Pool[] = [{ from: EPOCH, ids: map }];
+    expect(targetFor('2026-11-12', 'hr', pools)).toBe(map[dailyTarget('2026-11-12', 'hr', 50)]);
+  });
+
+  it('do prijelaza vrijedi stari bazen, od prijelaza novi', () => {
+    const pools: Pool[] = [
+      { from: EPOCH, ids: ids(100) },
+      { from: '2026-11-14', ids: ids(100, 1000) },
+    ];
+    expect(targetFor('2026-11-13', 'world', pools)).toBeLessThan(100);
+    expect(targetFor('2026-11-14', 'world', pools)).toBeGreaterThanOrEqual(1000);
+  });
+
+  it('novi bazen u N dana pokaže svaku metu jednom', () => {
+    const pools: Pool[] = [
+      { from: EPOCH, ids: ids(80) },
+      { from: '2026-11-14', ids: ids(84, 500) },
+    ];
+    const seen = new Set<number>();
+    for (let d = 0; d < 84; d++) seen.add(targetFor(addDays('2026-11-14', d), 'hr', pools));
+    expect(seen.size).toBe(84);
+  });
+
+  it('nijedna meta se ne ponovi unutar 30 dana, ni preko prijelaza', () => {
+    // Novi bazen dijeli sve mete sa starim: najgori slučaj za prijelaz.
+    const pools: Pool[] = [
+      { from: EPOCH, ids: ids(70) },
+      { from: '2026-11-14', ids: ids(70) },
+    ];
+    const last = new Map<number, string>();
+    for (let d = -60; d < 200; d++) {
+      const date = addDays('2026-11-14', d);
+      const id = targetFor(date, 'hr', pools);
+      const before = last.get(id);
+      if (before) expect(daysBetween(before, date), `${String(id)} na ${date}`).toBeGreaterThan(30);
+      last.set(id, date);
+    }
+  });
+
+  it('bazeni moraju ići redom', () => {
+    const pools: Pool[] = [
+      { from: '2026-11-14', ids: ids(40) },
+      { from: EPOCH, ids: ids(40) },
+    ];
+    expect(() => targetFor('2026-12-01', 'world', pools)).toThrow(/redom/);
   });
 });

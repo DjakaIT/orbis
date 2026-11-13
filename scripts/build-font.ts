@@ -80,8 +80,10 @@ interface Meta {
   countries: { name: string }[];
 }
 interface Places {
-  gradovi: { name: string }[];
-  mjesta: { name: string }[];
+  names: string[];
+}
+interface Capitals {
+  capitals: { name: string }[];
 }
 
 /**
@@ -105,10 +107,18 @@ async function dataCharacters(): Promise<string> {
     console.warn('  world-meta.json nije nađen — pokreni `pnpm data` prije fonta');
   }
   try {
+    // Sva naselja, ne samo mete: svako se može upisati i ispisati u listi.
     const places = JSON.parse(await readFile(join(dir, 'hr-places.json'), 'utf8')) as Places;
-    out += [...places.gradovi, ...places.mjesta].map((p) => p.name).join('');
+    out += places.names.join('');
   } catch {
     console.warn('  hr-places.json nije nađen — pokreni `pnpm data` prije fonta');
+  }
+  try {
+    // São Tomé, Asunción, Nukuʻalofa: znakovi kojih nema ni u jednom imenu države.
+    const file = JSON.parse(await readFile(join(dir, 'capitals.json'), 'utf8')) as Capitals;
+    out += file.capitals.map((c) => c.name).join('');
+  } catch {
+    console.warn('  capitals.json nije nađen — pokreni `pnpm data` prije fonta');
   }
   return out;
 }

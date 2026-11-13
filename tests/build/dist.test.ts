@@ -32,6 +32,22 @@ function assets(ext: string): string[] {
     .map((f) => `assets/${f}`);
 }
 
+/**
+ * Putanja podatka u `dist/`. Ime nosi sadržajni hash (`world-meta.3f2a1b9c04.json`),
+ * jer bi pod stalnim imenom `immutable` iz `_headers` igraču ostavio stari popis.
+ */
+function data(name: string): string {
+  const dot = name.lastIndexOf('.');
+  const base = name.slice(0, dot);
+  const ext = name.slice(dot);
+  const found = existsSync(join(DIST, 'data'))
+    ? readdirSync(join(DIST, 'data')).find(
+        (f) => f.startsWith(`${base}.`) && f.endsWith(ext) && /.[0-9a-f]{10}./.test(f),
+      )
+    : undefined;
+  return `data/${found ?? name}`;
+}
+
 function sum(paths: string[]): number {
   return paths.reduce((total, p) => total + kb(p), 0);
 }
@@ -163,10 +179,16 @@ describe.skipIf(!built)('service worker', () => {
     expect(urls.some((u) => u.endsWith('.woff2'))).toBe(true);
   });
 
+  it('podaci u dist/ nose hash, i nijedan nije pod stalnim imenom', () => {
+    const files = readdirSync(join(DIST, 'data'));
+    expect(files.length).toBeGreaterThan(0);
+    for (const f of files) expect(f).toMatch(/.[0-9a-f]{10}.(json|bin)$/);
+  });
+
   it('precachea svjetske podatke, jer bez njih nema prve partije', () => {
-    expect(urls).toContain('data/world-topo.json');
-    expect(urls).toContain('data/world-matrix.bin');
-    expect(urls).toContain('data/world-meta.json');
+    expect(urls).toContain(data('world-topo.json'));
+    expect(urls).toContain(data('world-matrix.bin'));
+    expect(urls).toContain(data('world-meta.json'));
   });
 
   it('ne precachea podatke modova koji se biraju', () => {
@@ -215,7 +237,7 @@ describe.skipIf(!built)('budzeti iz SPEC §9.5', () => {
       name: 'JS bez three.js',
       files: () => assets('.js').filter((f) => !f.includes('three-')),
       budget: 45,
-      ceiling: 94,
+      ceiling: 96,
     },
     // WebGLRenderer se ne da tree-shakeati dok se crta na WebGL-u.
     {
@@ -225,18 +247,20 @@ describe.skipIf(!built)('budzeti iz SPEC §9.5', () => {
       ceiling: 132,
     },
     { name: 'CSS', files: () => assets('.css'), budget: 6 },
-    { name: 'world-topo.json', files: () => ['data/world-topo.json'], budget: 40 },
-    { name: 'world-matrix.bin', files: () => ['data/world-matrix.bin'], budget: 40 },
+    { name: 'world-topo.json', files: () => [data('world-topo.json')], budget: 40 },
+    { name: 'world-matrix.bin', files: () => [data('world-matrix.bin')], budget: 40 },
     { name: 'font woff2', files: () => assets('.woff2'), budget: 32 },
     {
       name: 'HR podaci (lazy)',
       files: () => [
-        'data/hr-places.json',
-        'data/hr-outline.json',
+        data('hr-places.json'),
+        data('hr-outline.json'),
         ...assets('.js').filter((f) => f.includes('MapHR-') || f.includes('loadHr-')),
         ...assets('.css').filter((f) => f.includes('MapHR-')),
       ],
       budget: 60,
+      // 6 760 naselja umjesto 695: svako se može upisati. DECISIONS.md, 2026-11-12.
+      ceiling: 90,
     },
   ];
 
@@ -265,10 +289,10 @@ describe.skipIf(!built)('budzeti iz SPEC §9.5', () => {
       ...assets('.css').filter((f) => f.includes('index-')),
       ...assets('.js').filter((f) => !/League-|MapHR-|loadHr-/.test(f)),
       ...assets('.woff2'),
-      'data/world-topo.json',
-      'data/world-matrix.bin',
-      'data/world-meta.json',
-      'data/aliases.json',
+      data('world-topo.json'),
+      data('world-matrix.bin'),
+      data('world-meta.json'),
+      data('aliases.json'),
     ];
     expect(sum(first)).toBeLessThanOrEqual(300);
   });

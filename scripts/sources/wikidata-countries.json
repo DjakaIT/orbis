@@ -1,0 +1,3799 @@
+[
+  {
+    "qid": "Q16",
+    "hr": "Kanada",
+    "capitals": [
+      {
+        "qid": "Q1930",
+        "hr": "Ottawa",
+        "en": "Ottawa",
+        "lon": -75.695,
+        "lat": 45.4247,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q17",
+    "hr": "Japan",
+    "capitals": [
+      {
+        "qid": "Q1490",
+        "hr": "Tokio",
+        "en": "Tokyo",
+        "lon": 139.6917,
+        "lat": 35.6894,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q20",
+    "hr": "Norveška",
+    "capitals": [
+      {
+        "qid": "Q585",
+        "hr": null,
+        "en": "Oslo",
+        "lon": 10.7389,
+        "lat": 59.9133,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q21",
+    "hr": "Engleska",
+    "capitals": [
+      {
+        "qid": "Q84",
+        "hr": "London",
+        "en": "London",
+        "lon": -0.1275,
+        "lat": 51.5072,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q22",
+    "hr": "Škotska",
+    "capitals": [
+      {
+        "qid": "Q23436",
+        "hr": "Edinburgh",
+        "en": "Edinburgh",
+        "lon": -3.1892,
+        "lat": 55.9533,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q25",
+    "hr": "Wales",
+    "capitals": [
+      {
+        "qid": "Q10690",
+        "hr": null,
+        "en": "Cardiff",
+        "lon": -3.1792,
+        "lat": 51.4817,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q26",
+    "hr": "Sjeverna Irska",
+    "capitals": [
+      {
+        "qid": "Q10686",
+        "hr": "Belfast",
+        "en": "Belfast",
+        "lon": -5.93,
+        "lat": 54.5967,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q27",
+    "hr": "Irska",
+    "capitals": [
+      {
+        "qid": "Q1761",
+        "hr": "Dublin",
+        "en": "Dublin",
+        "lon": -6.2603,
+        "lat": 53.3497,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q28",
+    "hr": "Mađarska",
+    "capitals": [
+      {
+        "qid": "Q1781",
+        "hr": "Budimpešta",
+        "en": "Budapest",
+        "lon": 19.0408,
+        "lat": 47.4983,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q29",
+    "hr": "Španjolska",
+    "capitals": [
+      {
+        "qid": "Q2807",
+        "hr": "Madrid",
+        "en": "Madrid",
+        "lon": -3.7033,
+        "lat": 40.4169,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q30",
+    "hr": "Sjedinjene Američke Države",
+    "capitals": [
+      {
+        "qid": "Q61",
+        "hr": "Washington",
+        "en": "Washington, D.C.",
+        "lon": -77.0367,
+        "lat": 38.895,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q31",
+    "hr": "Belgija",
+    "capitals": [
+      {
+        "qid": "Q239",
+        "hr": "Bruxelles",
+        "en": "Brussels",
+        "lon": 4.3517,
+        "lat": 50.8467,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q32",
+    "hr": "Luksemburg",
+    "capitals": [
+      {
+        "qid": "Q1842",
+        "hr": "Luxembourg",
+        "en": "Luxembourg",
+        "lon": 6.13,
+        "lat": 49.6114,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q33",
+    "hr": "Finska",
+    "capitals": [
+      {
+        "qid": "Q1757",
+        "hr": "Helsinki",
+        "en": "Helsinki",
+        "lon": 24.9375,
+        "lat": 60.1708,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q34",
+    "hr": "Švedska",
+    "capitals": [
+      {
+        "qid": "Q1754",
+        "hr": "Stockholm",
+        "en": "Stockholm",
+        "lon": 18.0686,
+        "lat": 59.3294,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q35",
+    "hr": "Danska",
+    "capitals": [
+      {
+        "qid": "Q1748",
+        "hr": "Kopenhagen",
+        "en": "Copenhagen",
+        "lon": 12.5689,
+        "lat": 55.6761,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q36",
+    "hr": "Poljska",
+    "capitals": [
+      {
+        "qid": "Q270",
+        "hr": "Varšava",
+        "en": "Warsaw",
+        "lon": 21.0111,
+        "lat": 52.23,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q37",
+    "hr": "Litva",
+    "capitals": [
+      {
+        "qid": "Q216",
+        "hr": "Vilnius",
+        "en": "Vilnius",
+        "lon": 25.28,
+        "lat": 54.6872,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q38",
+    "hr": "Italija",
+    "capitals": [
+      {
+        "qid": "Q220",
+        "hr": "Rim",
+        "en": "Rome",
+        "lon": 12.4828,
+        "lat": 41.8931,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q39",
+    "hr": "Švicarska",
+    "capitals": [
+      {
+        "qid": "Q70",
+        "hr": "Bern",
+        "en": "Bern",
+        "lon": 7.4474,
+        "lat": 46.948,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q40",
+    "hr": "Austrija",
+    "capitals": [
+      {
+        "qid": "Q1741",
+        "hr": "Beč",
+        "en": "Vienna",
+        "lon": 16.3725,
+        "lat": 48.2083,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q41",
+    "hr": "Grčka",
+    "capitals": [
+      {
+        "qid": "Q1524",
+        "hr": "Atena",
+        "en": "Athens",
+        "lon": 23.7281,
+        "lat": 37.9842,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q43",
+    "hr": "Turska",
+    "capitals": [
+      {
+        "qid": "Q3640",
+        "hr": "Ankara",
+        "en": "Ankara",
+        "lon": 32.8387,
+        "lat": 39.9358,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q45",
+    "hr": "Portugal",
+    "capitals": [
+      {
+        "qid": "Q597",
+        "hr": "Lisabon",
+        "en": "Lisbon",
+        "lon": -9.139,
+        "lat": 38.708,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q51",
+    "hr": "Antarktika",
+    "capitals": []
+  },
+  {
+    "qid": "Q55",
+    "hr": "Nizozemska",
+    "capitals": [
+      {
+        "qid": "Q727",
+        "hr": "Amsterdam",
+        "en": "Amsterdam",
+        "lon": 4.8833,
+        "lat": 52.3667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q77",
+    "hr": "Urugvaj",
+    "capitals": [
+      {
+        "qid": "Q1335",
+        "hr": "Montevideo",
+        "en": "Montevideo",
+        "lon": -56.1913,
+        "lat": -34.9059,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q79",
+    "hr": "Egipat",
+    "capitals": [
+      {
+        "qid": "Q85",
+        "hr": "Kairo",
+        "en": "Cairo",
+        "lon": 31.2358,
+        "lat": 30.0444,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q96",
+    "hr": "Meksiko",
+    "capitals": [
+      {
+        "qid": "Q1489",
+        "hr": "Ciudad de México",
+        "en": "Mexico City",
+        "lon": -99.1359,
+        "lat": 19.3538,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q114",
+    "hr": "Kenija",
+    "capitals": [
+      {
+        "qid": "Q3870",
+        "hr": "Nairobi",
+        "en": "Nairobi",
+        "lon": 36.8172,
+        "lat": -1.2864,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q115",
+    "hr": "Etiopija",
+    "capitals": [
+      {
+        "qid": "Q3624",
+        "hr": "Adis Abeba",
+        "en": "Addis Ababa",
+        "lon": 38.7525,
+        "lat": 9.0358,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q117",
+    "hr": "Gana",
+    "capitals": [
+      {
+        "qid": "Q3761",
+        "hr": "Accra",
+        "en": "Accra",
+        "lon": -0.1969,
+        "lat": 5.556,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q142",
+    "hr": "Francuska",
+    "capitals": [
+      {
+        "qid": "Q90",
+        "hr": "Pariz",
+        "en": "Paris",
+        "lon": 2.3522,
+        "lat": 48.8567,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q145",
+    "hr": "Ujedinjeno Kraljevstvo",
+    "capitals": [
+      {
+        "qid": "Q84",
+        "hr": "London",
+        "en": "London",
+        "lon": -0.1275,
+        "lat": 51.5072,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q148",
+    "hr": "Narodna Republika Kina",
+    "capitals": [
+      {
+        "qid": "Q956",
+        "hr": "Peking",
+        "en": "Beijing",
+        "lon": 116.4075,
+        "lat": 39.904,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q155",
+    "hr": "Brazil",
+    "capitals": [
+      {
+        "qid": "Q2844",
+        "hr": "Brasília",
+        "en": "Brasília",
+        "lon": -47.8828,
+        "lat": -15.7939,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q159",
+    "hr": "Rusija",
+    "capitals": [
+      {
+        "qid": "Q649",
+        "hr": "Moskva",
+        "en": "Moscow",
+        "lon": 37.6175,
+        "lat": 55.7506,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q183",
+    "hr": "Njemačka",
+    "capitals": [
+      {
+        "qid": "Q64",
+        "hr": "Berlin",
+        "en": "Berlin",
+        "lon": 13.3833,
+        "lat": 52.5167,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q184",
+    "hr": "Bjelorusija",
+    "capitals": [
+      {
+        "qid": "Q2280",
+        "hr": "Minsk",
+        "en": "Minsk",
+        "lon": 27.5618,
+        "lat": 53.9022,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q189",
+    "hr": "Island",
+    "capitals": [
+      {
+        "qid": "Q1764",
+        "hr": "Reykjavik",
+        "en": "Reykjavík",
+        "lon": -21.935,
+        "lat": 64.1475,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q191",
+    "hr": "Estonija",
+    "capitals": [
+      {
+        "qid": "Q1770",
+        "hr": "Tallinn",
+        "en": "Tallinn",
+        "lon": 24.745,
+        "lat": 59.4372,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q211",
+    "hr": "Latvija",
+    "capitals": [
+      {
+        "qid": "Q1773",
+        "hr": "Riga",
+        "en": "Riga",
+        "lon": 24.1069,
+        "lat": 56.9475,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q212",
+    "hr": "Ukrajina",
+    "capitals": [
+      {
+        "qid": "Q1899",
+        "hr": "Kijev",
+        "en": "Kyiv",
+        "lon": 30.5236,
+        "lat": 50.45,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q213",
+    "hr": "Češka",
+    "capitals": [
+      {
+        "qid": "Q1085",
+        "hr": "Prag",
+        "en": "Prague",
+        "lon": 14.4214,
+        "lat": 50.0875,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q214",
+    "hr": "Slovačka",
+    "capitals": [
+      {
+        "qid": "Q1780",
+        "hr": "Bratislava",
+        "en": "Bratislava",
+        "lon": 17.1093,
+        "lat": 48.1517,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q215",
+    "hr": "Slovenija",
+    "capitals": [
+      {
+        "qid": "Q437",
+        "hr": "Ljubljana",
+        "en": "Ljubljana",
+        "lon": 14.5061,
+        "lat": 46.0514,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q217",
+    "hr": "Moldavija",
+    "capitals": [
+      {
+        "qid": "Q21197",
+        "hr": "Kišinjev",
+        "en": "Chișinău",
+        "lon": 28.8353,
+        "lat": 47.0228,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q218",
+    "hr": "Rumunjska",
+    "capitals": [
+      {
+        "qid": "Q19660",
+        "hr": "Bukurešt",
+        "en": "Bucharest",
+        "lon": 26.0978,
+        "lat": 44.4134,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q219",
+    "hr": "Bugarska",
+    "capitals": [
+      {
+        "qid": "Q472",
+        "hr": "Sofija",
+        "en": "Sofia",
+        "lon": 23.3217,
+        "lat": 42.6979,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q221",
+    "hr": "Sjeverna Makedonija",
+    "capitals": [
+      {
+        "qid": "Q384",
+        "hr": "Skoplje",
+        "en": "Skopje",
+        "lon": 21.4317,
+        "lat": 41.9961,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q222",
+    "hr": "Albanija",
+    "capitals": [
+      {
+        "qid": "Q19689",
+        "hr": "Tirana",
+        "en": "Tirana",
+        "lon": 19.8181,
+        "lat": 41.3283,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q223",
+    "hr": "Grenland",
+    "capitals": [
+      {
+        "qid": "Q226",
+        "hr": "Nuuk",
+        "en": "Nuuk",
+        "lon": -51.7333,
+        "lat": 64.175,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q224",
+    "hr": "Hrvatska",
+    "capitals": [
+      {
+        "qid": "Q1435",
+        "hr": "Zagreb",
+        "en": "Zagreb",
+        "lon": 15.9772,
+        "lat": 45.8131,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q225",
+    "hr": "Bosna i Hercegovina",
+    "capitals": [
+      {
+        "qid": "Q11194",
+        "hr": "Sarajevo",
+        "en": "Sarajevo",
+        "lon": 18.4131,
+        "lat": 43.8564,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q227",
+    "hr": "Azerbajdžan",
+    "capitals": [
+      {
+        "qid": "Q9248",
+        "hr": "Baku",
+        "en": "Baku",
+        "lon": 49.8352,
+        "lat": 40.3667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q228",
+    "hr": "Andora",
+    "capitals": [
+      {
+        "qid": "Q1863",
+        "hr": "Andorra la Vella",
+        "en": "Andorra la Vella",
+        "lon": 1.5222,
+        "lat": 42.5072,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q229",
+    "hr": "Cipar",
+    "capitals": [
+      {
+        "qid": "Q3856",
+        "hr": "Nikozija",
+        "en": "Nicosia",
+        "lon": 33.365,
+        "lat": 35.1725,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q230",
+    "hr": "Gruzija",
+    "capitals": [
+      {
+        "qid": "Q994",
+        "hr": "Tbilisi",
+        "en": "Tbilisi",
+        "lon": 44.7925,
+        "lat": 41.7225,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q232",
+    "hr": "Kazahstan",
+    "capitals": [
+      {
+        "qid": "Q1520",
+        "hr": "Astana",
+        "en": "Astana",
+        "lon": 71.4333,
+        "lat": 51.1333,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q233",
+    "hr": "Malta",
+    "capitals": [
+      {
+        "qid": "Q23800",
+        "hr": "Valletta",
+        "en": "Valletta",
+        "lon": 14.5125,
+        "lat": 35.8978,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q235",
+    "hr": "Monako",
+    "capitals": [
+      {
+        "qid": "Q235",
+        "hr": "Monako",
+        "en": "Monaco",
+        "lon": 7.42,
+        "lat": 43.7311,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q236",
+    "hr": "Crna Gora",
+    "capitals": [
+      {
+        "qid": "Q23564",
+        "hr": "Podgorica",
+        "en": "Podgorica",
+        "lon": 19.2628,
+        "lat": 42.4414,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q237",
+    "hr": "Vatikan",
+    "capitals": [
+      {
+        "qid": "Q237",
+        "hr": "Vatikan",
+        "en": "Vatican City",
+        "lon": 12.453,
+        "lat": 41.904,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q238",
+    "hr": "San Marino",
+    "capitals": [
+      {
+        "qid": "Q1848",
+        "hr": "San Marino",
+        "en": "San Marino",
+        "lon": 12.4485,
+        "lat": 43.932,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q240",
+    "hr": "Regija glavnoga grada Bruxellesa",
+    "capitals": [
+      {
+        "qid": "Q239",
+        "hr": "Bruxelles",
+        "en": "Brussels",
+        "lon": 4.3517,
+        "lat": 50.8467,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q241",
+    "hr": "Kuba",
+    "capitals": [
+      {
+        "qid": "Q1563",
+        "hr": "Havana",
+        "en": "Havana",
+        "lon": -82.3589,
+        "lat": 23.1367,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q242",
+    "hr": "Belize",
+    "capitals": [
+      {
+        "qid": "Q3043",
+        "hr": "Belmopan",
+        "en": "Belmopan",
+        "lon": -88.7675,
+        "lat": 17.25,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q244",
+    "hr": "Barbados",
+    "capitals": [
+      {
+        "qid": "Q36168",
+        "hr": "Bridgetown",
+        "en": "Bridgetown",
+        "lon": -59.6167,
+        "lat": 13.0975,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q252",
+    "hr": "Indonezija",
+    "capitals": [
+      {
+        "qid": "Q3630",
+        "hr": "Jakarta",
+        "en": "Jakarta",
+        "lon": 106.8269,
+        "lat": -6.1753,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q258",
+    "hr": "Južnoafrička Republika",
+    "capitals": [
+      {
+        "qid": "Q37701",
+        "hr": "Bloemfontein",
+        "en": "Bloemfontein",
+        "lon": 26.2167,
+        "lat": -29.1,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q3926",
+        "hr": "Pretoria",
+        "en": "Pretoria",
+        "lon": 28.1881,
+        "lat": -25.7464,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q5465",
+        "hr": "Kaapstad",
+        "en": "Cape Town",
+        "lon": 18.4239,
+        "lat": -33.9253,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q262",
+    "hr": "Alžir",
+    "capitals": [
+      {
+        "qid": "Q3561",
+        "hr": "Alžir",
+        "en": "Algiers",
+        "lon": 3.0586,
+        "lat": 36.7764,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q265",
+    "hr": "Uzbekistan",
+    "capitals": [
+      {
+        "qid": "Q269",
+        "hr": "Taškent",
+        "en": "Tashkent",
+        "lon": 69.2797,
+        "lat": 41.3111,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q298",
+    "hr": "Čile",
+    "capitals": [
+      {
+        "qid": "Q2887",
+        "hr": "Santiago de Chile",
+        "en": "Santiago",
+        "lon": -70.65,
+        "lat": -33.4375,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q334",
+    "hr": "Singapur",
+    "capitals": [
+      {
+        "qid": "Q334",
+        "hr": "Singapur",
+        "en": "Singapore",
+        "lon": 103.8,
+        "lat": 1.3,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q347",
+    "hr": "Lihtenštajn",
+    "capitals": [
+      {
+        "qid": "Q1844",
+        "hr": "Vaduz",
+        "en": "Vaduz",
+        "lon": 9.5222,
+        "lat": 47.1406,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q398",
+    "hr": "Bahrein",
+    "capitals": [
+      {
+        "qid": "Q3882",
+        "hr": "Manama",
+        "en": "Manama",
+        "lon": 50.5833,
+        "lat": 26.2167,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q399",
+    "hr": "Armenija",
+    "capitals": [
+      {
+        "qid": "Q1953",
+        "hr": "Erevan",
+        "en": "Yerevan",
+        "lon": 44.5144,
+        "lat": 40.1814,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q403",
+    "hr": "Srbija",
+    "capitals": [
+      {
+        "qid": "Q3711",
+        "hr": "Beograd",
+        "en": "Belgrade",
+        "lon": 20.4569,
+        "lat": 44.8178,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q408",
+    "hr": "Australija",
+    "capitals": [
+      {
+        "qid": "Q3114",
+        "hr": "Canberra",
+        "en": "Canberra",
+        "lon": 149.1269,
+        "lat": -35.2931,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q414",
+    "hr": "Argentina",
+    "capitals": [
+      {
+        "qid": "Q1486",
+        "hr": "Buenos Aires",
+        "en": "Buenos Aires",
+        "lon": -58.3819,
+        "lat": -34.5997,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q419",
+    "hr": "Peru",
+    "capitals": [
+      {
+        "qid": "Q2868",
+        "hr": "Lima",
+        "en": "Lima",
+        "lon": -77.0375,
+        "lat": -12.06,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q423",
+    "hr": "Sjeverna Koreja",
+    "capitals": [
+      {
+        "qid": "Q18808",
+        "hr": "Pjongjang",
+        "en": "Pyongyang",
+        "lon": 125.7475,
+        "lat": 39.0167,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q424",
+    "hr": "Kambodža",
+    "capitals": [
+      {
+        "qid": "Q1850",
+        "hr": "Phnom Penh",
+        "en": "Phnom Penh",
+        "lon": 104.921,
+        "lat": 11.5696,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q574",
+    "hr": "Istočni Timor",
+    "capitals": [
+      {
+        "qid": "Q9310",
+        "hr": "Dili",
+        "en": "Dili",
+        "lon": 125.5783,
+        "lat": -8.5536,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q657",
+    "hr": "Čad",
+    "capitals": [
+      {
+        "qid": "Q3659",
+        "hr": "N'Djamena",
+        "en": "N'Djamena",
+        "lon": 15.05,
+        "lat": 12.11,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q664",
+    "hr": "Novi Zeland",
+    "capitals": [
+      {
+        "qid": "Q23661",
+        "hr": "Wellington",
+        "en": "Wellington",
+        "lon": 174.7772,
+        "lat": -41.2889,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q668",
+    "hr": "Indija",
+    "capitals": [
+      {
+        "qid": "Q987",
+        "hr": "New Delhi",
+        "en": "New Delhi",
+        "lon": 77.2089,
+        "lat": 28.6139,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q672",
+    "hr": "Tuvalu",
+    "capitals": [
+      {
+        "qid": "Q34126",
+        "hr": "Funafuti",
+        "en": "Funafuti",
+        "lon": 179.1174,
+        "lat": -8.5048,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q678",
+    "hr": "Tonga",
+    "capitals": [
+      {
+        "qid": "Q38834",
+        "hr": "Nuku'alofa",
+        "en": "Nukuʻalofa",
+        "lon": -175.2018,
+        "lat": -21.1343,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q683",
+    "hr": "Samoa",
+    "capitals": [
+      {
+        "qid": "Q36260",
+        "hr": "Apia",
+        "en": "Apia",
+        "lon": -171.8333,
+        "lat": -13.8333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q685",
+    "hr": "Salomonski Otoci",
+    "capitals": [
+      {
+        "qid": "Q40921",
+        "hr": "Honiara",
+        "en": "Honiara",
+        "lon": 159.95,
+        "lat": -9.4333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q686",
+    "hr": "Vanuatu",
+    "capitals": [
+      {
+        "qid": "Q37806",
+        "hr": "Port Vila",
+        "en": "Port Vila",
+        "lon": 168.3167,
+        "lat": -17.7333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q691",
+    "hr": "Papua Nova Gvineja",
+    "capitals": [
+      {
+        "qid": "Q36526",
+        "hr": "Port Moresby",
+        "en": "Port Moresby",
+        "lon": 147.1494,
+        "lat": -9.4789,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q695",
+    "hr": "Palau",
+    "capitals": [
+      {
+        "qid": "Q515229",
+        "hr": null,
+        "en": "Ngerulmud",
+        "lon": 134.6242,
+        "lat": 7.5006,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q697",
+    "hr": "Nauru",
+    "capitals": [
+      {
+        "qid": "Q31026",
+        "hr": "Yaren",
+        "en": "Yaren District",
+        "lon": 166.9209,
+        "lat": -0.5477,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q702",
+    "hr": "Mikronezija",
+    "capitals": [
+      {
+        "qid": "Q42751",
+        "hr": "Palikir",
+        "en": "Palikir",
+        "lon": 158.185,
+        "lat": 6.9178,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q709",
+    "hr": "Maršalovi Otoci",
+    "capitals": [
+      {
+        "qid": "Q12919",
+        "hr": "Majuro",
+        "en": "Majuro",
+        "lon": 171.3802,
+        "lat": 7.0918,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q710",
+    "hr": "Kiribati",
+    "capitals": [
+      {
+        "qid": "Q131233",
+        "hr": "South Tarawa",
+        "en": "South Tarawa",
+        "lon": 172.9667,
+        "lat": 1.3333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q711",
+    "hr": "Mongolija",
+    "capitals": [
+      {
+        "qid": "Q23430",
+        "hr": "Ulan Bator",
+        "en": "Ulaanbaatar",
+        "lon": 106.9055,
+        "lat": 47.9214,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q712",
+    "hr": "Fidži",
+    "capitals": [
+      {
+        "qid": "Q38807",
+        "hr": "Suva",
+        "en": "Suva",
+        "lon": 178.44,
+        "lat": -18.1267,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q717",
+    "hr": "Venezuela",
+    "capitals": [
+      {
+        "qid": "Q1533",
+        "hr": "Caracas",
+        "en": "Caracas",
+        "lon": -66.9144,
+        "lat": 10.5061,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q730",
+    "hr": "Surinam",
+    "capitals": [
+      {
+        "qid": "Q3001",
+        "hr": "Paramaribo",
+        "en": "Paramaribo",
+        "lon": -55.1667,
+        "lat": 5.8667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q733",
+    "hr": "Paragvaj",
+    "capitals": [
+      {
+        "qid": "Q2933",
+        "hr": "Asunción",
+        "en": "Asunción",
+        "lon": -57.6344,
+        "lat": -25.28,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q734",
+    "hr": "Gvajana",
+    "capitals": [
+      {
+        "qid": "Q10717",
+        "hr": "Georgetown",
+        "en": "Georgetown",
+        "lon": -58.1508,
+        "lat": 6.8058,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q736",
+    "hr": "Ekvador",
+    "capitals": [
+      {
+        "qid": "Q2900",
+        "hr": "Quito",
+        "en": "Quito",
+        "lon": -78.5125,
+        "lat": -0.22,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q739",
+    "hr": "Kolumbija",
+    "capitals": [
+      {
+        "qid": "Q2841",
+        "hr": "Bogotá",
+        "en": "Bogotá",
+        "lon": -74.0817,
+        "lat": 4.6097,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q750",
+    "hr": "Bolivija",
+    "capitals": [
+      {
+        "qid": "Q1491",
+        "hr": "La Paz",
+        "en": "La Paz",
+        "lon": -68.1333,
+        "lat": -16.4958,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q2907",
+        "hr": "Sucre",
+        "en": "Sucre",
+        "lon": -65.26,
+        "lat": -19.0475,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q754",
+    "hr": "Trinidad i Tobago",
+    "capitals": [
+      {
+        "qid": "Q39178",
+        "hr": "Port-of-Spain",
+        "en": "Port of Spain",
+        "lon": -61.5167,
+        "lat": 10.6667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q757",
+    "hr": "Sveti Vincent i Grenadini",
+    "capitals": [
+      {
+        "qid": "Q41474",
+        "hr": "Kingstown",
+        "en": "Kingstown",
+        "lon": -61.2274,
+        "lat": 13.1553,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q760",
+    "hr": "Sveta Lucija",
+    "capitals": [
+      {
+        "qid": "Q41699",
+        "hr": "Castries",
+        "en": "Castries",
+        "lon": -60.9894,
+        "lat": 14.0108,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q763",
+    "hr": "Sveti Kristofor i Nevis",
+    "capitals": [
+      {
+        "qid": "Q41295",
+        "hr": "Basseterre",
+        "en": "Basseterre",
+        "lon": -62.7342,
+        "lat": 17.2983,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q766",
+    "hr": "Jamajka",
+    "capitals": [
+      {
+        "qid": "Q34692",
+        "hr": "Kingston",
+        "en": "Kingston",
+        "lon": -76.7931,
+        "lat": 17.9714,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q769",
+    "hr": "Grenada",
+    "capitals": [
+      {
+        "qid": "Q41547",
+        "hr": "St. George's",
+        "en": "St. George's",
+        "lon": -61.7531,
+        "lat": 12.0525,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q774",
+    "hr": "Gvatemala",
+    "capitals": [
+      {
+        "qid": "Q1555",
+        "hr": "Guatemala",
+        "en": "Guatemala City",
+        "lon": -90.5133,
+        "lat": 14.6417,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q778",
+    "hr": "Bahami",
+    "capitals": [
+      {
+        "qid": "Q2467",
+        "hr": "Nassau",
+        "en": "Nassau",
+        "lon": -77.3386,
+        "lat": 25.0781,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q781",
+    "hr": "Antigva i Barbuda",
+    "capitals": [
+      {
+        "qid": "Q36262",
+        "hr": null,
+        "en": "St. John's",
+        "lon": -61.8447,
+        "lat": 17.1211,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q783",
+    "hr": "Honduras",
+    "capitals": [
+      {
+        "qid": "Q3238",
+        "hr": "Tegucigalpa",
+        "en": "Tegucigalpa",
+        "lon": -87.2047,
+        "lat": 14.1058,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q784",
+    "hr": "Dominika",
+    "capitals": [
+      {
+        "qid": "Q36281",
+        "hr": "Roseau",
+        "en": "Roseau",
+        "lon": -61.3833,
+        "lat": 15.3,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q785",
+    "hr": "Bailiwick Jersey",
+    "capitals": [
+      {
+        "qid": "Q147738",
+        "hr": "Saint Helier",
+        "en": "Saint Helier",
+        "lon": -2.11,
+        "lat": 49.1858,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q786",
+    "hr": "Dominikanska Republika",
+    "capitals": [
+      {
+        "qid": "Q34820",
+        "hr": "Santo Domingo",
+        "en": "Santo Domingo",
+        "lon": -69.9361,
+        "lat": 18.4625,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q790",
+    "hr": "Haiti",
+    "capitals": [
+      {
+        "qid": "Q34261",
+        "hr": "Port-au-Prince",
+        "en": "Port-au-Prince",
+        "lon": -72.3403,
+        "lat": 18.5469,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q792",
+    "hr": "Salvador",
+    "capitals": [
+      {
+        "qid": "Q3110",
+        "hr": "San Salvador",
+        "en": "San Salvador",
+        "lon": -89.1912,
+        "lat": 13.6976,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q794",
+    "hr": "Iran",
+    "capitals": [
+      {
+        "qid": "Q3616",
+        "hr": "Teheran",
+        "en": "Tehran",
+        "lon": 51.3897,
+        "lat": 35.6889,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q796",
+    "hr": "Irak",
+    "capitals": [
+      {
+        "qid": "Q1530",
+        "hr": "Bagdad",
+        "en": "Baghdad",
+        "lon": 44.3661,
+        "lat": 33.3153,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q800",
+    "hr": "Kostarika",
+    "capitals": [
+      {
+        "qid": "Q3070",
+        "hr": "San José, Kostarika",
+        "en": "San José",
+        "lon": -84.0796,
+        "lat": 9.9327,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q801",
+    "hr": "Izrael",
+    "capitals": [
+      {
+        "qid": "Q1218",
+        "hr": "Jeruzalem",
+        "en": "Jerusalem",
+        "lon": 35.2342,
+        "lat": 31.7767,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q804",
+    "hr": "Panama",
+    "capitals": [
+      {
+        "qid": "Q3306",
+        "hr": "Panamá",
+        "en": "Panama City",
+        "lon": -79.5347,
+        "lat": 8.9711,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q805",
+    "hr": "Jemen",
+    "capitals": [
+      {
+        "qid": "Q131694",
+        "hr": "Aden",
+        "en": "Aden",
+        "lon": 45.0333,
+        "lat": 12.8,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q2471",
+        "hr": "Sana",
+        "en": "Sanaa",
+        "lon": 44.2,
+        "lat": 15.35,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q810",
+    "hr": "Jordan",
+    "capitals": [
+      {
+        "qid": "Q3805",
+        "hr": "Amman",
+        "en": "Amman",
+        "lon": 35.9333,
+        "lat": 31.95,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q811",
+    "hr": "Nikaragva",
+    "capitals": [
+      {
+        "qid": "Q131546626",
+        "hr": "Managua",
+        "en": "Managua",
+        "lon": -86.2737,
+        "lat": 12.1547,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q813",
+    "hr": "Kirgistan",
+    "capitals": [
+      {
+        "qid": "Q9361",
+        "hr": "Biškek",
+        "en": "Bishkek",
+        "lon": 74.5667,
+        "lat": 42.8667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q817",
+    "hr": "Kuvajt",
+    "capitals": [
+      {
+        "qid": "Q35178",
+        "hr": "Kuwait",
+        "en": "Kuwait City",
+        "lon": 47.98,
+        "lat": 29.375,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q819",
+    "hr": "Laos",
+    "capitals": [
+      {
+        "qid": "Q9326",
+        "hr": "Vientiane",
+        "en": "Vientiane",
+        "lon": 102.63,
+        "lat": 17.98,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q822",
+    "hr": "Libanon",
+    "capitals": [
+      {
+        "qid": "Q3820",
+        "hr": "Beirut",
+        "en": "Beirut",
+        "lon": 35.5131,
+        "lat": 33.8869,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q826",
+    "hr": "Maldivi",
+    "capitals": [
+      {
+        "qid": "Q9347",
+        "hr": "Malé",
+        "en": "Malé",
+        "lon": 73.5083,
+        "lat": 4.175,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q833",
+    "hr": "Malezija",
+    "capitals": [
+      {
+        "qid": "Q182378",
+        "hr": "Putrajaya",
+        "en": "Putrajaya",
+        "lon": 101.69,
+        "lat": 2.93,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q1865",
+        "hr": "Kuala Lumpur",
+        "en": "Kuala Lumpur",
+        "lon": 101.6953,
+        "lat": 3.1478,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q836",
+    "hr": "Mjanmar",
+    "capitals": [
+      {
+        "qid": "Q37400",
+        "hr": "Naypyidaw",
+        "en": "Naypyidaw",
+        "lon": 96.115,
+        "lat": 19.7475,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q837",
+    "hr": "Nepal",
+    "capitals": [
+      {
+        "qid": "Q3037",
+        "hr": "Katmandu",
+        "en": "Kathmandu",
+        "lon": 85.32,
+        "lat": 27.71,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q842",
+    "hr": "Oman",
+    "capitals": [
+      {
+        "qid": "Q3826",
+        "hr": "Muskat",
+        "en": "Muscat",
+        "lon": 58.5922,
+        "lat": 23.6139,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q843",
+    "hr": "Pakistan",
+    "capitals": [
+      {
+        "qid": "Q1362",
+        "hr": "Islamabad",
+        "en": "Islamabad",
+        "lon": 73.0369,
+        "lat": 33.6989,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q846",
+    "hr": "Katar",
+    "capitals": [
+      {
+        "qid": "Q3861",
+        "hr": "Doha",
+        "en": "Doha",
+        "lon": 51.5294,
+        "lat": 25.2861,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q851",
+    "hr": "Saudijska Arabija",
+    "capitals": [
+      {
+        "qid": "Q3692",
+        "hr": "Rijad",
+        "en": "Riyadh",
+        "lon": 46.715,
+        "lat": 24.6383,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q854",
+    "hr": "Šri Lanka",
+    "capitals": [
+      {
+        "qid": "Q35381",
+        "hr": "Colombo",
+        "en": "Colombo",
+        "lon": 79.8606,
+        "lat": 6.9267,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q41963",
+        "hr": "Sri Jayawardenepura Kotte",
+        "en": "Sri Jayawardenepura Kotte",
+        "lon": 79.9164,
+        "lat": 6.9,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q858",
+    "hr": "Sirija",
+    "capitals": [
+      {
+        "qid": "Q3766",
+        "hr": "Damask",
+        "en": "Damascus",
+        "lon": 36.2919,
+        "lat": 33.5131,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q863",
+    "hr": "Tadžikistan",
+    "capitals": [
+      {
+        "qid": "Q9365",
+        "hr": "Dušanbe",
+        "en": "Dushanbe",
+        "lon": 68.7864,
+        "lat": 38.5731,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q865",
+    "hr": "Republika Kina",
+    "capitals": [
+      {
+        "qid": "Q1867",
+        "hr": "Taipei",
+        "en": "Taipei",
+        "lon": 121.5625,
+        "lat": 25.0375,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q869",
+    "hr": "Tajland",
+    "capitals": [
+      {
+        "qid": "Q1861",
+        "hr": "Bangkok",
+        "en": "Bangkok",
+        "lon": 100.5167,
+        "lat": 13.75,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q874",
+    "hr": "Turkmenistan",
+    "capitals": [
+      {
+        "qid": "Q23438",
+        "hr": "Ašgabat",
+        "en": "Ashgabat",
+        "lon": 58.3833,
+        "lat": 37.95,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q878",
+    "hr": "Ujedinjeni Arapski Emirati",
+    "capitals": [
+      {
+        "qid": "Q1519",
+        "hr": "Abu Dhabi",
+        "en": "Abu Dhabi",
+        "lon": 54.3969,
+        "lat": 24.4511,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q881",
+    "hr": "Vijetnam",
+    "capitals": [
+      {
+        "qid": "Q1858",
+        "hr": "Hanoi",
+        "en": "Hanoi",
+        "lon": 105.8412,
+        "lat": 21.0245,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q884",
+    "hr": "Južna Koreja",
+    "capitals": [
+      {
+        "qid": "Q8684",
+        "hr": "Seul",
+        "en": "Seoul",
+        "lon": 126.99,
+        "lat": 37.56,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q889",
+    "hr": "Afganistan",
+    "capitals": [
+      {
+        "qid": "Q5838",
+        "hr": "Kabul",
+        "en": "Kabul",
+        "lon": 69.1658,
+        "lat": 34.5328,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q902",
+    "hr": "Bangladeš",
+    "capitals": [
+      {
+        "qid": "Q1354",
+        "hr": "Dhaka",
+        "en": "Dhaka",
+        "lon": 90.3944,
+        "lat": 23.7289,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q912",
+    "hr": "Mali",
+    "capitals": [
+      {
+        "qid": "Q3703",
+        "hr": "Bamako",
+        "en": "Bamako",
+        "lon": -7.9922,
+        "lat": 12.6458,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q916",
+    "hr": "Angola",
+    "capitals": [
+      {
+        "qid": "Q3897",
+        "hr": "Luanda",
+        "en": "Luanda",
+        "lon": 13.23,
+        "lat": -8.815,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q917",
+    "hr": "Kraljevina Butan",
+    "capitals": [
+      {
+        "qid": "Q9270",
+        "hr": "Thimphu",
+        "en": "Thimphu",
+        "lon": 89.6337,
+        "lat": 27.4714,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q921",
+    "hr": "Brunej",
+    "capitals": [
+      {
+        "qid": "Q9279",
+        "hr": "Bandar Seri Begawan",
+        "en": "Bandar Seri Begawan",
+        "lon": 114.9167,
+        "lat": 4.9167,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q924",
+    "hr": "Tanzanija",
+    "capitals": [
+      {
+        "qid": "Q3866",
+        "hr": "Dodoma",
+        "en": "Dodoma",
+        "lon": 35.746,
+        "lat": -6.1835,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q928",
+    "hr": "Filipini",
+    "capitals": [
+      {
+        "qid": "Q1461",
+        "hr": "Manila",
+        "en": "Manila",
+        "lon": 120.9772,
+        "lat": 14.5958,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q929",
+    "hr": "Srednjoafrička Republika",
+    "capitals": [
+      {
+        "qid": "Q3832",
+        "hr": "Bangui",
+        "en": "Bangui",
+        "lon": 18.5628,
+        "lat": 4.3733,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q945",
+    "hr": "Togo",
+    "capitals": [
+      {
+        "qid": "Q3792",
+        "hr": "Lomé",
+        "en": "Lomé",
+        "lon": 1.2158,
+        "lat": 6.13,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q948",
+    "hr": "Tunis",
+    "capitals": [
+      {
+        "qid": "Q3572",
+        "hr": "Tunis",
+        "en": "Tunis",
+        "lon": 10.18,
+        "lat": 36.8008,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q953",
+    "hr": "Zambija",
+    "capitals": [
+      {
+        "qid": "Q3881",
+        "hr": "Lusaka",
+        "en": "Lusaka",
+        "lon": 28.2833,
+        "lat": -15.4167,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q954",
+    "hr": "Zimbabve",
+    "capitals": [
+      {
+        "qid": "Q3921",
+        "hr": "Harare",
+        "en": "Harare",
+        "lon": 31.0522,
+        "lat": -17.8292,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q958",
+    "hr": "Južni Sudan",
+    "capitals": [
+      {
+        "qid": "Q1947",
+        "hr": "Juba, grad",
+        "en": "Juba",
+        "lon": 31.5825,
+        "lat": 4.8539,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q962",
+    "hr": "Benin",
+    "capitals": [
+      {
+        "qid": "Q3799",
+        "hr": "Porto-Novo",
+        "en": "Porto-Novo",
+        "lon": 2.6167,
+        "lat": 6.4833,
+        "rank": "preferred"
+      },
+      {
+        "qid": "Q43595",
+        "hr": "Cotonou",
+        "en": "Cotonou",
+        "lon": 2.4167,
+        "lat": 6.3667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q963",
+    "hr": "Bocvana",
+    "capitals": [
+      {
+        "qid": "Q3919",
+        "hr": "Gaborone",
+        "en": "Gaborone",
+        "lon": 25.9086,
+        "lat": -24.6569,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q965",
+    "hr": "Burkina Faso",
+    "capitals": [
+      {
+        "qid": "Q3777",
+        "hr": "Ouagadougou",
+        "en": "Ouagadougou",
+        "lon": -1.5275,
+        "lat": 12.3686,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q967",
+    "hr": "Burundi",
+    "capitals": [
+      {
+        "qid": "Q167551",
+        "hr": "Gitega",
+        "en": "Gitega",
+        "lon": 29.925,
+        "lat": -3.4283,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q970",
+    "hr": "Komori",
+    "capitals": [
+      {
+        "qid": "Q3901",
+        "hr": "Moroni",
+        "en": "Moroni",
+        "lon": 43.2536,
+        "lat": -11.7036,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q971",
+    "hr": "Republika Kongo",
+    "capitals": [
+      {
+        "qid": "Q3844",
+        "hr": "Brazzaville",
+        "en": "Brazzaville",
+        "lon": 15.2711,
+        "lat": -4.2694,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q974",
+    "hr": "Demokratska Republika Kongo",
+    "capitals": [
+      {
+        "qid": "Q3838",
+        "hr": "Kinshasa",
+        "en": "Kinshasa",
+        "lon": 15.3119,
+        "lat": -4.3219,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q977",
+    "hr": "Džibuti",
+    "capitals": [
+      {
+        "qid": "Q3604",
+        "hr": "Djibouti",
+        "en": "Djibouti",
+        "lon": 43.1481,
+        "lat": 11.595,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q983",
+    "hr": "Ekvatorska Gvineja",
+    "capitals": [
+      {
+        "qid": "Q1140136",
+        "hr": "Ciudad de la Paz",
+        "en": "Ciudad de la Paz",
+        "lon": 10.8222,
+        "lat": 1.5917,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q986",
+    "hr": "Eritreja",
+    "capitals": [
+      {
+        "qid": "Q3642",
+        "hr": "Asmera",
+        "en": "Asmara",
+        "lon": 38.9167,
+        "lat": 15.3333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1000",
+    "hr": "Gabon",
+    "capitals": [
+      {
+        "qid": "Q3825",
+        "hr": "Libreville",
+        "en": "Libreville",
+        "lon": 9.4403,
+        "lat": 0.4078,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1005",
+    "hr": "Gambija",
+    "capitals": [
+      {
+        "qid": "Q3726",
+        "hr": "Banjul",
+        "en": "Banjul",
+        "lon": -16.5775,
+        "lat": 13.4531,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1006",
+    "hr": "Gvineja",
+    "capitals": [
+      {
+        "qid": "Q3733",
+        "hr": "Conakry",
+        "en": "Conakry",
+        "lon": -13.7122,
+        "lat": 9.5092,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1007",
+    "hr": "Gvineja Bisau",
+    "capitals": [
+      {
+        "qid": "Q3739",
+        "hr": "Bissau",
+        "en": "Bissau",
+        "lon": -15.5833,
+        "lat": 11.86,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1008",
+    "hr": "Obala Bjelokosti",
+    "capitals": [
+      {
+        "qid": "Q3768",
+        "hr": "Yamoussoukro",
+        "en": "Yamoussoukro",
+        "lon": -5.2742,
+        "lat": 6.8161,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q1009",
+    "hr": "Kamerun",
+    "capitals": [
+      {
+        "qid": "Q3808",
+        "hr": "Yaoundé",
+        "en": "Yaoundé",
+        "lon": 11.5181,
+        "lat": 3.8578,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1011",
+    "hr": "Zelenortska Republika",
+    "capitals": [
+      {
+        "qid": "Q3751",
+        "hr": "Praia",
+        "en": "Praia",
+        "lon": -23.5092,
+        "lat": 14.9177,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1013",
+    "hr": "Lesoto",
+    "capitals": [
+      {
+        "qid": "Q3909",
+        "hr": "Maseru",
+        "en": "Maseru",
+        "lon": 27.48,
+        "lat": -29.31,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1014",
+    "hr": "Liberija",
+    "capitals": [
+      {
+        "qid": "Q3748",
+        "hr": "Monrovia",
+        "en": "Monrovia",
+        "lon": -10.8047,
+        "lat": 6.3106,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1016",
+    "hr": "Libija",
+    "capitals": [
+      {
+        "qid": "Q3579",
+        "hr": "Tripoli",
+        "en": "Tripoli",
+        "lon": 13.1875,
+        "lat": 32.8875,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1019",
+    "hr": "Madagaskar",
+    "capitals": [
+      {
+        "qid": "Q3915",
+        "hr": "Antananarivo",
+        "en": "Antananarivo",
+        "lon": 47.525,
+        "lat": -18.91,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1020",
+    "hr": "Malavi",
+    "capitals": [
+      {
+        "qid": "Q3876",
+        "hr": "Lilongwe",
+        "en": "Lilongwe",
+        "lon": 33.7681,
+        "lat": -13.9864,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q1025",
+    "hr": "Mauretanija",
+    "capitals": [
+      {
+        "qid": "Q3688",
+        "hr": "Nouakchott",
+        "en": "Nouakchott",
+        "lon": -15.9785,
+        "lat": 18.0858,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1027",
+    "hr": "Mauricijus",
+    "capitals": [
+      {
+        "qid": "Q3929",
+        "hr": "Port Louis",
+        "en": "Port Louis",
+        "lon": 57.4989,
+        "lat": -20.1619,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1028",
+    "hr": "Maroko",
+    "capitals": [
+      {
+        "qid": "Q3551",
+        "hr": "Rabat",
+        "en": "Rabat",
+        "lon": -6.8414,
+        "lat": 34.0211,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1029",
+    "hr": "Mozambik",
+    "capitals": [
+      {
+        "qid": "Q3889",
+        "hr": "Maputo",
+        "en": "Maputo",
+        "lon": 32.5733,
+        "lat": -25.9689,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1030",
+    "hr": "Namibija",
+    "capitals": [
+      {
+        "qid": "Q3935",
+        "hr": "Windhoek",
+        "en": "Windhoek",
+        "lon": 17.0836,
+        "lat": -22.57,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1032",
+    "hr": "Niger",
+    "capitals": [
+      {
+        "qid": "Q3674",
+        "hr": "Niamey",
+        "en": "Niamey",
+        "lon": 2.1175,
+        "lat": 13.515,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1033",
+    "hr": "Nigerija",
+    "capitals": [
+      {
+        "qid": "Q3787",
+        "hr": null,
+        "en": "Abuja",
+        "lon": 7.4914,
+        "lat": 9.0556,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q1036",
+    "hr": "Uganda",
+    "capitals": [
+      {
+        "qid": "Q3894",
+        "hr": "Kampala",
+        "en": "Kampala",
+        "lon": 32.5811,
+        "lat": 0.3136,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1037",
+    "hr": "Ruanda",
+    "capitals": [
+      {
+        "qid": "Q3859",
+        "hr": "Kigali",
+        "en": "Kigali",
+        "lon": 30.115,
+        "lat": -1.9525,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1039",
+    "hr": "Sveti Toma i Princip",
+    "capitals": [
+      {
+        "qid": "Q3932",
+        "hr": "São Tomé",
+        "en": "São Tomé",
+        "lon": 6.7283,
+        "lat": 0.3375,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1041",
+    "hr": "Senegal",
+    "capitals": [
+      {
+        "qid": "Q3718",
+        "hr": "Dakar",
+        "en": "Dakar",
+        "lon": -17.432,
+        "lat": 14.6726,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1042",
+    "hr": "Sejšeli",
+    "capitals": [
+      {
+        "qid": "Q3940",
+        "hr": "Victoria, Sejšeli",
+        "en": "Victoria",
+        "lon": 55.4544,
+        "lat": -4.6236,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1044",
+    "hr": "Sijera Leone",
+    "capitals": [
+      {
+        "qid": "Q3780",
+        "hr": "Freetown",
+        "en": "Freetown",
+        "lon": -13.2356,
+        "lat": 8.4872,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1045",
+    "hr": "Somalija",
+    "capitals": [
+      {
+        "qid": "Q2449",
+        "hr": "Mogadishu",
+        "en": "Mogadishu",
+        "lon": 45.3419,
+        "lat": 2.0392,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1049",
+    "hr": "Sudan",
+    "capitals": [
+      {
+        "qid": "Q1963",
+        "hr": "Khartoum",
+        "en": "Khartoum",
+        "lon": 32.5265,
+        "lat": 15.6031,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1050",
+    "hr": "Esvatini",
+    "capitals": [
+      {
+        "qid": "Q101418",
+        "hr": null,
+        "en": "Lobamba",
+        "lon": 31.2064,
+        "lat": -26.4465,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q3904",
+        "hr": "Mbabane",
+        "en": "Mbabane",
+        "lon": 31.1333,
+        "lat": -26.3167,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1118",
+    "hr": "Flamanski Brabant",
+    "capitals": [
+      {
+        "qid": "Q118958",
+        "hr": "Leuven",
+        "en": "Leuven",
+        "lon": 4.7044,
+        "lat": 50.8775,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1122",
+    "hr": "Valonski Brabant",
+    "capitals": [
+      {
+        "qid": "Q181314",
+        "hr": "Wavre",
+        "en": "Wavre",
+        "lon": 4.6,
+        "lat": 50.7167,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1183",
+    "hr": "Portoriko",
+    "capitals": [
+      {
+        "qid": "Q41211",
+        "hr": "San Juan",
+        "en": "San Juan",
+        "lon": -66.1167,
+        "lat": 18.4653,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1246",
+    "hr": "Kosovo",
+    "capitals": [
+      {
+        "qid": "Q25270",
+        "hr": "Priština",
+        "en": "Pristina",
+        "lon": 21.1667,
+        "lat": 42.6667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q1774",
+    "hr": "Zanzibar",
+    "capitals": [
+      {
+        "qid": "Q2222874",
+        "hr": "Zanzibar (grad)",
+        "en": "Zanzibar City",
+        "lon": 39.2,
+        "lat": -6.1667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q3769",
+    "hr": "Francuska Gvajana",
+    "capitals": [
+      {
+        "qid": "Q44401",
+        "hr": "Cayenne",
+        "en": "Cayenne",
+        "lon": -52.335,
+        "lat": 4.9386,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q4628",
+    "hr": "Farski otoci",
+    "capitals": [
+      {
+        "qid": "Q10704",
+        "hr": "Tórshavn",
+        "en": "Tórshavn",
+        "lon": -6.7713,
+        "lat": 62.0098,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q5689",
+    "hr": "Ålandski otoci",
+    "capitals": [
+      {
+        "qid": "Q48329",
+        "hr": "Mariehamn",
+        "en": "Mariehamn",
+        "lon": 19.9444,
+        "lat": 60.0986,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q5785",
+    "hr": "Kajmanski otoci",
+    "capitals": [
+      {
+        "qid": "Q172996",
+        "hr": "George Town",
+        "en": "George Town",
+        "lon": -81.3817,
+        "lat": 19.2964,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q6250",
+    "hr": "Zapadna Sahara",
+    "capitals": []
+  },
+  {
+    "qid": "Q8646",
+    "hr": "Hong Kong",
+    "capitals": []
+  },
+  {
+    "qid": "Q9648",
+    "hr": "Falklandski otoci",
+    "capitals": [
+      {
+        "qid": "Q12245",
+        "hr": "Stanley, Falklandski otoci",
+        "en": "Stanley",
+        "lon": -57.8496,
+        "lat": -51.6939,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q9676",
+    "hr": "Otok Man",
+    "capitals": [
+      {
+        "qid": "Q18569",
+        "hr": "Douglas, Otok Man",
+        "en": "Douglas",
+        "lon": -4.4775,
+        "lat": 54.15,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q11196",
+    "hr": "Republika Srpska",
+    "capitals": [
+      {
+        "qid": "Q11194",
+        "hr": "Sarajevo",
+        "en": "Sarajevo",
+        "lon": 18.4131,
+        "lat": 43.8564,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q131127",
+        "hr": "Banja Luka",
+        "en": "Banja Luka",
+        "lon": 17.1925,
+        "lat": 44.7725,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q11198",
+    "hr": "Federacija Bosne i Hercegovine",
+    "capitals": [
+      {
+        "qid": "Q11194",
+        "hr": "Sarajevo",
+        "en": "Sarajevo",
+        "lon": 18.4131,
+        "lat": 43.8564,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q11703",
+    "hr": "Američki Djevičanski otoci",
+    "capitals": [
+      {
+        "qid": "Q51681",
+        "hr": "Charlotte Amalie",
+        "en": "Charlotte Amalie",
+        "lon": -64.95,
+        "lat": 18.35,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q13353",
+    "hr": "Montserrat",
+    "capitals": [
+      {
+        "qid": "Q30990",
+        "hr": "Plymouth (Montserrat)",
+        "en": "Plymouth",
+        "lon": -62.2158,
+        "lat": 16.7064,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q31006",
+        "hr": "Brades",
+        "en": "Brades",
+        "lon": -62.2106,
+        "lat": 16.7928,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q14056",
+    "hr": "Jan Mayen",
+    "capitals": []
+  },
+  {
+    "qid": "Q14773",
+    "hr": "Makao",
+    "capitals": []
+  },
+  {
+    "qid": "Q16635",
+    "hr": "Guam",
+    "capitals": [
+      {
+        "qid": "Q30988",
+        "hr": "Hagåtña",
+        "en": "Hagåtña",
+        "lon": 144.75,
+        "lat": 13.4833,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q16641",
+    "hr": "Američka Samoa",
+    "capitals": [
+      {
+        "qid": "Q51678",
+        "hr": "Pago Pago",
+        "en": "Pago Pago",
+        "lon": -170.7006,
+        "lat": -14.2794,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q16644",
+    "hr": "Sjevernomarijanski otoci",
+    "capitals": [
+      {
+        "qid": "Q49755159",
+        "hr": null,
+        "en": "Saipan",
+        "lon": 145.7545,
+        "lat": 15.2123,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q17012",
+    "hr": "Gvadalupa",
+    "capitals": [
+      {
+        "qid": "Q167024",
+        "hr": "Basse-Terre",
+        "en": "Basse-Terre",
+        "lon": -61.7328,
+        "lat": 15.9969,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q17054",
+    "hr": "Martinik",
+    "capitals": [
+      {
+        "qid": "Q81621",
+        "hr": "Fort-de-France",
+        "en": "Fort-de-France",
+        "lon": -61.0667,
+        "lat": 14.6,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q17063",
+    "hr": "Mayotte",
+    "capitals": [
+      {
+        "qid": "Q132676",
+        "hr": "Mamoudzou",
+        "en": "Mamoudzou",
+        "lon": 45.2317,
+        "lat": -12.7814,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q17070",
+    "hr": "Réunion",
+    "capitals": [
+      {
+        "qid": "Q47045",
+        "hr": "Saint-Denis",
+        "en": "Saint-Denis",
+        "lon": 55.4481,
+        "lat": -20.8789,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q18221",
+    "hr": "Otoci Turks i Caicos",
+    "capitals": [
+      {
+        "qid": "Q34205",
+        "hr": "Cockburn Town",
+        "en": "Cockburn Town",
+        "lon": -71.1414,
+        "lat": 21.4603,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q18826",
+    "hr": "Bougainville",
+    "capitals": [
+      {
+        "qid": "Q2482800",
+        "hr": null,
+        "en": "Buka",
+        "lon": 154.6728,
+        "lat": -5.4219,
+        "rank": "preferred"
+      },
+      {
+        "qid": "Q2485587",
+        "hr": null,
+        "en": "Sohana",
+        "lon": 154.6667,
+        "lat": -5.4444,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q626729",
+        "hr": null,
+        "en": "Arawa",
+        "lon": 155.5667,
+        "lat": -6.225,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q21203",
+    "hr": "Aruba",
+    "capitals": [
+      {
+        "qid": "Q131243",
+        "hr": "Oranjestad",
+        "en": "Oranjestad",
+        "lon": -70.0358,
+        "lat": 12.5186,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q23635",
+    "hr": "Bermudi",
+    "capitals": [
+      {
+        "qid": "Q30985",
+        "hr": "Hamilton",
+        "en": "Hamilton",
+        "lon": -64.7831,
+        "lat": 32.295,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q23681",
+    "hr": "Turska Republika Sjeverni Cipar",
+    "capitals": [
+      {
+        "qid": "Q2762100",
+        "hr": null,
+        "en": "North Nicosia",
+        "lon": 33.3636,
+        "lat": 35.19,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q23792",
+    "hr": "Palestina",
+    "capitals": []
+  },
+  {
+    "qid": "Q25228",
+    "hr": "Angvila",
+    "capitals": [
+      {
+        "qid": "Q30994",
+        "hr": "The Valley",
+        "en": "The Valley",
+        "lon": -63.0517,
+        "lat": 18.2208,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q25230",
+    "hr": "Guernsey",
+    "capitals": [
+      {
+        "qid": "Q174262",
+        "hr": "St. Peter Port",
+        "en": "Saint Peter Port",
+        "lon": -2.5519,
+        "lat": 49.46,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q25231",
+    "hr": "Svalbard",
+    "capitals": [
+      {
+        "qid": "Q25923",
+        "hr": "Longyearbyen",
+        "en": "Longyearbyen",
+        "lon": 15.6333,
+        "lat": 78.2167,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q25263",
+    "hr": "Azori",
+    "capitals": [
+      {
+        "qid": "Q193677",
+        "hr": "Angra do Heroísmo",
+        "en": "Angra do Heroísmo",
+        "lon": -27.2153,
+        "lat": 38.6558,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q208149",
+        "hr": null,
+        "en": "Ponta Delgada",
+        "lon": -25.67,
+        "lat": 37.74,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q990385",
+        "hr": null,
+        "en": "Horta",
+        "lon": -28.6333,
+        "lat": 38.5333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q25279",
+    "hr": "Curaçao",
+    "capitals": [
+      {
+        "qid": "Q132679",
+        "hr": "Willemstad",
+        "en": "Willemstad",
+        "lon": -68.935,
+        "lat": 12.108,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q25305",
+    "hr": "Britanski Djevičanski otoci",
+    "capitals": [
+      {
+        "qid": "Q179431",
+        "hr": "Road Town",
+        "en": "Road Town",
+        "lon": -64.6167,
+        "lat": 18.4333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q25362",
+    "hr": "Saint Barthélemy",
+    "capitals": [
+      {
+        "qid": "Q34112",
+        "hr": "Gustavia",
+        "en": "Gustavia",
+        "lon": -62.8492,
+        "lat": 17.8986,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q26253",
+    "hr": "Madeira",
+    "capitals": [
+      {
+        "qid": "Q25444",
+        "hr": "Funchal",
+        "en": "Funchal",
+        "lon": -16.9167,
+        "lat": 32.65,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q26273",
+    "hr": "Sveti Martin",
+    "capitals": [
+      {
+        "qid": "Q30958",
+        "hr": "Philipsburg (Zemlja Sveti Martin)",
+        "en": "Philipsburg",
+        "lon": -63.0433,
+        "lat": 18.0242,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q26988",
+    "hr": "Cookovo Otočje",
+    "capitals": [
+      {
+        "qid": "Q170482",
+        "hr": "Avarua",
+        "en": "Avarua",
+        "lon": -159.771,
+        "lat": -21.207,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q27561",
+    "hr": "Karipska Nizozemska",
+    "capitals": []
+  },
+  {
+    "qid": "Q30971",
+    "hr": "Francuska Polinezija",
+    "capitals": [
+      {
+        "qid": "Q130800",
+        "hr": "Papeete",
+        "en": "Papeete",
+        "lon": -149.5689,
+        "lat": -17.5397,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q31057",
+    "hr": "Otok Norfolk",
+    "capitals": [
+      {
+        "qid": "Q30963",
+        "hr": "Kingston",
+        "en": "Kingston",
+        "lon": 167.9667,
+        "lat": -29.05,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q31063",
+    "hr": "Božićni otok",
+    "capitals": [
+      {
+        "qid": "Q30980",
+        "hr": "Flying Fish Cove",
+        "en": "Flying Fish Cove",
+        "lon": 105.6781,
+        "lat": -10.4217,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q33788",
+    "hr": "Nova Kaledonija",
+    "capitals": [
+      {
+        "qid": "Q9733",
+        "hr": "Nouméa",
+        "en": "Nouméa",
+        "lon": 166.45,
+        "lat": -22.2667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q34020",
+    "hr": "Niue",
+    "capitals": [
+      {
+        "qid": "Q30966",
+        "hr": "Alofi",
+        "en": "Alofi",
+        "lon": -169.921,
+        "lat": -19.056,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q34497",
+    "hr": "Sveta Helena",
+    "capitals": []
+  },
+  {
+    "qid": "Q34617",
+    "hr": "Sveti Petar i Mikelon",
+    "capitals": [
+      {
+        "qid": "Q185678",
+        "hr": "Saint-Pierre",
+        "en": "Saint-Pierre",
+        "lon": -56.1778,
+        "lat": 46.7778,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q34754",
+    "hr": "Somaliland",
+    "capitals": [
+      {
+        "qid": "Q168652",
+        "hr": "Hargeisa",
+        "en": "Hargeisa",
+        "lon": 44.0606,
+        "lat": 9.5656,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q35086",
+    "hr": "Južna Georgija i otočje Južni Sandwich",
+    "capitals": [
+      {
+        "qid": "Q185672",
+        "hr": "Grytviken",
+        "en": "Grytviken",
+        "lon": -36.508,
+        "lat": -54.2815,
+        "rank": "normal"
+      },
+      {
+        "qid": "Q393878",
+        "hr": null,
+        "en": "King Edward Point",
+        "lon": -36.4871,
+        "lat": -54.2823,
+        "rank": "preferred"
+      }
+    ]
+  },
+  {
+    "qid": "Q35555",
+    "hr": "Wallis i Futuna",
+    "capitals": [
+      {
+        "qid": "Q31002",
+        "hr": "Mata-Utu",
+        "en": "Mata-Utu",
+        "lon": -176.1737,
+        "lat": -13.2827,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q35672",
+    "hr": "Pitcairnovo otočje",
+    "capitals": [
+      {
+        "qid": "Q48273",
+        "hr": "Adamstown",
+        "en": "Adamstown",
+        "lon": -130.1,
+        "lat": -25.0667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q36004",
+    "hr": "Kokosovi otoci",
+    "capitals": [
+      {
+        "qid": "Q48675",
+        "hr": "West Island",
+        "en": "West Island",
+        "lon": 96.8283,
+        "lat": -12.1869,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q36678",
+    "hr": "Zapadna Obala",
+    "capitals": [
+      {
+        "qid": "Q158119",
+        "hr": "Ramala",
+        "en": "Ramallah",
+        "lon": 35.2017,
+        "lat": 31.8969,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q36823",
+    "hr": "Tokelau",
+    "capitals": []
+  },
+  {
+    "qid": "Q39760",
+    "hr": "Pojas Gaze",
+    "capitals": [
+      {
+        "qid": "Q47492",
+        "hr": "Gaza",
+        "en": "Gaza City",
+        "lon": 34.4597,
+        "lat": 31.5075,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q43448",
+    "hr": "Britanski Indijskooceanski teritorij",
+    "capitals": [
+      {
+        "qid": "Q184851",
+        "hr": "Diego Garcia",
+        "en": "Diego Garcia",
+        "lon": 72.4111,
+        "lat": -7.3133,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q44749",
+    "hr": "Vojvodina",
+    "capitals": [
+      {
+        "qid": "Q55630",
+        "hr": "Novi Sad",
+        "en": "Novi Sad",
+        "lon": 19.8317,
+        "lat": 45.2644,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q126125",
+    "hr": null,
+    "capitals": [
+      {
+        "qid": "Q200605",
+        "hr": "Marigot",
+        "en": "Marigot",
+        "lon": -63.0847,
+        "lat": 18.0667,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q129003",
+    "hr": "Francuski južni i antarktički teritoriji",
+    "capitals": [
+      {
+        "qid": "Q839559",
+        "hr": null,
+        "en": "Port-aux-Français",
+        "lon": 70.2167,
+        "lat": -49.35,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q131198",
+    "hr": "Otok Heard i otočje McDonald",
+    "capitals": []
+  },
+  {
+    "qid": "Q133888",
+    "hr": "Otoci Ashmore i Cartier",
+    "capitals": []
+  },
+  {
+    "qid": "Q238752",
+    "hr": null,
+    "capitals": [
+      {
+        "qid": "Q1024679",
+        "hr": null,
+        "en": "Codrington",
+        "lon": -61.8333,
+        "lat": 17.6333,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q316390",
+    "hr": null,
+    "capitals": [
+      {
+        "qid": "Q36262",
+        "hr": null,
+        "en": "St. John's",
+        "lon": -61.8447,
+        "lat": 17.1211,
+        "rank": "normal"
+      }
+    ]
+  },
+  {
+    "qid": "Q333946",
+    "hr": null,
+    "capitals": []
+  },
+  {
+    "qid": "Q4824275",
+    "hr": "Australski teritoriji Indijskog oceana",
+    "capitals": []
+  }
+]

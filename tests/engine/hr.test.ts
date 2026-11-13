@@ -1,57 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { readZipEntry } from '../../scripts/unzip';
 import { geoArea } from 'd3-geo';
 
 import { projectionFor } from '../../src/render/mapHR';
-
-/** Minimalan ZIP s jednim STORED članom, složen ručno. */
-function storedZip(name: string, content: string): Buffer {
-  const nameBuf = Buffer.from(name, 'utf8');
-  const data = Buffer.from(content, 'utf8');
-
-  const local = Buffer.alloc(30);
-  local.writeUInt32LE(0x04034b50, 0);
-  local.writeUInt16LE(0, 8); // metoda: STORED
-  local.writeUInt32LE(data.length, 18);
-  local.writeUInt32LE(data.length, 22);
-  local.writeUInt16LE(nameBuf.length, 26);
-
-  const localBlock = Buffer.concat([local, nameBuf, data]);
-
-  const central = Buffer.alloc(46);
-  central.writeUInt32LE(0x02014b50, 0);
-  central.writeUInt16LE(0, 10);
-  central.writeUInt32LE(data.length, 20);
-  central.writeUInt32LE(data.length, 24);
-  central.writeUInt16LE(nameBuf.length, 28);
-  central.writeUInt32LE(0, 42); // pomak lokalnog zaglavlja
-
-  const centralBlock = Buffer.concat([central, nameBuf]);
-
-  const eocd = Buffer.alloc(22);
-  eocd.writeUInt32LE(0x06054b50, 0);
-  eocd.writeUInt16LE(1, 8);
-  eocd.writeUInt16LE(1, 10);
-  eocd.writeUInt32LE(centralBlock.length, 12);
-  eocd.writeUInt32LE(localBlock.length, 16);
-
-  return Buffer.concat([localBlock, centralBlock, eocd]);
-}
-
-describe('readZipEntry', () => {
-  it('čita nekomprimirani član', () => {
-    expect(readZipEntry(storedZip('HR.txt', 'Zagreb\tHR'), 'HR.txt')).toBe('Zagreb\tHR');
-  });
-
-  it('nepostojeći član je greška, ne prazan niz', () => {
-    expect(() => readZipEntry(storedZip('HR.txt', 'x'), 'nema.txt')).toThrow(/nema člana/);
-  });
-
-  it('datoteka koja nije ZIP je greška', () => {
-    expect(() => readZipEntry(Buffer.from('ovo nije zip'), 'HR.txt')).toThrow(/End of Central/);
-  });
-});
 
 /**
  * Pravokutnik oko Hrvatske, vanjski prsten **u smjeru kazaljke** — tako ga piše

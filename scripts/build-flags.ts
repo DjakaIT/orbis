@@ -42,7 +42,8 @@ export async function buildFlags(codes: string[], out: string): Promise<FlagResu
   await mkdir(out, { recursive: true });
 
   const wanted = [...new Set(codes.map((c) => c.trim().toLowerCase()))].filter((c) =>
-    /^[a-z]{2}$/.test(c),
+    // Dva slova za države, `gb-eng` i slično za dijelove UK-a (ISO 3166-2).
+    /^[a-z]{2}(-[a-z]{3})?$/.test(c),
   );
 
   const missing: string[] = [];

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { emptyState } from '../../src/state/persist';
+import { EPOCH, type Pool } from '../../src/engine/seed';
+import { DATA_VERSION, emptyState, translateRound } from '../../src/state/persist';
 import {
   initialState,
   reducer,
@@ -23,7 +24,9 @@ const MATRIX = new Uint16Array([
   0, 100, 200, 300, 100, 0, 400, 500, 200, 400, 0, 600, 300, 500, 600, 0,
 ]);
 
-const DATA: ModeData = { places: PLACES, matrix: MATRIX, n: 4 };
+const POOLS: Pool[] = [{ from: EPOCH, ids: [0, 1, 2, 3] }];
+
+const DATA: ModeData = { places: PLACES, matrix: MATRIX, n: 4, pools: POOLS };
 const DATE = '2026-09-14';
 
 let state: GameState;
@@ -137,13 +140,19 @@ describe('toRound', () => {
   it('zapisuje samo indekse, ne izvedene vrijednosti', () => {
     let s: GameState = { ...load(), target: 0 };
     s = reducer(s, { type: 'guess', id: 1, now: 2_000 });
-    expect(toRound(s)).toEqual({ date: DATE, guesses: [1], solved: false, startedAt: 1_000 });
+    expect(toRound(s, DATA_VERSION)).toEqual({
+      date: DATE,
+      guesses: [1],
+      solved: false,
+      startedAt: 1_000,
+      data: DATA_VERSION,
+    });
   });
 });
 
 describe('mod bez matrice', () => {
   it('pada na haversine preko koordinata', () => {
-    const points: ModeData = { places: PLACES, matrix: null, n: 4 };
+    const points: ModeData = { places: PLACES, matrix: null, n: 4, pools: POOLS };
     const loaded = reducer(initialState(emptyState(), 'hr', DATE), {
       type: 'loaded',
       data: points,
@@ -169,7 +178,7 @@ describe('pogodak, susjed i trend', () => {
   const BORDERS = new Uint16Array([
     0, 0, 200, 300, 0, 0, 400, 500, 200, 400, 0, 600, 300, 500, 600, 0,
   ]);
-  const BORDER_DATA: ModeData = { places: PLACES, matrix: BORDERS, n: 4 };
+  const BORDER_DATA: ModeData = { places: PLACES, matrix: BORDERS, n: 4, pools: POOLS };
 
   function ready(target: number): GameState {
     const base = reducer(state, { type: 'loaded', data: BORDER_DATA, round: null, now: 1_000 });
@@ -197,7 +206,7 @@ describe('pogodak, susjed i trend', () => {
 
   it('u modu Hrvatska susjedstva nema — naselja su tocke', () => {
     // Bez matrice udaljenost je haversine, pa nula znaci isto mjesto, ne granicu.
-    const hr: ModeData = { places: PLACES, matrix: null, n: 4 };
+    const hr: ModeData = { places: PLACES, matrix: null, n: 4, pools: POOLS };
     const base = reducer(state, { type: 'loaded', data: hr, round: null, now: 1_000 });
     const next = reducer({ ...base, target: 1 }, { type: 'guess', id: 0, now: 2_000 });
 
@@ -227,5 +236,72 @@ describe('pogodak, susjed i trend', () => {
 
     expect(restored.guesses.map((g) => g.ordinal)).toEqual([1, 2, 3]);
     expect(restored.guesses[0]?.trend).toBe('first');
+  });
+});
+
+describe('više mjesta iste mete', () => {
+  /*
+   * Južnoafrička Republika ima tri glavna grada. Svaki se može upisati i svaki
+   * je pogodak — meta je država. Prije je država ispadala iz bazena, pa se
+   * Pretoria nije mogla ni upisati.
+   */
+  const CITIES: Place[] = [
+    { id: 0, code: 'ZAF', name: 'Pretoria', lat: -25.75, lon: 28.19 },
+    { id: 1, code: 'ZAF', name: 'Cape Town', lat: -33.92, lon: 18.42 },
+    { id: 2, code: 'NAM', name: 'Windhoek', lat: -22.57, lon: 17.08 },
+  ];
+  const CAPITALS: ModeData = {
+    places: CITIES,
+    matrix: null,
+    n: 3,
+    pools: [{ from: EPOCH, ids: [0, 2] }],
+  };
+
+  function ready(target: number): GameState {
+    const base = reducer(initialState(emptyState(), 'capitals', DATE), {
+      type: 'loaded',
+      data: CAPITALS,
+      round: null,
+      now: 1_000,
+    });
+    return { ...base, target };
+  }
+
+  it('drugi glavni grad mete je pogodak', () => {
+    const next = reducer(ready(0), { type: 'guess', id: 1, now: 2_000 });
+    expect(next.guesses[0]?.hit).toBe(true);
+    expect(next.guesses[0]?.km).toBe(0);
+    expect(next.solved).toBe(true);
+  });
+
+  it('udaljenost ide do najbližeg glavnog grada mete, ne do onog u bazenu', () => {
+    // Meta je zapisana kao Cape Town (1 269 km od Windhoeka), ali Pretoria je bliža (1 181 km).
+    const next = reducer(ready(1), { type: 'guess', id: 2, now: 2_000 });
+    expect(next.guesses[0]?.hit).toBe(false);
+    expect(next.guesses[0]?.km).toBe(1181);
+  });
+});
+
+describe('partija spremljena prije novog popisa', () => {
+  it('stari indeksi prevode se kroz legacy', () => {
+    const round: Round = { date: DATE, guesses: [0, 2], solved: false, startedAt: 500 };
+    expect(translateRound(round, [3, 1, 0]).guesses).toEqual([3, 0]);
+  });
+
+  it('dva stara mjesta koja padnu na isto novo broje se jednom', () => {
+    // Somaliland i Somalija su sada jedna država.
+    const round: Round = { date: DATE, guesses: [0, 1], solved: false, startedAt: 500 };
+    expect(translateRound(round, [5, 5]).guesses).toEqual([5]);
+  });
+
+  it('partija s oznakom verzije se ne dira', () => {
+    const round: Round = {
+      date: DATE,
+      guesses: [0, 2],
+      solved: false,
+      startedAt: 500,
+      data: DATA_VERSION,
+    };
+    expect(translateRound(round, [3, 1, 0])).toBe(round);
   });
 });

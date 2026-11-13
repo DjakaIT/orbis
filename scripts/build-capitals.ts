@@ -1,25 +1,37 @@
 /**
  * Glavni gradovi svijeta — treći bazen meta.
  *
- * Izvori, oba već u projektu: Natural Earth za grad i koordinate, Unicode CLDR
- * za hrvatski naziv. Ništa se ne izmišlja — grad bez potvrđenog hrvatskog naziva
- * zadržava izvorni i zapisuje se u `MISSING_CAPITALS_HR.md`, kako SPEC §4.2 traži
- * za nesigurne egzonime.
+ * Izvori: **Wikidata** za to koji je grad glavni i gdje je (svojstvo P36, samo
+ * izjave bez datuma završetka), **Unicode CLDR** za hrvatski naziv gdje ga ima,
+ * pa Wikidatin hrvatski naziv. Ništa se ne izmišlja — grad bez potvrđenog
+ * hrvatskog naziva zadržava izvorni i zapisuje se u `MISSING_CAPITALS_HR.md`.
  *
- * Matrica udaljenosti ovdje ne treba: gradovi su točke, pa je haversine u
- * runtimeu trivijalan — isto kao za naselja u modu Hrvatska. SPEC §4.4.
+ * Do 2026-11 izvor je bio Natural Earth 110m, čiji su podaci iz 2018. i stariji:
+ * Kazahstan je ondje imao Nur-Sultan, Tanzanija Dar es Salaam, Burundi
+ * Bujumburu, Palau Melekeok. Wikidata nosi sadašnje stanje.
+ *
+ * Država s više službenih glavnih gradova (Južnoafrička Republika ima tri) više
+ * ne ispada iz bazena: svaki se može upisati i svaki je pogodak. Meta je
+ * država, a grad samo način da se do nje dođe — isto pravilo kao „pogodak je
+ * identitet mete".
  */
 
 import { writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
+import type { Pool } from '../src/engine/seed';
+import type { DateString } from '../src/engine/time';
+import { normalize } from '../src/engine/search';
+import type { WdCountry } from './fetch-wikidata';
+import { assertContinuity, datedPools, km, nearest, type Legacy } from './pools';
+
 const require = createRequire(import.meta.url);
 
 /** Zapis kakav ide u `public/data/capitals.json`. */
 export interface Capital {
   id: number;
-  /** ISO3 države kojoj je grad glavni — ujedno i ključ prema `world-meta.json`. */
+  /** Kod države kojoj je grad glavni — ujedno i ključ prema `world-meta.json`. */
   code: string;
   /** Alpha-2 iste države, za zastavicu. */
   a2: string;
@@ -30,27 +42,11 @@ export interface Capital {
   lon: number;
 }
 
-interface PlaceProperties {
-  FEATURECLA?: string;
-  NAME?: string;
-  NAME_EN?: string;
-  NAMEASCII?: string;
-  NAMEALT?: string;
-  ADM0_A3?: string;
-  SOV_A3?: string;
-  ISO_A3?: string;
-}
-
-interface PlaceFeature {
-  properties: PlaceProperties;
-  geometry: { type: string; coordinates: number[] };
-}
-
 interface Country {
   iso: string;
-  /** ISO 3166-1 alpha-2, za zastavicu grada — grad nosi zastavu svoje drzave. */
   a2?: string;
   name: string;
+  qid: string;
 }
 
 interface ZoneNode {
@@ -59,11 +55,8 @@ interface ZoneNode {
 }
 
 /**
- * Hrvatski nazivi gradova iz CLDR-a, po IANA vremenskoj zoni.
- *
- * CLDR ih vodi kao „exemplar city" uz svaku zonu — to je jedini izvor hrvatskih
- * egzonima za gradove koji je u projektu, i isti paket obitelji iz kojeg već
- * dolaze nazivi država. Ondje su Beč, Prag, Varšava, Kopenhagen i Kijev.
+ * Hrvatski nazivi gradova iz CLDR-a, po IANA vremenskoj zoni. CLDR ih vodi kao
+ * „exemplar city" uz svaku zonu: Beč, Prag, Varšava, Džakarta, Kuvajt.
  */
 function croatianCities(): Map<string, string> {
   const data = require('cldr-dates-full/main/hr/timeZoneNames.json') as {
@@ -85,120 +78,188 @@ function croatianCities(): Map<string, string> {
 }
 
 /**
- * Grad → IANA zona, po zadnjem segmentu imena zone.
+ * Gdje se hrvatska Wikipedija i Hrvatska enciklopedija (Leksikografski zavod)
+ * razilaze, vrijedi enciklopedija. Samo s izvorom, po Wikidata ID-u grada.
  *
- * Mehanički, ne procijenjeno: `Europe/Vienna` je grad „Vienna". Natural Earthovo
- * polje `TIMEZONE` se **ne** koristi — u 110m sloju je neispravno (Prag ondje
- * ima `America/Chicago`, Moskva nema ništa).
+ * - Q5465: hr.wikipedia vodi „Kaapstad", enciklopedija.hr natuknicu „Cape Town"
+ *   (provjereno 2026-11-12). Kaapstad ostaje upis.
+ */
+const ENCYCLOPEDIA_NAMES: Record<string, string> = { Q5465: 'Cape Town' };
+
+/**
+ * Grad → IANA zona, po zadnjem segmentu imena zone, bez dijakritika: `Europe/
+ * Vienna` je grad „Vienna", a Wikidatin „Panamá" nalazi `America/Panama`.
  */
 function zonesByCity(): Map<string, string> {
   const out = new Map<string, string>();
   for (const zone of Intl.supportedValuesOf('timeZone')) {
     const city = zone.split('/').pop()?.replaceAll('_', ' ');
-    if (city && !out.has(city)) out.set(city, zone);
+    if (city && !out.has(normalize(city))) out.set(normalize(city), zone);
   }
   return out;
 }
 
+/**
+ * Wikidatin hrvatski naziv bez razlikovnog dodatka: „San José, Kostarika",
+ * „Victoria, Sejšeli" i „Juba, grad" su naslovi članaka, ne imena gradova.
+ */
+export function cleanLabel(label: string): string {
+  return label
+    .replace(/\s*\(.*\)\s*$/, '')
+    .replace(/,.*$/, '')
+    .trim();
+}
+
 export interface CapitalsResult {
   capitals: Capital[];
+  pools: Pool[];
+  /** Stari id → novi id. Za partije spremljene prije prijelaza. */
+  legacy: number[];
+  /** Drugi oblici imena koji se prihvaćaju kao upis → prikazno ime. */
+  aliases: Record<string, string>;
   /** Države iz bazena koje u izvoru nemaju glavni grad. */
   withoutCapital: string[];
-  /** Države s više od jednog glavnog grada u izvoru — izbačene kao dvojbene. */
-  ambiguous: { country: string; cities: string[] }[];
+  /** Države s više službenih glavnih gradova. Svi su u igri. */
+  multiple: { country: string; cities: string[] }[];
   /** Gradovi koji su zadržali izvorni naziv jer hrvatski nije potvrđen. */
   withoutCroatianName: { name: string; country: string }[];
+  continuity: string[];
 }
 
 /**
  * Gradi popis glavnih gradova za države koje su već u svjetskom bazenu.
  *
- * Poredak prati `countries`, koji je sortiran po ISO kodu — bez stabilnog
- * poretka svaki bi `pnpm data` pomaknuo sve mete. Isti razlog kao kod država.
+ * Poredak prati `countries`, koji je sortiran po kodu — bez stabilnog poretka
+ * svaki bi `pnpm data` pomaknuo sve mete. Unutar države prvi je grad koji
+ * Wikidata vodi s prednošću, pa ostali abecedno.
  */
-export function buildCapitals(geojson: string, countries: Country[]): CapitalsResult {
-  const features = (JSON.parse(geojson) as { features: PlaceFeature[] }).features;
-
-  /*
-   * Izvor razlikuje `Admin-0 capital` od `Admin-0 capital alt`: prvo je stvarno
-   * sjediste, drugo ustavno. Uzima se samo prvo, pa Benin daje Cotonou a ne
-   * Porto-Novo — to je klasifikacija izvora, ne nasa procjena.
-   */
-  const byIso = new Map<string, PlaceFeature[]>();
-  for (const feature of features) {
-    if (feature.properties.FEATURECLA !== 'Admin-0 capital') continue;
-    const key =
-      feature.properties.ADM0_A3 ?? feature.properties.SOV_A3 ?? feature.properties.ISO_A3;
-    if (!key || key === '-99') continue;
-    byIso.set(key, [...(byIso.get(key) ?? []), feature]);
-  }
-
+export function buildCapitals(
+  countries: Country[],
+  wikidata: Map<string, WdCountry>,
+  legacy: Legacy['capitals'],
+  today?: DateString,
+): CapitalsResult {
   const cities = croatianCities();
   const zones = zonesByCity();
 
   const capitals: Capital[] = [];
+  const aliasCandidates: [string, string][] = [];
   const withoutCapital: string[] = [];
-  const ambiguous: { country: string; cities: string[] }[] = [];
+  const multiple: { country: string; cities: string[] }[] = [];
   const withoutCroatianName: { name: string; country: string }[] = [];
 
   for (const country of countries) {
-    const found = byIso.get(country.iso) ?? [];
-
-    /*
-     * Cetiri drzave imaju vise gradova oznacenih kao glavni: Juzna Afrika ima tri
-     * ustavne, a Bolivija, Obala Bjelokosti i Mijanmar imaju podijeljeno de jure
-     * i de facto sjediste. U kvizu je dvojben odgovor gori od nikakvog, pa
-     * ispadaju iz bazena — isto nacelo po kojem se broj stanovnika ne procjenjuje.
-     */
-    if (found.length > 1) {
-      ambiguous.push({
-        country: `${country.iso} ${country.name}`,
-        cities: found.map((f) => f.properties.NAME_EN ?? f.properties.NAME ?? '?'),
-      });
-      continue;
-    }
-
-    const feature = found[0];
-    if (!feature) {
-      // Antarktika, Zapadna Sahara, Falklandi i slicni nemaju suvereni glavni
-      // grad. To nije rupa u podacima nego tocan odgovor, pa ispadaju iz bazena.
+    const found = wikidata.get(country.qid)?.capitals ?? [];
+    if (found.length === 0) {
       withoutCapital.push(`${country.iso} ${country.name}`);
       continue;
     }
 
-    const props = feature.properties;
-    const source = props.NAME_EN ?? props.NAME;
-    const [lon, lat] = feature.geometry.coordinates;
-    if (!source || lon === undefined || lat === undefined) {
-      withoutCapital.push(`${country.iso} ${country.name}`);
-      continue;
-    }
-
-    /*
-     * Zona se traži kroz sva imena koja Natural Earth nosi: `NAME` je endonim
-     * (København), `NAME_EN` engleski (Copenhagen), `NAMEASCII` bez dijakritika
-     * (Kiev, dok je NAME već Kyiv). Bez toga ispadnu Kopenhagen i Kijev.
-     */
-    const zone = [props.NAME_EN, props.NAME, props.NAMEASCII, props.NAMEALT]
-      .filter((n): n is string => typeof n === 'string')
-      .map((n) => zones.get(n))
-      .find((z): z is string => z !== undefined);
-
-    const croatian = zone ? cities.get(zone) : undefined;
-    if (!croatian) withoutCroatianName.push({ name: source, country: country.name });
-
-    capitals.push({
-      id: capitals.length,
-      code: country.iso,
-      a2: country.a2 ?? '',
-      name: croatian ?? source,
-      country: country.name,
-      lat: round(lat),
-      lon: round(lon),
+    const named = found.map((cap) => {
+      const zone = [cap.en, cap.hr]
+        .filter((n): n is string => Boolean(n))
+        .map((n) => zones.get(normalize(cleanLabel(n))))
+        .find((z): z is string => z !== undefined);
+      const fromCldr = zone ? cities.get(zone) : undefined;
+      const fromWikidata = cap.hr ? cleanLabel(cap.hr) : undefined;
+      const name = ENCYCLOPEDIA_NAMES[cap.qid] ?? fromCldr ?? fromWikidata ?? cap.en ?? cap.qid;
+      if (!fromCldr && !fromWikidata) withoutCroatianName.push({ name, country: country.name });
+      return { cap, name };
     });
+
+    named.sort(
+      (a, b) =>
+        Number(b.cap.rank === 'preferred') - Number(a.cap.rank === 'preferred') ||
+        a.name.localeCompare(b.name, 'hr'),
+    );
+    if (named.length > 1) {
+      multiple.push({
+        country: `${country.iso} ${country.name}`,
+        cities: named.map((n) => n.name),
+      });
+    }
+
+    const old = legacy.find((l) => l.code === country.iso);
+    for (const { cap, name } of named) {
+      const place: Capital = {
+        id: capitals.length,
+        code: country.iso,
+        a2: country.a2 ?? '',
+        name,
+        country: country.name,
+        lat: round(cap.lat),
+        lon: round(cap.lon),
+      };
+      capitals.push(place);
+
+      // Očišćeni oblici: „San José, Kostarika" je naslov članka, ne upis.
+      for (const other of [cap.en, cap.hr].map((l) => (l ? cleanLabel(l) : null))) {
+        if (other) aliasCandidates.push([other, name]);
+      }
+      // Staro ime ostaje upis samo ako je to isti grad: Nur-Sultan je Astana,
+      // ali Dar es Salaam nije Dodoma.
+      if (old && km(old, place) < 30) aliasCandidates.push([old.name, name]);
+    }
   }
 
-  return { capitals, withoutCapital, ambiguous, withoutCroatianName };
+  /* ----------------------------------------------------------- bazen i v1 */
+
+  const firstOf = new Map<string, number>();
+  for (const c of capitals) if (!firstOf.has(c.code)) firstOf.set(c.code, c.id);
+  const next = [...firstOf.values()];
+
+  const legacyIds = legacy.map((old) => {
+    const same = capitals.filter((c) => c.code === old.code);
+    const pick = same.length > 0 ? same : capitals;
+    const best = pick[nearest(pick, old)];
+    if (!best) throw new Error(`Stari grad ${old.name} nema para`);
+    return best.id;
+  });
+
+  const pools = datedPools(legacyIds, next);
+  const continuity = assertContinuity(
+    'gradovi svijeta',
+    'capitals',
+    legacy.length,
+    pools,
+    (o, n) => legacy[o]?.code === capitals[n]?.code,
+    today,
+  );
+
+  return {
+    capitals,
+    pools,
+    legacy: legacyIds,
+    aliases: unambiguous(aliasCandidates, capitals),
+    withoutCapital,
+    multiple,
+    withoutCroatianName,
+    continuity,
+  };
+}
+
+/**
+ * Aliasi bez dvosmislenosti. Alias koji je ujedno ime drugog grada, ili pokazuje
+ * na dva različita grada, ispada — bolje „ne znam" nego krivi grad.
+ */
+function unambiguous(pairs: [string, string][], capitals: Capital[]): Record<string, string> {
+  const names = new Set(capitals.map((c) => normalize(c.name)));
+  const targets = new Map<string, Set<string>>();
+  const original = new Map<string, string>();
+  for (const [alias, name] of pairs) {
+    const key = normalize(alias);
+    if (!key || key === normalize(name)) continue;
+    targets.set(key, (targets.get(key) ?? new Set()).add(name));
+    original.set(key, alias);
+  }
+  const out: Record<string, string> = {};
+  for (const [key, set] of targets) {
+    if (set.size !== 1 || names.has(key)) continue;
+    const alias = original.get(key);
+    const [name] = [...set];
+    if (alias && name) out[alias] = name;
+  }
+  return out;
 }
 
 function round(x: number): number {
@@ -213,9 +274,8 @@ export async function writeMissingCapitalsReport(
   const lines = [
     '# Glavni gradovi bez potvrdjenog hrvatskog naziva',
     '',
-    'Generira `pnpm data`. Ovi gradovi zadrzavaju naziv iz Natural Eartha jer CLDR',
-    'za njih nema hrvatski egzonim. Vecina ih ni ne treba — Zagreb, Madrid i Ottawa',
-    'se u hrvatskom pisu jednako — ali popis stoji da odstupanje bude vidljivo.',
+    'Generira `pnpm data`. Ovi gradovi zadrzavaju izvorni naziv iz Wikidate jer ni',
+    'CLDR ni Wikidata za njih nemaju hrvatski oblik. Naziv se ne pogadja — SPEC §4.2.',
     '',
     `Ukupno: ${String(result.withoutCroatianName.length)} od ${String(result.capitals.length)}.`,
     '',
@@ -223,19 +283,17 @@ export async function writeMissingCapitalsReport(
     '| --- | --- |',
     ...result.withoutCroatianName.map((c) => `| ${c.name} | ${c.country} |`),
     '',
-    '## Drzave s vise od jednog glavnog grada',
+    '## Drzave s vise sluzbenih glavnih gradova',
     '',
-    'Izvor im daje vise gradova oznacenih kao glavni — ustavno i stvarno sjediste',
-    'nisu isti. Dvojben odgovor u kvizu je gori od nikakvog, pa ispadaju iz bazena.',
+    'Svaki od njih se moze upisati i svaki je pogodak. Meta je drzava.',
     '',
-    ...result.ambiguous.map((a) => `- ${a.country}: ${a.cities.join(', ')}`),
+    ...result.multiple.map((a) => `- ${a.country}: ${a.cities.join(', ')}`),
     '',
     '## Drzave bez glavnog grada u izvoru',
     '',
-    'Nemaju suvereni glavni grad (Antarktika, prekomorski teritoriji, sporna',
-    'podrucja), pa ispadaju iz bazena. To nije rupa u podacima.',
-    '',
-    ...result.withoutCapital.map((c) => `- ${c}`),
+    ...(result.withoutCapital.length > 0
+      ? result.withoutCapital.map((c) => `- ${c}`)
+      : ['Nijedna.']),
     '',
   ];
   await writeFile(join(here, 'MISSING_CAPITALS_HR.md'), lines.join('\n'), 'utf8');

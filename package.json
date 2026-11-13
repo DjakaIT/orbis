@@ -15,6 +15,7 @@
     "e2e": "playwright test",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "data": "tsx scripts/build-data.ts",
+    "sources": "tsx scripts/fetch-wikidata.ts",
     "analyze": "vite build --mode analyze",
     "dev:api": "netlify dev"
   },

@@ -2,8 +2,12 @@
  * Dohvat sirovih izvora u `scripts/.cache/`. SPEC §4.1.
  *
  * Cache nije u gitu — pipeline je reproducibilan, a CI ga regenerira pri deployu.
- * Za DGU URL nije stabilan: ako dohvat ne uspije, ispisuje se uputa da se dataset
- * spusti rucno. Nijedan URL se ne izmislja.
+ * Nijedan URL se ne izmislja. Wikidata se ne dohvaca ovdje nego u
+ * `fetch-wikidata.ts`, u snimku koja je u gitu.
+ *
+ * GeoNames i DGU vise nisu izvori: hrvatska naselja od 2026-11 dolaze iz Wikidate
+ * (DGU dataset nikad nije bio dohvatljiv, a GeoNames nije imao broj stanovnika
+ * za vecinu naselja u Dalmaciji i Lici). Vidi DECISIONS.md.
  */
 
 import { createHash } from 'node:crypto';
@@ -24,6 +28,14 @@ export interface Source {
 }
 
 /**
+ * Izdanje Natural Eartha, prikovano. `master` grana se može promijeniti između
+ * dva deploya, a granice određuju bazen meta — pa i niz meta. v5.1.2 je
+ * zadnje izdanje i bajt-za-bajt isto što je `master` davao do sada (sha256
+ * provjeren 2026-11-12).
+ */
+const NE_RELEASE = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson';
+
+/**
  * Granice drzava. **50m, ne 110m.**
  *
  * 110m je najgrublji sloj i iz njega jednostavno ispadnu male drzave: Andora,
@@ -33,42 +45,18 @@ export interface Source {
  */
 export const NATURAL_EARTH: Source = {
   file: 'ne_50m_admin_0_countries.geojson',
-  url: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson',
+  url: `${NE_RELEASE}/ne_50m_admin_0_countries.geojson`,
 };
 
 /**
- * Glavni gradovi. Isti izvor i ista licenca kao granice drzava — Natural Earth,
- * public domain. Sloj nosi `FEATURECLA = 'Admin-0 capital'` uz koordinate i ISO
- * kod drzave, pa se spaja na vec izgradjen popis drzava.
+ * Isti sloj podijeljen na zemljopisne jedinice. Odavde dolaze samo četiri dijela
+ * Ujedinjenog Kraljevstva — Engleska, Škotska, Wales i Sjeverna Irska su
+ * zasebne mete. Ostale države ostaju iz sloja država: ovaj bi inače razbio i
+ * Belgiju, Bosnu i Hercegovinu i Portugal na dijelove koji nisu države.
  */
-export const NE_PLACES: Source = {
-  file: 'ne_110m_populated_places.geojson',
-  url: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_populated_places.geojson',
-};
-
-/**
- * DGU Registar prostornih jedinica. URL nije stabilan i mijenja se izmedu izdanja,
- * pa je ovo pokusaj, a ne obecanje.
- */
-export const DGU_PLACES: Source = {
-  file: 'hr-naselja.json',
-  url: 'https://data.gov.hr/api/3/action/package_show?id=registar-prostornih-jedinica',
-  manual: [
-    'DGU dataset nije dohvacen automatski — URL nije stabilan.',
-    '',
-    'Rucno:',
-    '  1. Otvori https://data.gov.hr i nadi "Registar prostornih jedinica" (DGU).',
-    '  2. Skini sloj naselja kao GeoJSON ili SHP.',
-    `  3. Spremi ga kao ${join(CACHE, 'hr-naselja.json')}`,
-    '',
-    'Bez njega mod Hrvatska pada na GeoNames, koji nema sluzbene granice naselja.',
-  ].join('\n'),
-};
-
-/** GeoNames HR dump — fallback za populaciju naselja. CC BY 4.0. */
-export const GEONAMES_HR: Source = {
-  file: 'HR.zip',
-  url: 'https://download.geonames.org/export/dump/HR.zip',
+export const NE_MAP_UNITS: Source = {
+  file: 'ne_50m_admin_0_map_units.geojson',
+  url: `${NE_RELEASE}/ne_50m_admin_0_map_units.geojson`,
 };
 
 /**
@@ -78,7 +66,7 @@ export const GEONAMES_HR: Source = {
  */
 export const NE_ADMIN1: Source = {
   file: 'ne_10m_admin_1_states_provinces.geojson',
-  url: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_1_states_provinces.geojson',
+  url: `${NE_RELEASE}/ne_10m_admin_1_states_provinces.geojson`,
 };
 
 /**
@@ -121,8 +109,7 @@ export async function readCached(file: string): Promise<string> {
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replaceAll('\\', '/'))) {
   console.warn('Izvori →');
   await fetchSource(NATURAL_EARTH);
-  await fetchSource(NE_PLACES);
-  await fetchSource(GEONAMES_HR);
-  await fetchSource(DGU_PLACES);
+  await fetchSource(NE_MAP_UNITS);
+  await fetchSource(NE_ADMIN1);
   console.warn('Gotovo.');
 }

@@ -5,7 +5,7 @@
  * dva igraca dobiju razlicite mete i liga nema smisla.
  */
 
-import { daysBetween, type DateString } from './time';
+import { addDays, daysBetween, type DateString } from './time';
 
 /** Ne mijenjati nakon pustanja u rad — pomice sve buduce mete. SPEC §5.2. */
 const SALT = 'orbis-v1';
@@ -62,9 +62,14 @@ function mulberry32(seed: number): () => number {
  * krug daje isti niz na svakom uredaju i u svakom pokretanju.
  */
 function shuffled(mode: Mode, poolSize: number, cycle: number): number[] {
-  const random = mulberry32(xmur3(`${mode}:${SALT}:${String(cycle)}:${String(poolSize)}`)());
-  const out = Array.from({ length: poolSize }, (_, i) => i);
-  for (let i = poolSize - 1; i > 0; i--) {
+  return shuffle(`${mode}:${SALT}:${String(cycle)}:${String(poolSize)}`, poolSize);
+}
+
+/** Fisher–Yates unatrag nad `0 … size-1`, sijan iz zadanog niza znakova. */
+function shuffle(seed: string, size: number): number[] {
+  const random = mulberry32(xmur3(seed)());
+  const out = Array.from({ length: size }, (_, i) => i);
+  for (let i = size - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
     const a = out[i];
     const b = out[j];
@@ -128,20 +133,7 @@ function order(mode: Mode, poolSize: number, cycle: number): number[] {
     const out = [...raw(mode, poolSize, c)];
     if (c > FIRST_CYCLE) {
       const previous = cache.get(key(c - 1)) ?? raw(mode, poolSize, c - 1);
-      const tail = new Set(previous.slice(-NO_REPEAT_DAYS));
-
-      for (let i = 0; i < NO_REPEAT_DAYS; i++) {
-        const value = out[i];
-        if (value === undefined || !tail.has(value)) continue;
-
-        for (let j = NO_REPEAT_DAYS; j < poolSize; j++) {
-          const candidate = out[j];
-          if (candidate === undefined || tail.has(candidate)) continue;
-          out[i] = candidate;
-          out[j] = value;
-          break;
-        }
-      }
+      clearHead(out, new Set(previous.slice(-NO_REPEAT_DAYS)));
     }
     cache.set(key(c), out);
   }
@@ -149,6 +141,25 @@ function order(mode: Mode, poolSize: number, cycle: number): number[] {
   const built = cache.get(key(cycle));
   if (!built) throw new Error('Poredak kruga nije izgraden');
   return built;
+}
+
+/**
+ * Prvih 30 mjesta kruga ocisti od svega iz `tail`, zamjenom s prvim kasnijim
+ * mjestom koje u `tail` nije. Mijenja `out` na mjestu.
+ */
+function clearHead(out: number[], tail: ReadonlySet<number>): void {
+  for (let i = 0; i < NO_REPEAT_DAYS; i++) {
+    const value = out[i];
+    if (value === undefined || !tail.has(value)) continue;
+
+    for (let j = NO_REPEAT_DAYS; j < out.length; j++) {
+      const candidate = out[j];
+      if (candidate === undefined || tail.has(candidate)) continue;
+      out[i] = candidate;
+      out[j] = value;
+      break;
+    }
+  }
 }
 
 /**
@@ -174,4 +185,129 @@ export function dailyTarget(date: DateString, mode: Mode, poolSize: number): num
   const index = order(mode, poolSize, cycle)[position];
   if (index === undefined) throw new Error('Poredak kruga je krivo duljine');
   return index;
+}
+
+/* ------------------------------------------------------------ bazeni s datumom */
+
+/**
+ * Bazen meta koji vrijedi od zadanog dana.
+ *
+ * Bazen se nakon puštanja u rad ne smije promijeniti na mjestu: niz meta je
+ * permutacija nad njegovom veličinom, pa bi svaka promjena pomaknula sve buduće
+ * mete — i današnju, usred dana. Promjena se zato uvodi kao **novi bazen s
+ * datumom početka**. Do tog dana vrijedi stari i niz se ne mijenja ni za jedan
+ * dan; od tog dana vrijedi novi, sa svojim nizom.
+ */
+export interface Pool {
+  /** Prvi dan u kojem ovaj bazen vrijedi. Prvi bazen počinje na `EPOCH`. */
+  from: DateString;
+  /**
+   * Mjesta u bazenu, kao indeksi u popisu za pogađanje. Niz meta bira
+   * **poziciju** u ovom nizu, pa je poredak dio bazena i ne smije se mijenjati.
+   */
+  ids: readonly number[];
+}
+
+export { EPOCH };
+
+/** Bazen koji vrijedi na zadani dan: zadnji čiji je početak na taj dan ili prije. */
+function poolIndexFor(pools: readonly Pool[], date: DateString): number {
+  if (pools.length === 0) throw new Error('Nema bazena meta');
+  let k = 0;
+  for (let i = 1; i < pools.length; i++) {
+    const p = pools[i];
+    const before = pools[i - 1];
+    if (!p || !before || p.from <= before.from)
+      throw new Error('Bazeni moraju ići redom po datumu');
+    if (p.from <= date) k = i;
+  }
+  return k;
+}
+
+/**
+ * Indeks današnje mete u popisu za pogađanje.
+ *
+ * Prvi bazen ide točno starim računom (`dailyTarget` od `EPOCH`), pa je niz do
+ * prvog prijelaza isti onaj koji je igra uvijek imala. Svaki kasniji bazen ima
+ * vlastiti niz koji kreće od svog prvog dana, i isto jamstvo: u `N` dana svaka
+ * meta jednom, i nijedna dvaput unutar 30 dana — **ni preko samog prijelaza**,
+ * jer se prvih 30 dana novog bazena očisti od svega što je stari dao u svojih
+ * zadnjih 30.
+ */
+export function targetFor(date: DateString, mode: Mode, pools: readonly Pool[]): number {
+  const k = poolIndexFor(pools, date);
+  const pool = pools[k];
+  if (!pool || pool.ids.length < 1) throw new Error('Bazen meta je prazan');
+
+  const position =
+    k === 0
+      ? dailyTarget(date, mode, pool.ids.length)
+      : poolPosition(daysBetween(pool.from, date), mode, pools, k);
+
+  const id = pool.ids[position];
+  if (id === undefined) throw new Error('Poredak kruga je krivo duljine');
+  return id;
+}
+
+function poolPosition(day: number, mode: Mode, pools: readonly Pool[], k: number): number {
+  const pool = pools[k];
+  if (!pool) throw new Error('Nema bazena');
+  const size = pool.ids.length;
+  const cycle = Math.floor(day / size);
+  const position = day % size;
+  const index = poolOrder(mode, pools, k, cycle)[position];
+  if (index === undefined) throw new Error('Poredak kruga je krivo duljine');
+  return index;
+}
+
+/**
+ * Poredak jednog kruga kasnijeg bazena. Isti postupak kao `order`, s dvije
+ * razlike: sjeme nosi datum početka bazena, pa dva bazena iste veličine nemaju
+ * isti niz, a krug 0 se čisti od repa **prethodnog bazena**, ne prethodnog kruga.
+ */
+function poolOrder(mode: Mode, pools: readonly Pool[], k: number, cycle: number): number[] {
+  const pool = pools[k];
+  if (!pool) throw new Error('Nema bazena');
+  const size = pool.ids.length;
+  const key = (c: number): string => `pool:${mode}:${pool.from}:${String(size)}:${String(c)}`;
+
+  const known = cache.get(key(cycle));
+  if (known) return known;
+
+  let start = cycle;
+  while (start > 0 && !cache.has(key(start - 1))) start--;
+
+  for (let c = start; c <= cycle; c++) {
+    if (cache.has(key(c))) continue;
+
+    const out = shuffle(`${mode}:${SALT}:${pool.from}:${String(c)}:${String(size)}`, size);
+
+    if (size > NO_REPEAT_DAYS) {
+      if (c === 0) clearHead(out, previousTail(mode, pools, k));
+      else clearHead(out, new Set((cache.get(key(c - 1)) ?? []).slice(-NO_REPEAT_DAYS)));
+    }
+    cache.set(key(c), out);
+  }
+
+  const built = cache.get(key(cycle));
+  if (!built) throw new Error('Poredak kruga nije izgraden');
+  return built;
+}
+
+/**
+ * Pozicije u bazenu `k` onih mjesta koja je prethodni bazen dao kao metu u
+ * zadnjih 30 dana prije početka bazena `k`. Ono čega u novom bazenu nema ne
+ * smeta i preskače se.
+ */
+function previousTail(mode: Mode, pools: readonly Pool[], k: number): Set<number> {
+  const pool = pools[k];
+  if (!pool || k === 0) return new Set();
+  const position = new Map(pool.ids.map((id, i) => [id, i]));
+  const tail = new Set<number>();
+  for (let d = 1; d <= NO_REPEAT_DAYS; d++) {
+    const id = targetFor(addDays(pool.from, -d), mode, pools.slice(0, k));
+    const p = position.get(id);
+    if (p !== undefined) tail.add(p);
+  }
+  return tail;
 }

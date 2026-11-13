@@ -28,6 +28,9 @@ vi.mock('../src/data/load', () => ({
       matrix: MATRIX,
       shapes: new Map<string, GeoJSON.Geometry>(),
       index: buildIndex(PLACES, { prva: 'Alfa' }),
+      // Jedan bazen od epohe: isti račun kao `dailyTarget`, pa komentar ispod vrijedi.
+      pools: [{ from: '2026-01-01', ids: [0, 1, 2, 3] }],
+      legacy: [0, 1, 2, 3],
     }),
   expandTriangle: () => new Uint16Array(),
 }));

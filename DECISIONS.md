@@ -1033,3 +1033,64 @@ ili kasnije padne iz razloga koji nema veze s kodom.
 **Ostaje na vlasniku projekta** jedan korak koji se ne da automatizirati: OAuth
 client ID u Google Cloud konzoli traži prijavu na njegov Google račun. Upute su u
 README-u. Do tada je sve ostalo na mjestu i ništa nije pokvareno.
+
+## 2026-11-12 — Imena, glavni gradovi i naselja iz Wikidate; novi bazeni od 2026-11-14
+
+Prijavljeno iz igre: imena nisu ažurna (država ne postoji, krivo ime, krivi grad),
+Južnoafrička Republika nije u modu gradova, a hrvatske mete su „uvijek oko
+Slavonije, Podravine ili Zagreba". Uz to: UK kao jedna ili četiri mete.
+
+**Izvori.** Glavni gradovi su dolazili iz Natural Eartha 110m, s podacima iz 2018.
+i starijim: Nur-Sultan, Dar es Salaam, Bujumbura, Melekeok, Malabo. Sada iz
+Wikidate (P36, samo izjave bez datuma završetka): Astana, Dodoma, Gitega,
+Ngerulmud, Ciudad de la Paz. Hrvatski naziv ide CLDR → Hrvatska enciklopedija
+(gdje se izvori razilaze; jedan slučaj, Cape Town) → Wikidata. Imena država ostaju
+iz CLDR-a, osim gdje CLDR daje oblik za popise: „Kongo - Kinshasa" →
+Demokratska Republika Kongo, „Mjanmar (Burma)" → Mjanmar, „Timor-Leste" → Istočni
+Timor (CLDR-ova vlastita varijanta). Stari oblici ostaju kao upis.
+
+Hrvatska naselja dolaze iz Wikidate: 6 760 službenih naselja s popisom 2021.
+Središnje naselje grada ili općine u Wikidati je često isti zapis kao jedinica i
+nosi njezin broj stanovnika; uzima se kvalifikator P6343 (samo naselje: Split
+149 830, ne 160 577). GeoNames i DGU više nisu izvori.
+
+Wikidata se **ne** dohvaća pri buildu: snimka je u `scripts/sources/`, osvježava je
+`pnpm sources`. Endpoint zna vratiti 502, a podaci se uređuju svaki dan — dohvat
+pri svakom deployu mogao bi tiho promijeniti bazen, dakle i sutrašnju metu.
+Natural Earth je iz istog razloga prikovan na v5.1.2 (bajt-za-bajt isti kao
+dosadašnji `master`).
+
+**Bazeni.** Odluke vlasnika: UK kao četiri mete (Engleska, Škotska, Wales,
+Sjeverna Irska, iz NE map units); Somaliland i Sjeverni Cipar stopljeni u
+Somaliju i Cipar; Zapadna Sahara ostaje na karti, ali nije meta ni upis. Države
+s više glavnih gradova (JAR, Bolivija, Benin, Esvatini, Jemen, Malezija, Šri
+Lanka) su u igri sa svima: svaki je pogodak, udaljenost ide do najbližeg.
+
+Hrvatska: svako naselje se može upisati; istoimena dobivaju općinu u zagradi
+(„Lipovac (Nijemci)"), a daleko najveće zadržava golo ime. Mete se biraju **po
+županiji**: 4 najveća naselja iz svake od 21 za Gradove, 30 za Mjesta. Prvo sam
+pretpostavio da je pristranost od GeoNamesa koji nema broj stanovnika za
+dalmatinska sela — mjereno na punom popisu, raspodjela po pragu 800 ostaje ista
+(32 % Zagreb i sjever, 23 % Slavonija), jer velika sela stvarno jesu ondje. Tek
+izbor po županiji daje svakom kraju jednako.
+
+**Prijelaz.** Bazen se nakon puštanja ne smije mijenjati na mjestu (niz meta je
+permutacija nad njim). Zato `Pool` u engine/seed.ts nosi datum početka: prvi
+bazen je stari niz izražen novim indeksima (`legacy` u podacima, iz snimke
+produkcije u `sources/legacy-v1.json`), drugi kreće 2026-11-14 — prvi dan nove
+runde lige. Pipeline pada ako za ijedan dan od danas do prijelaza novi račun ne
+daje istu metu kao stari. Jamstvo od 30 dana vrijedi i preko prijelaza. Partija
+spremljena starom aplikacijom prevodi se kroz `legacy` (`Round.data`), pa shema
+ostaje `v: 1`.
+
+**Podaci dobivaju hash u imenu** u `dist/` (vite.config.ts). Pod stalnim imenom bi
+`immutable` iz `_headers` i `CacheFirst` iz service workera igraču ostavili stari
+popis uz novi kod.
+
+**Zum** ide do 8× (bio 4×), prema pokazivaču ili sredini dvaju prstiju, klizno, i
+dvoklikom. Tekstura je 4096 × 2048 da 8× bude oštro kao prije 4×, a kopno i more
+slikaju se kao dva sloja odvojena vektorskim obrisom, jer se obala razvučena iz
+1024 px na 8× razlijevala u pojas od pedesetak kilometara.
+
+**Budžeti.** HR podaci: 84 KB gzip (budžet 60, strop podignut na 90) — 6 760
+naselja umjesto 695. JS bez three.js: 94,7 KB (strop 94 → 96).

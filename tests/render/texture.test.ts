@@ -171,13 +171,14 @@ describe('sitne države', () => {
     // Oko 0,35° × 0,45° — stvarne dimenzije iz Natural Eartha.
     const px = widthPx(box(57.3, -20.5, 0.35, 0.45));
     expect(px).toBeGreaterThan(0);
-    expect(px).toBeLessThan(5);
+    // Tekstura je od 2026-11 široka 4096, ne 2048 — granice su dvostruke.
+    expect(px).toBeLessThan(10);
   });
 
   it('Malta, Singapur i Maldivi također', () => {
-    expect(widthPx(box(14.2, 35.8, 0.3, 0.2))).toBeLessThan(5);
-    expect(widthPx(box(103.6, 1.2, 0.4, 0.2))).toBeLessThan(5);
-    expect(widthPx(box(72.9, 3.2, 0.6, 1.2))).toBeLessThan(10);
+    expect(widthPx(box(14.2, 35.8, 0.3, 0.2))).toBeLessThan(10);
+    expect(widthPx(box(103.6, 1.2, 0.4, 0.2))).toBeLessThan(10);
+    expect(widthPx(box(72.9, 3.2, 0.6, 1.2))).toBeLessThan(20);
   });
 
   it('Esvatini je malen, ali daleko od točke', () => {
@@ -189,7 +190,7 @@ describe('sitne države', () => {
      */
     const px = widthPx(box(30.8, -27.3, 1.4, 1.9));
     expect(px).toBeGreaterThan(5);
-    expect(px).toBeLessThan(20);
+    expect(px).toBeLessThan(40);
   });
 
   it('Hrvatska se vidi i bez zuma', () => {
